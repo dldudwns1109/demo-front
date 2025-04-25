@@ -34,7 +34,7 @@ export default function Header({ input = true, loginState = "" }) {
   const searchRef = useRef(null);
 
   useEffect(() => {
-    console.log(searchKeyword);
+    // console.log(searchKeyword);
   }, [searchKeyword]);
 
   useEffect(() => {

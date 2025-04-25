@@ -52,7 +52,7 @@ function App() {
         <Route path="/group/create-finish" element={<GroupCreateFinish />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/join/board" element={<JoinBoard />} />
-        <Route path="/join/board/detail" element={<JoinBoardDetail />} />
+        <Route path="/join/board/detail/:boardNo" element={<JoinBoardDetail />} />
         <Route path="/join/board/write" element={<JoinBoardWrite />} />
         <Route path="/join/board/edit" element={<JoinBoardEdit />} />
         <Route path="/group/list" element={<GroupList />} />

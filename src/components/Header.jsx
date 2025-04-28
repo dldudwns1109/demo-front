@@ -6,17 +6,19 @@ import { IoLocationSharp } from "react-icons/io5";
 
 import categoryData from "../json/category.json";
 import locationData from "../json/location.json";
+import { useNavigate } from "react-router-dom";
 
 const categoryOptions = categoryData;
 const locationOptions = locationData;
 
-export default function Header({ input = true, loginState = "" }) {
+export default function Header({
+  input = true,
+  loginState = "",
+  location = null,
+  setLocation = null,
+}) {
   const [category, setCategory] = useState("전체");
   const [isOpenCategoryRef, setIsOpenCategoryRef] = useState(false);
-  const [location, setLocation] = useState({
-    city: "서울특별시",
-    area: "강남구",
-  });
   const [isOpenLocationRef, setIsOpenLocationRef] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -32,6 +34,8 @@ export default function Header({ input = true, loginState = "" }) {
   const categoryRef = useRef(null);
   const locationRef = useRef(null);
   const searchRef = useRef(null);
+
+  const navigate = useNavigate("/signin");
 
   useEffect(() => {
     // console.log(searchKeyword);
@@ -61,8 +65,13 @@ export default function Header({ input = true, loginState = "" }) {
 
   return (
     <div
-      className="w-100 d-flex justify-content-between align-items-center shadow-sm"
-      style={{ paddingLeft: "120px", paddingRight: "120px", height: "70px" }}
+      className="w-100 bg-white position-fixed d-flex justify-content-between align-items-center shadow-sm"
+      style={{
+        paddingLeft: "120px",
+        paddingRight: "120px",
+        height: "70px",
+        zIndex: 1,
+      }}
     >
       <img src="/images/logo.svg" />
 
@@ -227,6 +236,7 @@ export default function Header({ input = true, loginState = "" }) {
         <button
           className="btn btn-primary"
           style={{ paddingTop: "7px", paddingBottom: "7px" }}
+          onClick={() => navigate("/signin")}
         >
           로그인
         </button>

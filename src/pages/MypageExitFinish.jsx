@@ -21,20 +21,7 @@ export default function MypageExitFinish() {
         </div>
         {/* 홈이동 버튼 */}
         <div style={{ width: "360px"}}>
-          <button 
-            style={{
-              width: "100%",
-              padding: "12px",
-              paddingTop: "7px",
-              paddingBottom: "7px",
-              backgroundColor: "#f1f3f5",
-              color: "#6C757D",
-              fontSize: "16px",
-              fontWeight: "bold",
-              border: "none",
-              borderRadius: "8px",
-            }}
-          >
+          <button className="light-gray-btn">
             홈으로 이동
           </button>
         </div>

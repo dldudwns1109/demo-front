@@ -44,49 +44,18 @@ export default function MypageExit() {
 
         {/* 비밀번호 입력 */}
         <div style={{ width: "360px", margin: "0 auto", marginBottom:"48px"}}>
-          <label 
-            style={{
-              display: "block",
-              marginBottom: "8px",
-              fontSize: "16px",
-              fontWeight: "bold",
-              color: "#333333"
-            }}>
+          <label className="label-text">
             비밀번호 입력
           </label>
 
-          <input 
-            type="password"
-            placeholder="사용중이신 비밀번호를 입력해주세요."
-            style={{
-              width: "360px",
-              height: "36px",
-              padding: "12px",
-              paddingTop: "8px",
-              paddingBottom: "8px",
-              fontSize: "14px",
-              border: "none",
-              borderRadius: "8px",
-              backgroundColor: "#f1f3f5"
-            }}/>
+          <input type="password" 
+            placeholder="사용중이신 비밀번호를 입력해주세요." 
+            className="member-input"/>
         </div>
 
         {/* 탈퇴 버튼 */}
         <div style={{ width: "360px"}}>
-          <button 
-            style={{
-              width: "100%",
-              padding: "12px",
-              paddingTop: "7px",
-              paddingBottom: "7px",
-              backgroundColor: "#DC3545",
-              color: "#ffffff",
-              fontSize: "16px",
-              fontWeight: "bold",
-              border: "none",
-              borderRadius: "8px",
-            }}
-          >
+          <button className="red-btn">
             회원 탈퇴하기
           </button>
         </div>

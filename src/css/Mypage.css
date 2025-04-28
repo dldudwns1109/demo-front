@@ -1,71 +1,133 @@
 .memberProfile {
-    width: 200px;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 1px solid #ccc;
-    flex-shrink: 0;
-    vertical-align: middle;
-  }
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
 
-  .group-tab-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 120px;
-    margin-top: 40px;
-  }
+.group-tab-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 120px;
+  margin-top: 40px;
+}
 
-  .group-tab-button {
-    width: 300px;
-    height: 64px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #111111;
-    background-color: transparent;
-    border: none;
-    border-bottom: 1px solid #ebebeb;
-    transition: all 0.2s ease;
-    border-radius: 0;
-  }
+.group-tab-button {
+  width: 300px;
+  height: 64px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #111111;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid #ebebeb;
+  transition: all 0.2s ease;
+  border-radius: 0;
+}
 
-  .group-tab-button:hover {
-    background-color: #f1f3f5;
-    cursor: pointer;
-    transform: scale(1.01);
-  }
-  
-  .group-tab-button.active {
-    border-bottom: 2px solid #111111;
-    background-color: #ffffff;
-  }
+.group-tab-button:hover {
+  background-color: #f1f3f5;
+  cursor: pointer;
+  transform: scale(1.01);
+}
 
-  .mbti-badge {
-    display: inline-block;
-    padding: 7px 12px;               
-    color: #333333;      
-    border: 1px solid #F9B4ED;      
-    border-radius: 8px;             
-    line-height: 1;
-    font-size: 16px;
-    background-color: transparent;
-  }
+.group-tab-button.active {
+  border-bottom: 2px solid #111111;
+  background-color: #ffffff;
+}
 
-  .creat-crew-btn {
-    display: inline-block;
-    padding: 7px 12px;               
-    color: #ffffff;
-    font-weight: bold;     
-    background-color: #007BFF;   
-    border: none;   
-    border-radius: 8px;
-  }
+.mbti-badge {
+  display: inline-block;
+  padding: 7px 12px;
+  color: #333333;
+  border: 1px solid #F9B4ED;
+  border-radius: 8px;
+  line-height: 1;
+  font-size: 16px;
+  background-color: transparent;
+}
 
-  .empty-message {
-    text-align: center;
-    color: #888;
-    font-size: 18px;
-    padding: 60px 0;
-  }
+.creat-crew-btn {
+  display: inline-block;
+  padding: 7px 12px;
+  color: #ffffff;
+  font-weight: bold;
+  background-color: #007BFF;
+  border: none;
+  border-radius: 8px;
+}
 
-  
+.empty-message {
+  text-align: center;
+  color: #888;
+  font-size: 18px;
+  padding: 60px 0;
+}
+
+.label-text {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  color: "#333333"
+}
+
+.member-input {
+  width: 360px;
+  height: 36px;
+  padding: 12px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
+  background-color: #f1f3f5;
+}
+
+.blue-btn {
+  width: 100%;
+  padding: 12px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  background-color: #007bff;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+}
+
+.red-btn {
+  width: 100%;
+  padding: 12px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  background-color: #DC3545;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+}
+
+.light-gray-btn {
+  width: 100%;
+  padding: 12px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  background-color: #f1f3f5;
+  color: #6C757D;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+}
+
+.mbti-badge.active {
+  background-color: #F9B4ED;
+  color: #ffffff;
+}

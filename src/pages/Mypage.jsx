@@ -2,71 +2,78 @@ import "../css/Mypage.css";
 import Header from "../components/Header";
 import { useCallback, useEffect, useState } from "react";
 import ProfileCard from "../components/ProfileCard";
+import axios from "axios";
+import { useRecoilValue } from "recoil";
+import { userIdState } from "../utils/storage";
 
 export default function Mypage() {
-  // 테스트용 유저 ID
-  const userId = 1;
-
-  // 테스트용 유저 정보
-  const user = {
-    name: "김진영",
-    mbti: "ISFJ",
-    location: "서울시",
-    school: "고려대학교",
-    birth: "2001.04.02",
-    statusMessage: "파이널 프로젝트 어렵잖아!",
-    likeList: ["스포츠", "사교", "게임", "음악"],
-  };
+  //recoil
+  const userId = useRecoilValue(userIdState);
 
   //state
+  const [member, setMember] = useState(null);//회원정보
   const [createList, setCreateList] = useState([]); //만든모임
   const [joinList, setJoinList] = useState([]); //가입한모임
   const [likeList, setLikeList] = useState([]); //찜한모임
   const [meetingList, setMeetingList] = useState([]); //정모일정
   const [activeTab, setActiveTab] = useState("create"); //현재탭상태
 
+  //effect
+  useEffect(() => {
+    console.log("현재 userId는?", userId); // ✅ 여기 추가
+    loadMember();
+    loadCreateList();
+  }, []);
+
   //callback
   //목록 로딩 함수들
+  const loadMember = useCallback(async () => {
+    if (!userId) return;
+    const resp = await axios.get(`/member/mypage/${userId}`);
+    setMember(resp.data);
+  }, [userId]);
+
   const loadCreateList = useCallback(async () => {
-    const resp = await axios.get(`/crew/created/${userId}`);
-    setCreateList(resp.data);
+    const resp = await axios.get(`/crew/creat/${userId}`);
+    const list = Array.isArray(resp.data) ? resp.data : [];
+    setCreateList(list);
   }, [userId]);
 
   const loadJoinList = useCallback(async () => {
-    const resp = await axios.get(`/crew/joined/${userId}`);
-    setJoinList(resp.data);
+    const resp = await axios.get(`/crew/join/${userId}`);
+    const list = Array.isArray(resp.data) ? resp.data : [];
+    setJoinList(list);
   }, [userId]);
 
   const loadLikeList = useCallback(async () => {
-    const resp = await axios.get(`/crew/liked/${userId}`);
-    setLikeList(resp.data);
+    const resp = await axios.get(`/crew/like/${userId}`);
+    const list = Array.isArray(resp.data) ? resp.data : [];
+    setLikeList(list);
   }, [userId]);
 
   const loadMeetingList = useCallback(async () => {
     const resp = await axios.get(`/meeting/member/${userId}`);
-    setMeetingList(resp.data);
+    const list = Array.isArray(resp.data) ? resp.data : [];
+    setMeetingList(list);
   }, [userId]);
 
-  const handleTabClick = useCallback((tab) => {
-    setActiveTab(tab);
-    // 선택된 탭에 맞는 목록을 필요한 경우만 불러오기
-    if (tab === "join" && joinList.length === 0) loadJoinList();
-    if (tab === "like" && likeList.length === 0) loadLikeList();
-    if (tab === "meeting" && meetingList.length === 0) loadMeetingList();
-  },[joinList,likeList,meetingList,loadJoinList,loadLikeList,loadMeetingList]);
+const handleTabClick = useCallback((tab) => {
+  setActiveTab(tab);
+  // 선택된 탭에 맞는 목록을 필요한 경우만 불러오기
+  if (tab === "create" && createList.length === 0) loadCreateList();
+  if (tab === "join" && joinList.length === 0) loadJoinList();
+  if (tab === "like" && likeList.length === 0) loadLikeList();
+  if (tab === "meeting" && meetingList.length === 0) loadMeetingList();
+}, [createList, joinList, likeList, meetingList, loadCreateList, loadJoinList, loadLikeList, loadMeetingList]);
 
-  //effect
-  useEffect(() => {
-    loadCreateList();
-  }, []);
-
+  
   //view
   return (
     <>
       {/* 헤더 */}
       <Header/>
       {/* 마이페이지 프로필 */}
-      <ProfileCard user={user}/>
+      <ProfileCard member={member}/>
 
       {/* 모임 탭 메뉴 */}
       <div className="group-tab-container">
@@ -93,7 +100,8 @@ export default function Mypage() {
         {activeTab === "create" && (
           createList.length > 0 ? (
             <div className="d-flex flex-wrap gap-4 justify-content-start">
-              {createList.map((crew) => <CrewCard key={crew.id} crew={crew} />)}
+              {/* {createList.map((crew) => <CrewCard key={crew.id} crew={crew} />)} */}
+              만든 모임 있습니다
             </div>
           ) : (
             <div className="empty-message">만든 모임이 없습니다.</div>
@@ -103,7 +111,8 @@ export default function Mypage() {
         {activeTab === "join" && (
           joinList.length > 0 ? (
             <div className="d-flex flex-wrap gap-4 justify-content-start">
-              {joinList.map((crew) => <CrewCard key={crew.id} crew={crew} />)}
+              {/* {joinList.map((crew) => <CrewCard key={crew.id} crew={crew} />)} */}
+              가입한 모임 있습니다
             </div>
           ) : (
             <div className="empty-message">가입한 모임이 없습니다.</div>
@@ -113,7 +122,8 @@ export default function Mypage() {
         {activeTab === "like" && (
           likeList.length > 0 ? (
             <div className="d-flex flex-wrap gap-4 justify-content-start">
-              {likeList.map((crew) => <CrewCard key={crew.id} crew={crew} />)}
+              {/* {likeList.map((crew) => <CrewCard key={crew.id} crew={crew} />)} */}
+              찜한 모임 있습니다
             </div>
           ) : (
             <div className="empty-message">찜한 모임이 없습니다.</div>
@@ -123,7 +133,8 @@ export default function Mypage() {
         {activeTab === "meeting" && (
           meetingList.length > 0 ? (
             <div className="d-flex flex-wrap gap-4 justify-content-start">
-              {meetingList.map((meeting) => <MeetingCard key={meeting.id} meeting={meeting} />)}
+              {/* {meetingList.map((meeting) => <MeetingCard key={meeting.id} meeting={meeting} />)} */}
+              정모 일정 있습니다
             </div>
           ) : (
             <div className="empty-message">정모 일정이 없습니다.</div>

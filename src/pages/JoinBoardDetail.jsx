@@ -1,201 +1,290 @@
-// import { useEffect, useState } from "react";
-// import { useParams, useNavigate, Link } from "react-router-dom";
-// import axios from "axios";
-// import { BsThreeDotsVertical } from "react-icons/bs";
-// import { userIdState } from "../utils/storage";
-// import { useRecoilValueLoadable } from "recoil";
+import { useEffect, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { FiMoreVertical } from "react-icons/fi";
+import { FaPaperPlane } from "react-icons/fa";
+import Header from "../components/Header";
 
 export default function JoinBoardDetail() {
-  // const { boardNo } = useParams();
-  // const navigate = useNavigate();
+  const { boardNo } = useParams();
+  const [board, setBoard] = useState(null);
+  const [replies, setReplies] = useState([]);
+  const [newReply, setNewReply] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(null);
+  const [boardDropdownOpen, setBoardDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
-  // const loginIdLoadable = useRecoilValueLoadable(userIdState);
-  // const loginId = loginIdLoadable.state === "hasValue" ? loginIdLoadable.contents : null;
-  // const [board, setBoard] = useState(null);
-  // const [replies, setReplies] = useState([]);
-  // const [newReply, setNewReply] = useState("");
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:8080/api/board/${boardNo}`
+        );
+        setBoard(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchData();
+  }, [boardNo]);
 
-  // // 게시글 + 댓글 조회
-  // useEffect(() => {
-  //   axios
-  //     .get(`/api/board/${boardNo}`)
-  //     .then((res) => setBoard(res.data))
-  //     .catch(() => alert("게시글을 불러오지 못했습니다."));
+  const handleReplySubmit = () => {
+    if (newReply.trim()) {
+      const reply = {
+        writer: "댓글작성자", // 추후 API 연동 예정
+        profileUrl: "/images/default-profile.png",
+        content: newReply,
+        writeTime: new Date(),
+        isEditing: false,
+      };
+      setReplies([reply, ...replies]);
+      setNewReply("");
+    }
+  };
 
-  //   axios
-  //     .get(`/api/reply/${boardNo}`)
-  //     .then((res) => setReplies(res.data))
-  //     .catch(() => setReplies([]));
-  // }, [boardNo]);
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleReplySubmit();
+    }
+  };
 
-  // const handleDeleteBoard = () => {
-  //   if (loginId !== board.boardWriterId) {
-  //     window.confirm("수정 및 삭제는 작성자만 가능합니다");
-  //     return;
-  //   }
+  const toggleDropdown = (idx) => {
+    setDropdownOpen(dropdownOpen === idx ? null : idx);
+  };
 
-  //   const ok = window.confirm("정말로 삭제하시겠습니까?");
-  //   if (!ok) return;
+  const toggleBoardDropdown = () => {
+    setBoardDropdownOpen(!boardDropdownOpen);
+  };
 
-  //   axios
-  //     .delete(`/api/board/${boardNo}`)
-  //     .then(() => navigate("/join/board"))
-  //     .catch(() => alert("삭제 실패"));
-  // };
+  const handleEditReply = (idx) => {
+    const updatedReplies = [...replies];
+    updatedReplies[idx].isEditing = true;
+    setReplies(updatedReplies);
+    setDropdownOpen(null);
+  };
 
-  // const handleReplySubmit = () => {
-  //   if (!loginId) {
-  //     alert("댓글은 로그인 후 작성할 수 있습니다.");
-  //     return;
-  //   }
+  const handleUpdateReply = (idx, newContent) => {
+    const updatedReplies = [...replies];
+    updatedReplies[idx].content = newContent;
+    updatedReplies[idx].isEditing = false;
+    updatedReplies[idx].writeTime = new Date();
+    setReplies(
+      updatedReplies.sort(
+        (a, b) => new Date(b.writeTime) - new Date(a.writeTime)
+      )
+    );
+  };
 
-  //   axios
-  //     .post("/api/reply", {
-  //       replyOrigin: board.boardNo,
-  //       replyContent: newReply
-  //     })
-  //     .then(() => {
-  //       setNewReply("");
-  //       return axios.get(`/api/reply/${boardNo}`);
-  //     })
-  //     .then((res) => setReplies(res.data));
-  // };
+  const handleDeleteReply = (idx) => {
+    if (window.confirm("이 댓글을 삭제하시겠습니까?")) {
+      const updatedReplies = replies.filter((_, i) => i !== idx);
+      setReplies(updatedReplies);
+      setDropdownOpen(null);
+    }
+  };
 
-  // const handleReplyDelete = (reply) => {
-  //   if (loginId !== reply.replyWriterId && loginId !== board.boardWriterId) {
-  //     alert("삭제는 댓글 작성자 또는 게시글 작성자만 가능합니다.");
-  //     return;
-  //   }
+  const handleBoardEdit = () => {
+    navigate(`/join/board/edit/${boardNo}`);
+  };
 
-  //   const ok = window.confirm("댓글을 삭제하시겠습니까?");
-  //   if (!ok) return;
+  const handleBoardDelete = async () => {
+    if (window.confirm("이 게시글을 삭제하시겠습니까?")) {
+      try {
+        await axios.delete(`http://localhost:8080/api/board/${boardNo}`);
+        navigate("/join/board");
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
 
-  //   axios
-  //     .delete(`/api/reply/${reply.replyNo}`)
-  //     .then(() => setReplies((prev) => prev.filter((r) => r.replyNo !== reply.replyNo)));
-  // };
-
-  // const handleReplyEdit = (reply) => {
-  //   if (loginId !== reply.replyWriterId) {
-  //     alert("수정은 댓글 작성자만 가능합니다.");
-  //     return;
-  //   }
-
-  //   const newContent = prompt("수정할 내용을 입력하세요", reply.replyContent);
-  //   if (!newContent || newContent === reply.replyContent) return;
-
-  //   axios
-  //     .patch(`/api/reply/${reply.replyNo}`, {
-  //       replyContent: newContent
-  //     })
-  //     .then(() => {
-  //       return axios.get(`/api/reply/${boardNo}`);
-  //     })
-  //     .then((res) => setReplies(res.data));
-  // };
-
-  // if (!board) return <div className="text-center my-5">불러오는 중...</div>;
+  if (!board) return <div>로딩 중...</div>;
 
   return (
     <>
-      {/* <div className="container py-4">
-      <h3 className="fw-bold mb-4">{board.boardTitle}</h3>
-
-      <div className="d-flex justify-content-between align-items-start mb-3">
-        <div className="d-flex">
-          <img
-            src={board.boardWriterProfileUrl || "/images/default-profile.png"}
-            alt="프로필"
-            className="rounded-circle me-3"
-            style={{ width: "50px", height: "50px", objectFit: "cover", cursor: "pointer" }}
-            onClick={() =>
-              window.dispatchEvent(new CustomEvent("open-profile-modal", { detail: board.boardWriterNickname }))
-            }
-          />
-          <div>
-            <div className="d-flex align-items-center mb-1">
-              <strong className="me-2">{board.boardWriterNickname}</strong>
-              <span className="text-muted" style={{ fontSize: "0.85rem" }}>
-                {board.boardWriteTime}
-              </span>
-            </div>
-            <div className="text-muted" style={{ fontSize: "0.85rem" }}>
-              {board.boardWriterGender === "M" ? "남성" : "여성"} · {board.boardWriterBirth} · {board.boardWriterMbti}
-            </div>
-          </div>
+      <Header loginState="login" />
+      <div className="container py-4">
+        {/* 목록으로 돌아가기 */}
+        <div className="mb-3">
+          <Link to="/join/board" className="btn btn-outline-secondary btn-sm">
+            목록으로
+          </Link>
         </div>
 
-        <div className="dropdown text-end">
-          <button className="btn" data-bs-toggle="dropdown">
-            <BsThreeDotsVertical />
-          </button>
-          <ul className="dropdown-menu">
-            <li>
-              <button
-                className="dropdown-item"
-                onClick={() => {
-                  if (loginId === board.boardWriterId) {
-                    navigate(`/join/board/edit/${board.boardNo}`);
-                  } else {
-                    window.confirm("수정 및 삭제는 작성자만 가능합니다");
-                  }
-                }}
+        {/* 프로필 영역 + 게시글 수정/삭제 드롭다운 */}
+        <div className="d-flex justify-content-between align-items-start mb-3">
+          <div className="d-flex align-items-center">
+            <img
+              src={board.boardWriterProfileUrl || "/images/default-profile.png"}
+              alt="프로필"
+              className="rounded-circle me-3"
+              style={{ width: "3rem", height: "3rem", objectFit: "cover" }}
+            />
+            <div>
+              <strong>{board.boardWriterNickname}</strong>
+              <div className="text-muted" style={{ fontSize: "0.85rem" }}>
+                {board.boardWriterGender === "M" ? "남성" : "여성"} ·{" "}
+                {board.boardWriterBirth} · {board.boardWriterMbti}
+              </div>
+            </div>
+          </div>
+
+          {/* 게시글 수정 삭제 드롭다운 */}
+          <div className="position-relative">
+            <button
+              className="btn btn-link p-0"
+              type="button"
+              onClick={toggleBoardDropdown}
+              style={{ color: "#0d6efd" }}
+            >
+              <FiMoreVertical size="1.5rem" />
+            </button>
+            {boardDropdownOpen && (
+              <ul
+                className="dropdown-menu show"
+                style={{ position: "absolute", right: 0 }}
               >
-                수정
-              </button>
-            </li>
-            <li>
-              <button className="dropdown-item text-danger" onClick={handleDeleteBoard}>
-                삭제
-              </button>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="mb-2 text-primary fw-bold">{board.boardCategory}</div>
-
-      <div className="mb-4" style={{ whiteSpace: "pre-line", fontSize: "1.05rem" }}>
-        {board.boardContent}
-      </div>
-
-      <div className="border-top pt-4">
-        <h6 className="fw-bold mb-3">댓글</h6>
-
-        {replies.map((reply) => (
-          <div key={reply.replyNo} className="border rounded p-2 mb-2">
-            <div className="d-flex justify-content-between">
-              <div>
-                <strong>{reply.replyWriterNickname}</strong>
-                <div className="text-muted small">{reply.replyWtime}</div>
-              </div>
-              <div>
-                <button className="btn btn-sm btn-outline-secondary me-1" onClick={() => handleReplyEdit(reply)}>
-                  수정
-                </button>
-                <button className="btn btn-sm btn-outline-danger" onClick={() => handleReplyDelete(reply)}>
-                  삭제
-                </button>
-              </div>
-            </div>
-            <div className="mt-2">{reply.replyContent}</div>
+                <li>
+                  <button className="dropdown-item" onClick={handleBoardEdit}>
+                    수정
+                  </button>
+                </li>
+                <li>
+                  <button className="dropdown-item" onClick={handleBoardDelete}>
+                    삭제
+                  </button>
+                </li>
+              </ul>
+            )}
           </div>
-        ))}
+        </div>
 
-        <div className="d-flex mt-4">
+        {/* 글 내용 */}
+        <div className="mb-4">
+          <div style={{ whiteSpace: "pre-wrap", fontSize: "1rem" }}>
+            {board.boardContent}
+          </div>
+        </div>
+
+        {/* 댓글 리스트 */}
+        <div className="mb-3">
+          {replies.length === 0 ? (
+            <p className="text-muted">아직 댓글이 없습니다.</p>
+          ) : (
+            replies.map((reply, idx) => (
+              <div
+                key={idx}
+                className="d-flex align-items-start border-bottom py-3"
+                style={{ fontSize: "0.95rem" }}
+              >
+                <img
+                  src={reply.profileUrl}
+                  alt="프로필"
+                  className="rounded-circle me-2"
+                  style={{
+                    width: "2.5rem",
+                    height: "2.5rem",
+                    objectFit: "cover",
+                  }}
+                />
+                <div className="flex-grow-1">
+                  <div className="fw-bold">{reply.writer}</div>
+                  <div className="d-flex align-items-center">
+                    {reply.isEditing ? (
+                      <input
+                        type="text"
+                        className="form-control form-control-sm border"
+                        defaultValue={reply.content}
+                        onBlur={(e) => handleUpdateReply(idx, e.target.value)}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" &&
+                          handleUpdateReply(idx, e.target.value)
+                        }
+                        autoFocus
+                      />
+                    ) : (
+                      <div>{reply.content}</div>
+                    )}
+                    <small
+                      className="text-muted ms-3"
+                      style={{ fontSize: "0.8rem" }}
+                    >
+                      {new Date(reply.writeTime).toLocaleString("ko-KR", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </small>
+                  </div>
+                </div>
+                <div
+                  className="position-relative ms-2"
+                  style={{ flexShrink: 0 }}
+                >
+                  <button
+                    className="btn btn-link p-0"
+                    type="button"
+                    onClick={() => toggleDropdown(idx)}
+                    style={{ color: "#0d6efd" }}
+                  >
+                    <FiMoreVertical size="1.5rem" />
+                  </button>
+                  {dropdownOpen === idx && (
+                    <ul
+                      className="dropdown-menu show"
+                      style={{ position: "absolute", right: 0 }}
+                    >
+                      <li>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => handleEditReply(idx)}
+                        >
+                          수정
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => handleDeleteReply(idx)}
+                        >
+                          삭제
+                        </button>
+                      </li>
+                    </ul>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* 댓글 작성 */}
+        <div className="position-relative border rounded p-2">
           <input
             type="text"
-            className="form-control me-2"
+            className="form-control border-0 pe-5"
             placeholder="댓글을 입력하세요"
             value={newReply}
             onChange={(e) => setNewReply(e.target.value)}
+            onKeyDown={handleKeyPress}
+            style={{ flex: 1, boxShadow: "none" }}
           />
-          <button className="btn btn-primary" onClick={handleReplySubmit}>
-            등록
+          <button
+            className="btn position-absolute"
+            style={{
+              top: "50%",
+              right: "1rem",
+              transform: "translateY(-50%)",
+              color: "#0d6efd",
+            }}
+            onClick={handleReplySubmit}
+          >
+            <FaPaperPlane size="1.2rem" />
           </button>
         </div>
       </div>
-    </div> */}
     </>
   );
 }

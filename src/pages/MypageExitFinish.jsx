@@ -16,8 +16,8 @@ export default function MypageExitFinish() {
           <span style={{ color:"#666666" }}>DE:MO를 이용해주셔서 진심으로 감사드립니다.</span>
         </h2>
         {/* 회원 탈퇴 이미지 */}
-        <div style={{ width: "240px", height:"280px"}}>
-          <img/>
+        <div style={{ width: "240px", height:"280px", marginBottom: "48px"}}>
+          <img src="/images/exit-finish.svg"/>
         </div>
         {/* 홈이동 버튼 */}
         <div style={{ width: "360px"}}>

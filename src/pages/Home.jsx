@@ -380,6 +380,20 @@ export default function Home() {
   const [isLikedMore, setIsLikedMore] = useState(false);
   const [likedRenderItem, setLikedRenderItem] = useState(6);
 
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -401,8 +415,8 @@ export default function Home() {
         style={{
           paddingTop: "70px",
           paddingBottom: "80px",
-          paddingLeft: "120px",
-          paddingRight: "120px",
+          paddingLeft: "8.33%",
+          paddingRight: "8.33%",
         }}
       >
         <div
@@ -416,7 +430,13 @@ export default function Home() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
+            gridTemplateColumns: `${
+              windowWidth > 1024
+                ? "repeat(3, 1fr)"
+                : windowWidth > 768
+                ? "repeat(2, 1fr)"
+                : "repeat(1, 1fr)"
+            }`,
             gap: "60px",
           }}
         >
@@ -458,7 +478,13 @@ export default function Home() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
+            gridTemplateColumns: `${
+              windowWidth > 1024
+                ? "repeat(3, 1fr)"
+                : windowWidth > 768
+                ? "repeat(2, 1fr)"
+                : "repeat(1, 1fr)"
+            }`,
             gap: "60px",
           }}
         >
@@ -500,7 +526,9 @@ export default function Home() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
+            gridTemplateColumns: `${
+              windowWidth > 1024 ? "repeat(2, 1fr)" : "repeat(1, 1fr)"
+            }`,
             gap: "60px",
           }}
         >

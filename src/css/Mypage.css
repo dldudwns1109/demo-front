@@ -126,3 +126,8 @@
   border: none;
   border-radius: 8px;
 }
+
+.mbti-badge.active {
+  background-color: #F9B4ED;
+  color: #ffffff;
+}

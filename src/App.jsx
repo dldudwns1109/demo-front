@@ -54,7 +54,7 @@ function App() {
         <Route path="/join/board" element={<JoinBoard />} />
         <Route path="/join/board/detail/:boardNo" element={<JoinBoardDetail />} />
         <Route path="/join/board/write" element={<JoinBoardWrite />} />
-        <Route path="/join/board/edit" element={<JoinBoardEdit />} />
+        <Route path="/join/board/edit/:boardNo" element={<JoinBoardEdit />} />
         <Route path="/group/list" element={<GroupList />} />
         <Route path="/group/detail" element={<GroupDetail />} />
         <Route path="/group/edit" element={<GroupEdit />} />

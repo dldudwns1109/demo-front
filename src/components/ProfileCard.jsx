@@ -1,9 +1,28 @@
 import { FaCog } from "react-icons/fa";
 import "../css/Mypage.css";
 import { useNavigate } from "react-router-dom";
+import { Modal } from "bootstrap";
+import { useCallback, useEffect, useRef } from "react";
 
 export default function ProfileCard({ member }) {
   const navigate = useNavigate();
+
+  {/* 모달(Modal) */}
+  const modal = useRef();
+  
+  const openModal = useCallback(()=>{
+    const target = Modal.getOrCreateInstance(modal.current);
+    target.show();
+  }, []);
+  const closeModal = useCallback(()=>{
+    const target = Modal.getInstance(modal.current);
+    if(target !== null) target.hide();
+}, [modal]);
+
+  //effect
+
+  //callback
+
   if (!member) return <div className="text-center">회원 정보를 불러오는 중입니다...</div>;
   return (
     <div className="container">
@@ -24,8 +43,11 @@ export default function ProfileCard({ member }) {
                 onClick={() => navigate("/group/create")}>
               모임 개설
             </button>
-            <button className="btn btn-light btn-sm" style={{ backgroundColor: "transparent", border: "none" }}>
-              <FaCog />
+            <button className="btn btn-light btn-sm" 
+              style={{ backgroundColor: "transparent", border: "none" }}
+              onClick={openModal}
+            >
+              <FaCog/>
             </button>
           </div>
           <div className="d-flex align-items-center gap-3 mb-4 text-muted small">
@@ -40,6 +62,49 @@ export default function ProfileCard({ member }) {
             {member.likeList.map((like, v) => (
               <span key={v} className="mbti-badge">{like}</span>
             ))}
+          </div>
+        </div>
+      </div>
+      {/* 모달(Modal) */}
+      <div className="modal fade" ref={modal} tabIndex="-1">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-body d-flex flex-column p-0">
+              {/* 개인정보수정 */}
+              <button type="button" 
+                className="custom-modal-button custom-modal-button-first"
+                onClick={() => {
+                  closeModal();
+                  navigate("/mypage/edit");
+                }}
+              >
+                개인정보변경
+              </button>
+              {/* 로그아웃 */}
+              <button type="button"
+                className="custom-modal-button"
+                onClick={() => {
+                  const choice = window.confirm("정말 로그아웃 하시겠습니까?");
+                  if (!choice) {
+                    return;
+                  }
+                  closeModal();
+                  navigate("/");
+                }}
+              >
+                로그아웃
+              </button>
+              {/* 회원탈퇴 */}
+              <button type="button" 
+                className="custom-modal-button custom-modal-button-last"
+                onClick={() => {
+                  closeModal();
+                  navigate("/mypage/exit");
+                }}
+              >
+                회원탈퇴
+              </button>
+            </div>
           </div>
         </div>
       </div>

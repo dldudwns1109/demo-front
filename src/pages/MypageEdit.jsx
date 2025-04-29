@@ -1,12 +1,15 @@
 import "../css/Mypage.css";
 import Header from "../components/Header";
 import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const likeList = ["스포츠", "사교", "독서", "여행", "음악", "게임", "공연", "자기계발", "요리"];
 const mbtiList = ["ISFJ", "ISTJ", "ESTJ", "ESFJ", "ENFJ", "ENTJ", "INTJ", "INFJ", "ENFP", "ENTP", "INTP", "INFP", "ESFP", "ESTP", "ISTP", "ISFP"];
 const locationList = ["김포시", "서울시", "대전시"];
 const schollList = ["가톨릭대학교", "고려대학교", "연세대학교"];
 export default function MypageEdit() {
+  const navigate = useNavigate();
+
   //state
   const [selectedLikeList, setSelectedLikeList] = useState([]);
   const [selectedMbti, setSelectedMbti] = useState("");
@@ -27,7 +30,7 @@ export default function MypageEdit() {
   return (
     <>
       {/* 헤더 */}
-      <Header/>
+      {/* <Header/> */}
       {/* 수정 페이지 */}
       <div className="d-flex flex-column align-items-center" style={{ marginTop:"80px" }}>
         <div style={{ marginBottom:"48px" }}>
@@ -56,7 +59,8 @@ export default function MypageEdit() {
           <label className="label-text">
             비밀번호
           </label>
-          <button className="light-gray-btn" style={{ backgroundColor:"#6C757D", color: "#ffffff" }}>
+          <button className="light-gray-btn" style={{ backgroundColor:"#6C757D", color: "#ffffff" }}
+              onClick={() => navigate("/mypage/edit/password")}>
             비밀번호 변경하기
           </button>
         </div>

@@ -1,6 +1,6 @@
 import "../css/Mypage.css";
 import Header from "../components/Header";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const likeList = ["스포츠", "사교", "독서", "여행", "음악", "게임", "공연", "자기계발", "요리"];
@@ -10,11 +10,13 @@ const schollList = ["가톨릭대학교", "고려대학교", "연세대학교"];
 export default function MypageEdit() {
   const navigate = useNavigate();
 
+  const fileInputRef = useRef(null);
+
   //state
   const [selectedLikeList, setSelectedLikeList] = useState([]);
   const [selectedMbti, setSelectedMbti] = useState("");
 
-  //callbacks
+  //callback
   const clickLikeBtn = useCallback((like) => {
     setSelectedLikeList((prev) => 
       prev.includes(like) ? 
@@ -26,20 +28,42 @@ export default function MypageEdit() {
     setSelectedMbti(mbti);
   }, []);
 
+  // 파일 선택창 열기 (이미지 클릭시)
+  const ChangeImage = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  }, []);
+
+  // 파일 선택했을 때 처리
+  const handleFileChange = useCallback((e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPreviewImage(URL.createObjectURL(file));
+    }
+  }, []);
+
   //view
   return (
     <>
       {/* 헤더 */}
       {/* <Header/> */}
       {/* 수정 페이지 */}
-      <div className="d-flex flex-column align-items-center" style={{ marginTop:"80px" }}>
+      <div className="d-flex flex-column align-items-center" style={{ paddingTop:"70px" }}>
         <div style={{ marginBottom:"48px" }}>
           <span style={{ fontSize: "24px", fontWeight: "bold", color: "#111111" }}>
             개인정보수정
           </span>
         </div>
-        <div >
-          <img className="memberProfile"/>
+        <div>
+          <img className="memberProfile" onClick={ChangeImage}/>
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
         </div>
         <div style={{ width: "360px", margin: "0 auto", marginBottom:"16px"}}>
           <label className="label-text">

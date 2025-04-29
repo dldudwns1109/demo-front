@@ -4,7 +4,12 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import Header from "../components/Header";
 import GroupItem from "../components/GroupItem";
 import JoinBoardItem from "../components/JoinBoardItem";
-import { locationState, windowWidthState } from "../utils/storage";
+import {
+  locationState,
+  windowWidthState,
+  loginState,
+  userIdState,
+} from "../utils/storage";
 
 import { IoLocationSharp } from "react-icons/io5";
 
@@ -373,6 +378,8 @@ const joinBoardItem = [
 
 export default function Home() {
   const windowWidth = useRecoilValue(windowWidthState);
+  const login = useRecoilValue(loginState);
+  const userId = useRecoilValue(userIdState);
   const [location, setLocation] = useRecoilState(locationState);
   const [isAroundMore, setIsAroundMore] = useState(false);
   const [aroundRenderItem, setAroundRenderItem] = useState(6);
@@ -380,6 +387,11 @@ export default function Home() {
   const [likedRenderItem, setLikedRenderItem] = useState(6);
 
   const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   console.log(login);
+  //   console.log(userId);
+  // }, [login, userId]);
 
   useEffect(() => {
     setIsAroundMore(aroundGroupData.length > aroundRenderItem);
@@ -392,7 +404,7 @@ export default function Home() {
   return (
     <>
       <Header
-        loginState="login"
+        loginState={`${login ? "loggined" : "login"}`}
         location={location}
         setLocation={setLocation}
       />

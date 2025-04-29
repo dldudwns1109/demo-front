@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
-import { useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import axios from "axios";
 
 import Home from "./pages/Home";
 import Signin from "./pages/Signin";
@@ -33,18 +34,46 @@ import GroupChat from "./pages/GroupChat";
 import MeetingCreate from "./pages/MeetingCreate";
 import MeetingDetail from "./pages/MeetingDetail";
 import MeetingEdit from "./pages/MeetingEdit";
-import { windowWidthState } from "./utils/storage";
+import { loginState, userIdState, windowWidthState } from "./utils/storage";
 import "./App.css";
 
 function App() {
   const setWindowWidth = useSetRecoilState(windowWidthState);
+  const login = useRecoilValue(loginState);
+  const setUserId = useSetRecoilState(userIdState);
 
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
     };
 
+    const refreshLogin = async () => {
+      let refreshToken = localStorage.getItem("refreshToken");
+      if (login || refreshToken === null) return;
+
+      try {
+        axios.defaults.headers.common[
+          "Authorization"
+        ] = `Bearer ${refreshToken}`;
+
+        const res = await axios.post(
+          "http://localhost:8080/api/member/refresh"
+        );
+
+        setUserId(res.data.memberId);
+
+        axios.defaults.headers.common[
+          "Authorization"
+        ] = `Bearer ${res.data.accessToken}`;
+
+        localStorage.setItem("refreshToken", res.data.refreshToken);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
     window.addEventListener("resize", handleResize);
+    refreshLogin();
 
     return () => {
       window.removeEventListener("resize", handleResize);

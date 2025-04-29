@@ -1,13 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import axios from "axios";
 import Header from "../components/Header";
-import { windowWidthState } from "../utils/storage";
+import { loginState, userIdState, windowWidthState } from "../utils/storage";
 
 export default function Signin() {
   const windowWidth = useRecoilValue(windowWidthState);
+  const login = useRecoilValue(loginState);
+  const setUserId = useSetRecoilState(userIdState);
+  const [memberId, setMemberId] = useState(
+    localStorage.getItem("saveId") ?? ""
+  );
+  const [memberPw, setMemberPw] = useState("");
+  const [saveId, setSaveId] = useState(
+    localStorage.getItem("isSaved") === "true" || false
+  );
+
+  const memberIdRef = useRef(null);
+  const memberPwRef = useRef(null);
+  const saveIdRef = useRef(null);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (login) navigate("/");
+  }, [login]);
 
   return (
     <div className="vh-100" style={{ backgroundColor: "#FAFAFA" }}>
@@ -88,7 +106,10 @@ export default function Signin() {
                     paddingRight: "12px",
                     borderRadius: "8px",
                   }}
-                  placeholder="닉네임"
+                  placeholder="아이디"
+                  ref={memberIdRef}
+                  value={memberId}
+                  onChange={(e) => setMemberId(e.target.value)}
                 />
                 <input
                   type="password"
@@ -102,6 +123,9 @@ export default function Signin() {
                     borderRadius: "8px",
                   }}
                   placeholder="비밀번호"
+                  ref={memberPwRef}
+                  value={memberPw}
+                  onChange={(e) => setMemberPw(e.target.value)}
                 />
               </div>
               <div className="d-flex gap-2 mb-4">
@@ -113,6 +137,9 @@ export default function Signin() {
                     height: "20px",
                     border: "1px solid #EBEBEB",
                   }}
+                  ref={saveIdRef}
+                  checked={saveId}
+                  onChange={(e) => setSaveId(e.target.checked)}
                 />
                 <label
                   htmlFor="saveId"
@@ -124,6 +151,39 @@ export default function Signin() {
               <button
                 className="btn btn-primary text-white mb-3"
                 style={{ width: "256px" }}
+                onClick={async () => {
+                  localStorage.setItem("isSaved", saveId);
+                  if (saveId) localStorage.setItem("saveId", memberId);
+                  else {
+                    localStorage.removeItem("saveId");
+                    localStorage.removeItem("isSaveId");
+                  }
+
+                  try {
+                    const res = await axios.post(
+                      "http://localhost:8080/api/member/signin",
+                      {
+                        memberId,
+                        memberPw,
+                      }
+                    );
+
+                    if (res.status === 200) {
+                      setUserId(res.data.memberId);
+                      axios.defaults.headers.common[
+                        "Authorization"
+                      ] = `Bearer ${res.data.accessToken}`;
+                      navigate("/");
+
+                      localStorage.setItem(
+                        "refreshToken",
+                        res.data.refreshToken
+                      );
+                    }
+                  } catch (e) {
+                    console.log(e);
+                  }
+                }}
               >
                 로그인
               </button>

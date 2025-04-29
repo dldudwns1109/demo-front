@@ -1,5 +1,5 @@
 // src/utils/storage.js
-import { atom } from "recoil";
+import { atom, selector } from "recoil";
 
 export const userIdState = atom({
   key: "userIdState",
@@ -17,4 +17,9 @@ export const locationState = atom({
 export const windowWidthState = atom({
   key: "windowWidthState",
   default: window.innerWidth,
+});
+
+export const loginState = selector({
+  key: "loginState",
+  get: (state) => state.get(userIdState) !== null,
 });

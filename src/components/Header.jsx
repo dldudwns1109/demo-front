@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import { windowWidthState } from "../utils/storage";
+
 import { FaSearch } from "react-icons/fa";
 import { IoPersonCircle } from "react-icons/io5";
 import { RiArrowDropDownLine } from "react-icons/ri";
@@ -18,6 +21,7 @@ export default function Header({
   location = null,
   setLocation = null,
 }) {
+  const windowWidth = useRecoilValue(windowWidthState);
   const [category, setCategory] = useState("전체");
   const [isOpenCategoryRef, setIsOpenCategoryRef] = useState(false);
   const [isOpenLocationRef, setIsOpenLocationRef] = useState(false);
@@ -35,25 +39,11 @@ export default function Header({
     }
   }, [location]);
 
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
   const categoryRef = useRef(null);
   const locationRef = useRef(null);
   const searchRef = useRef(null);
 
-  const navigate = useNavigate("/signin");
+  const navigate = useNavigate();
 
   useEffect(() => {
     // console.log(searchKeyword);

@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
+import { useSetRecoilState } from "recoil";
 
 import Home from "./pages/Home";
 import Signin from "./pages/Signin";
@@ -31,9 +33,24 @@ import GroupChat from "./pages/GroupChat";
 import MeetingCreate from "./pages/MeetingCreate";
 import MeetingDetail from "./pages/MeetingDetail";
 import MeetingEdit from "./pages/MeetingEdit";
+import { windowWidthState } from "./utils/storage";
 import "./App.css";
 
 function App() {
+  const setWindowWidth = useSetRecoilState(windowWidthState);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
     <>
       <Routes>
@@ -52,7 +69,10 @@ function App() {
         <Route path="/group/create-finish" element={<GroupCreateFinish />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/join/board" element={<JoinBoard />} />
-        <Route path="/join/board/detail/:boardNo" element={<JoinBoardDetail />} />
+        <Route
+          path="/join/board/detail/:boardNo"
+          element={<JoinBoardDetail />}
+        />
         <Route path="/join/board/write" element={<JoinBoardWrite />} />
         <Route path="/join/board/edit/:boardNo" element={<JoinBoardEdit />} />
         <Route path="/group/list" element={<GroupList />} />

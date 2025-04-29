@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useRecoilState, useRecoilValue } from "recoil";
 import Header from "../components/Header";
 import GroupItem from "../components/GroupItem";
+import JoinBoardItem from "../components/JoinBoardItem";
+import { locationState, windowWidthState } from "../utils/storage";
 
 import { IoLocationSharp } from "react-icons/io5";
-import JoinBoardItem from "../components/JoinBoardItem";
-import { useNavigate } from "react-router-dom";
 
 const aroundGroupData = [
   {
@@ -370,29 +372,12 @@ const joinBoardItem = [
 ];
 
 export default function Home() {
-  const [location, setLocation] = useState({
-    city: "서울특별시",
-    area: "강남구",
-  });
+  const windowWidth = useRecoilValue(windowWidthState);
+  const [location, setLocation] = useRecoilState(locationState);
   const [isAroundMore, setIsAroundMore] = useState(false);
   const [aroundRenderItem, setAroundRenderItem] = useState(6);
-
   const [isLikedMore, setIsLikedMore] = useState(false);
   const [likedRenderItem, setLikedRenderItem] = useState(6);
-
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
 
   const navigate = useNavigate();
 

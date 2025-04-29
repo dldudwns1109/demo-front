@@ -37,10 +37,9 @@ export default function ProfileCard({ member }) {
           </div>
           <p style={{ marginBottom: "40px" }}>{member.statusMessage}</p>
           <div className="d-flex flex-wrap gap-2">
-            {/* {member.likeList.map((like, v) => (
+            {member.likeList.map((like, v) => (
               <span key={v} className="mbti-badge">{like}</span>
-            ))} */}
-            <span className="mbti-badge">{member.like}</span>
+            ))}
           </div>
         </div>
       </div>

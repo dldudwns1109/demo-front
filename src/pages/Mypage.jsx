@@ -29,7 +29,7 @@ export default function Mypage() {
       school: "KH정보교육원",
       birth: "1997-03-21",
       statusMessage: "새로운 모임을 찾는 중이에요!",
-      like: "독서",
+      likeList: ["독서", "여행", "코딩"], // 수정 포인트!
       profileImageUrl: "", // 추가로 이미지 있으면 여기
     };
     setMember(dummyMember);

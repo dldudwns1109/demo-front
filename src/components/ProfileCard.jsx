@@ -1,7 +1,9 @@
 import { FaCog } from "react-icons/fa";
 import "../css/Mypage.css";
+import { useNavigate } from "react-router-dom";
 
 export default function ProfileCard({ member }) {
+  const navigate = useNavigate();
   if (!member) return <div className="text-center">회원 정보를 불러오는 중입니다...</div>;
   return (
     <div className="container">
@@ -18,7 +20,10 @@ export default function ProfileCard({ member }) {
               {member.memberNickname}
             </span>
             <span className="mbti-badge">{member.mbti}</span>
-            <button className="creat-crew-btn">모임 개설</button>
+            <button className="creat-crew-btn"
+                onClick={() => navigate("/group/create")}>
+              모임 개설
+            </button>
             <button className="btn btn-light btn-sm" style={{ backgroundColor: "transparent", border: "none" }}>
               <FaCog />
             </button>
@@ -32,9 +37,10 @@ export default function ProfileCard({ member }) {
           </div>
           <p style={{ marginBottom: "40px" }}>{member.statusMessage}</p>
           <div className="d-flex flex-wrap gap-2">
-            {member.likeList.map((like, v) => (
+            {/* {member.likeList.map((like, v) => (
               <span key={v} className="mbti-badge">{like}</span>
-            ))}
+            ))} */}
+            <span className="mbti-badge">{member.like}</span>
           </div>
         </div>
       </div>

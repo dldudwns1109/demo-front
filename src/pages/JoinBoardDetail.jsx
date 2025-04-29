@@ -1,21 +1,27 @@
-import { useEffect, useState } from "react";
+// JoinBoardDetail.jsx (정확한 수정 버전)
+
+import { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiMoreVertical } from "react-icons/fi";
 import { FaPaperPlane } from "react-icons/fa";
-import Header from "../components/Header";
+import { useRecoilState } from "recoil";
+import { replyCountState } from "../store/replyCountState";
 
 export default function JoinBoardDetail() {
-  //state
-  const { boardNo } = useParams(); //boardNo 불러옴
-  const [board, setBoard] = useState(null); //게시글 정보 저장
-  const [replies, setReplies] = useState([]); //댓글 리스트 상태
-  const [newReply, setNewReply] = useState(""); //새로운 댓글 입력값
-  const [dropdownOpen, setDropdownOpen] = useState(null); //댓글 드롭다운 설정
-  const [boardDropdownOpen, setBoardDropdownOpen] = useState(false); //게시글 드롭다운 설정
-  const navigate = useNavigate(); //페이지 이동 훅
+  const { boardNo } = useParams();
+  const [board, setBoard] = useState(null);
+  const [replies, setReplies] = useState([]);
+  const [newReply, setNewReply] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(null);
+  const [boardDropdownOpen, setBoardDropdownOpen] = useState(false);
+  const [replyCounts, setReplyCounts] = useRecoilState(replyCountState);
+  const [showBoardWriterPopover, setShowBoardWriterPopover] = useState(false);
+  const [replyPopoverIndex, setReplyPopoverIndex] = useState(null);
+  const boardPopoverRef = useRef();
+  const replyPopoverRefs = useRef([]);
+  const navigate = useNavigate();
 
-  //effect
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -28,39 +34,52 @@ export default function JoinBoardDetail() {
     fetchData();
   }, [boardNo]);
 
-  //댓글 등록 함수
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (boardPopoverRef.current && !boardPopoverRef.current.contains(e.target)) {
+        setShowBoardWriterPopover(false);
+      }
+      if (!replyPopoverRefs.current.some(ref => ref && ref.contains(e.target))) {
+        setReplyPopoverIndex(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleReplySubmit = () => {
     if (newReply.trim()) {
       const reply = {
-        writer: "댓글작성자", // 추후 API 연동 예정
+        writer: "댓글작성자", // 더미
         profileUrl: "/images/default-profile.png",
         content: newReply,
         writeTime: new Date(),
         isEditing: false,
+        memberLocation: "서울",
+        memberSchool: "서울대학교",
+        memberMbti: "ENTP"
       };
       setReplies([reply, ...replies]);
       setNewReply("");
+      setReplyCounts(prev => ({
+        ...prev,
+        [boardNo]: (prev[boardNo] ?? board?.boardReply ?? 0) + 1
+      }));
     }
   };
 
-  //댓글 입력창에 enter 키 누르면 댓글 등록
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      handleReplySubmit();
-    }
+    if (e.key === "Enter") handleReplySubmit();
   };
 
-  //댓글 드롭다운
   const toggleDropdown = (idx) => {
     setDropdownOpen(dropdownOpen === idx ? null : idx);
   };
 
-  //게시글 드롭다운
   const toggleBoardDropdown = () => {
     setBoardDropdownOpen(!boardDropdownOpen);
   };
 
-  //댓글 수정 모드
   const handleEditReply = (idx) => {
     const updatedReplies = [...replies];
     updatedReplies[idx].isEditing = true;
@@ -68,7 +87,6 @@ export default function JoinBoardDetail() {
     setDropdownOpen(null);
   };
 
-  //댓글 수정 완료 후 저장
   const handleUpdateReply = (idx, newContent) => {
     const updatedReplies = [...replies];
     updatedReplies[idx].content = newContent;
@@ -77,21 +95,22 @@ export default function JoinBoardDetail() {
     setReplies(updatedReplies.sort((a, b) => new Date(b.writeTime) - new Date(a.writeTime)));
   };
 
-  //댓글 삭제
   const handleDeleteReply = (idx) => {
     if (window.confirm("이 댓글을 삭제하시겠습니까?")) {
       const updatedReplies = replies.filter((_, i) => i !== idx);
       setReplies(updatedReplies);
       setDropdownOpen(null);
+      setReplyCounts(prev => ({
+        ...prev,
+        [boardNo]: (prev[boardNo] ?? board?.boardReply ?? 1) - 1
+      }));
     }
   };
 
-  //게시글 수정 페이지로 이동
   const handleBoardEdit = () => {
     navigate(`/join/board/edit/${boardNo}`);
   };
 
-  //게시글 삭제
   const handleBoardDelete = async () => {
     if (window.confirm("이 게시글을 삭제하시겠습니까?")) {
       try {
@@ -103,137 +122,177 @@ export default function JoinBoardDetail() {
     }
   };
 
-  //게시글이 없다면 로딩 표시
   if (!board) return <div>로딩 중...</div>;
 
   return (
     <>
-      {/* <Header loginState="login" /> */}
-      <div className="container py-4">
-        {/* 목록으로 돌아가기 */}
-        <div className="mb-3">
-          <Link to="/join/board" className="btn btn-outline-secondary btn-sm">
-            목록으로
-          </Link>
-        </div>
+    {/* <Header loginState="login" /> */}
+    <div className="container py-4">
+      <div className="mb-5">
+        <Link to="/join/board" className="btn btn-outline-secondary btn-sm">목록으로</Link>
+      </div>
 
-        {/* 프로필 영역 + 게시글 수정/삭제 드롭다운 */}
-        <div className="d-flex justify-content-between align-items-start mb-3">
-          <div className="d-flex align-items-center">
-            <img
-              src={board.boardWriterProfileUrl || "/images/default-profile.png"}
-              alt="프로필"
-              className="rounded-circle me-3"
-              style={{ width: "3rem", height: "3rem", objectFit: "cover" }}
-            />
-            <div>
-              <strong>{board.boardWriterNickname}</strong>
-              <div className="text-muted" style={{ fontSize: "0.85rem" }}>
-                {board.boardWriterGender === "M" ? "남성" : "여성"} · {board.boardWriterBirth} · {board.boardWriterMbti}
-              </div>
+      {/* 작성자 프로필 + 드롭다운 */}
+      <div className="d-flex justify-content-between align-items-start mb-4 position-relative">
+        <div className="d-flex align-items-center">
+          <img
+            src={board.boardWriterProfileUrl || "/images/default-profile.png"}
+            alt="프로필"
+            className="rounded-circle me-3"
+            style={{ width: "3rem", height: "3rem", objectFit: "cover", cursor: "pointer" }}
+            onClick={() => setShowBoardWriterPopover(!showBoardWriterPopover)}
+          />
+          <div>
+            <div className="d-flex align-items-center">
+              <strong className="me-2">{board.boardWriterNickname}</strong>
+              <small className="text-muted">
+                {new Date(board.boardWriteTime).toLocaleString("ko-KR", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit"
+                })}
+              </small>
+            </div>
+            <div className="text-muted" style={{ fontSize: "0.85rem" }}>
+              {board.boardWriterGender === "M" ? "남성" : "여성"} · {board.boardWriterBirth} · {board.boardWriterMbti}
             </div>
           </div>
-
-          {/* 게시글 수정 삭제 드롭다운 */}
-          <div className="position-relative">
-            <button
-              className="btn btn-link p-0"
-              type="button"
-              onClick={toggleBoardDropdown}
-              style={{ color: "#0d6efd" }}>
-              <FiMoreVertical size="1.5rem" />
-            </button>
-            {boardDropdownOpen && (
-              <ul className="dropdown-menu show" style={{ position: "absolute", right: 0 }}>
-                <li><button className="dropdown-item" onClick={handleBoardEdit}>수정</button></li>
-                <li><button className="dropdown-item" onClick={handleBoardDelete}>삭제</button></li>
-              </ul>
-            )}
-          </div>
         </div>
 
-        {/* 글 내용 */}
-        <div className="mb-4">
-          <div style={{ whiteSpace: "pre-wrap", fontSize: "1rem" }}>{board.boardContent}</div>
-        </div>
-
-        {/* 댓글 리스트 */}
-        <div className="mb-3">
-          {replies.length === 0 ? (
-            <p className="text-muted">아직 댓글이 없습니다.</p>
-          ) : (
-            replies.map((reply, idx) => (
-              <div key={idx} className="d-flex align-items-start border-bottom py-3" style={{ fontSize: "0.95rem" }}>
-                <img
-                  src={reply.profileUrl}
-                  alt="프로필"
-                  className="rounded-circle me-2"
-                  style={{ width: "2.5rem", height: "2.5rem", objectFit: "cover" }}
-                />
-                <div className="flex-grow-1">
-                  <div className="fw-bold">{reply.writer}</div>
-                  <div className="d-flex align-items-center">
-                    {reply.isEditing ? (
-                      <input
-                        type="text"
-                        className="form-control form-control-sm border"
-                        defaultValue={reply.content}
-                        onBlur={(e) => handleUpdateReply(idx, e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleUpdateReply(idx, e.target.value)}
-                        autoFocus
-                      />
-                    ) : (
-                      <div>{reply.content}</div>
-                    )}
-                    <small className="text-muted ms-3" style={{ fontSize: "0.8rem" }}>
-                      {new Date(reply.writeTime).toLocaleString("ko-KR", {
-                        year: "numeric", month: "2-digit", day: "2-digit",
-                        hour: "2-digit", minute: "2-digit"
-                      })}
-                    </small>
-                  </div>
-                </div>
-                <div className="position-relative ms-2" style={{ flexShrink: 0 }}>
-                  <button
-                    className="btn btn-link p-0"
-                    type="button"
-                    onClick={() => toggleDropdown(idx)}
-                    style={{ color: "#0d6efd" }}
-                  >
-                    <FiMoreVertical size="1.5rem" />
-                  </button>
-                  {dropdownOpen === idx && (
-                    <ul className="dropdown-menu show" style={{ position: "absolute", right: 0 }}>
-                      <li><button className="dropdown-item" onClick={() => handleEditReply(idx)}>수정</button></li>
-                      <li><button className="dropdown-item" onClick={() => handleDeleteReply(idx)}>삭제</button></li>
-                    </ul>
-                  )}
-                </div>
-              </div>
-            ))
+        {/* 게시글 드롭다운 */}
+        <div className="position-relative">
+          <button className="btn btn-link p-0" onClick={toggleBoardDropdown} style={{ color: "#F9B4ED" }}>
+            <FiMoreVertical size="1.5rem" />
+          </button>
+          {boardDropdownOpen && (
+            <ul className="dropdown-menu show" style={{ position: "absolute", right: 0 }}>
+              <li><button className="dropdown-item" onClick={handleBoardEdit}>수정</button></li>
+              <li><button className="dropdown-item" onClick={handleBoardDelete}>삭제</button></li>
+            </ul>
           )}
         </div>
 
-        {/* 댓글 작성 */}
-        <div className="position-relative border rounded p-2">
-          <input
-            type="text"
-            className="form-control border-0 pe-5"
-            placeholder="댓글을 입력하세요"
-            value={newReply}
-            onChange={(e) => setNewReply(e.target.value)}
-            onKeyDown={handleKeyPress}
-            style={{ flex: 1, boxShadow: "none" }}
-          />
-          <button
-            className="btn position-absolute"
-            style={{ top: "50%", right: "1rem", transform: "translateY(-50%)", color: "#0d6efd" }}
-            onClick={handleReplySubmit}
+        {/* 작성자 팝오버 */}
+        {showBoardWriterPopover && (
+          <div
+            ref={boardPopoverRef}
+            className="shadow position-absolute bg-white rounded p-3"
+            style={{ top: "5rem", left: "1rem", zIndex: 10, width: "300px", fontSize: "0.9rem", border: "1px solid #ddd" }}
           >
-            <FaPaperPlane size="1.2rem" />
-          </button>
-        </div>
+            <div className="d-flex align-items-center mb-3">
+              <img
+                src={board.boardWriterProfileUrl || "/images/default-profile.png"}
+                alt="프로필"
+                className="rounded-circle me-3"
+                style={{ width: "3.5rem", height: "3.5rem", objectFit: "cover" }}
+              />
+              <div>
+                <div className="fw-bold">{board.boardWriterNickname}</div>
+                <div className="badge bg-info text-white me-1">{board.boardWriterMbti || "MBTI"}</div>
+              </div>
+            </div>
+            <div className="text-muted mb-2">
+              {board.boardWriterLocation} · {board.boardWriterSchool} · {board.boardWriterBirth}
+            </div>
+            <hr />
+            <div className="fw-bold">가입한 모임 예시</div>
+            <div className="d-flex align-items-center mt-2">
+              <img src="/images/sample-group.jpg" className="me-2 rounded" style={{ width: "2rem", height: "2rem" }} alt="모임" />
+              <div className="text-muted" style={{ fontSize: "0.8rem" }}>모임 이름</div>
+            </div>
+          </div>
+        )}
       </div>
-    </>
+
+      {/* 게시글 내용 */}
+      <div className="mb-5">
+        <div style={{ whiteSpace: "pre-wrap", fontSize: "1rem" }}>{board.boardContent}</div>
+      </div>
+
+      <hr className="my-5" />
+
+      {/* 댓글 목록 */}
+      <h5 className="fw-bold mb-3">댓글 {replies.length}개</h5>
+
+      <div className="mb-3">
+        {replies.length === 0 ? (
+          <p className="text-muted">아직 댓글이 없습니다.</p>
+        ) : (
+          replies.map((reply, idx) => (
+            <div key={idx} className="d-flex align-items-start border-bottom py-3 position-relative" style={{ fontSize: "0.95rem" }}>
+              <img
+                src={reply.profileUrl}
+                alt="프로필"
+                className="rounded-circle me-2"
+                style={{ width: "2.5rem", height: "2.5rem", objectFit: "cover", cursor: "pointer" }}
+                onClick={() => setReplyPopoverIndex(replyPopoverIndex === idx ? null : idx)}
+              />
+              <div className="flex-grow-1">
+                <div className="fw-bold">{reply.writer}</div>
+                <div className="d-flex align-items-center">
+                  {reply.isEditing ? (
+                    <input
+                      type="text"
+                      className="form-control form-control-sm border"
+                      defaultValue={reply.content}
+                      onBlur={(e) => handleUpdateReply(idx, e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleUpdateReply(idx, e.target.value)}
+                      autoFocus
+                    />
+                  ) : (
+                    <div>{reply.content}</div>
+                  )}
+                  <small className="text-muted ms-3" style={{ fontSize: "0.8rem" }}>
+                    {new Date(reply.writeTime).toLocaleString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                  </small>
+                </div>
+              </div>
+              <div className="position-relative ms-2" style={{ flexShrink: 0 }}>
+                <button className="btn btn-link p-0" onClick={() => toggleDropdown(idx)} style={{ color: "#F9B4ED" }}>
+                  <FiMoreVertical size="1.5rem" />
+                </button>
+                {dropdownOpen === idx && (
+                  <ul className="dropdown-menu show" style={{ position: "absolute", right: 0 }}>
+                    <li><button className="dropdown-item" onClick={() => handleEditReply(idx)}>수정</button></li>
+                    <li><button className="dropdown-item" onClick={() => handleDeleteReply(idx)}>삭제</button></li>
+                  </ul>
+                )}
+              </div>
+
+              {/* 댓글 작성자 팝오버 */}
+              {replyPopoverIndex === idx && (
+                <div ref={(el) => replyPopoverRefs.current[idx] = el} className="shadow position-absolute bg-white rounded p-3" style={{ top: "3.5rem", left: "0", zIndex: 10, width: "250px", border: "1px solid #ddd" }}>
+                  <div className="fw-bold mb-2">댓글 작성자 프로필</div>
+                  <div className="text-muted mb-2">{reply.memberLocation} · {reply.memberSchool} · {reply.memberMbti}</div>
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* 댓글 작성 폼 */}
+      <div className="position-relative border rounded p-2">
+        <input
+          type="text"
+          className="form-control border-0 pe-5"
+          placeholder="댓글을 입력하세요"
+          value={newReply}
+          onChange={(e) => setNewReply(e.target.value)}
+          onKeyDown={handleKeyPress}
+          style={{ flex: 1, boxShadow: "none" }}
+        />
+        <button
+          className="btn position-absolute"
+          style={{ top: "50%", right: "1rem", transform: "translateY(-50%)", color: "#F9B4ED" }}
+          onClick={handleReplySubmit}
+        >
+          <FaPaperPlane size="1.2rem" />
+        </button>
+      </div>
+    </div>
+  </>
   );
 }

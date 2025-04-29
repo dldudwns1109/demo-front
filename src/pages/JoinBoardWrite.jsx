@@ -1,42 +1,65 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Link 추가
 import axios from "axios";
 import Header from "../components/Header";
 
 export default function JoinBoardWrite() {
-  // state
-  const [selectedCategory, setSelectedCategory] = useState(""); // 카테고리
-  const [boardTitle, setBoardTitle] = useState(""); // 게시글 제목
-  const [boardContent, setBoardContent] = useState(""); // 게시글 내용
-  const [profile, setProfile] = useState(null); // 작성자 프로필 정보
-  const navigate = useNavigate(); // 페이지 이동
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [boardTitle, setBoardTitle] = useState("");
+  const [boardContent, setBoardContent] = useState("");
+  const [profile, setProfile] = useState(null);
+  const navigate = useNavigate();
 
-  // 카테고리 목록
   const categories = [
-    "스포츠", "사교", "독서", "여행", "음악", "게임", "공연", "자기개발", "요리"
+    "스포츠",
+    "사교",
+    "독서",
+    "여행",
+    "음악",
+    "게임",
+    "공연",
+    "자기개발",
+    "요리",
   ];
 
   // effect: 컴포넌트 마운트 시 프로필 정보 요청
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     try {
+  //       const res = await axios.get("http://localhost:8080/api/profile");
+  //       setProfile(res.data); // 프로필 가져오기 성공 시 저장
+  //     } catch (err) {
+  //       console.error(err);
+  //       // 로그인 안 된 경우 경고창 띄우기
+  //       const shouldLogin = window.confirm("로그인 후 이용 가능합니다. 로그인 페이지로 이동할까요?");
+  //       if (shouldLogin) {
+  //         navigate("/login"); // 로그인 페이지로 이동
+  //       } else {
+  //         navigate(-1); // 이전 페이지로 돌아가기
+  //       }
+  //     }
+  //   };
+  //   fetchProfile();
+  // }, [navigate]);
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const res = await axios.get("http://localhost:8080/api/profile");
-        setProfile(res.data); // 프로필 가져오기 성공 시 저장
+        setProfile(res.data);
       } catch (err) {
         console.error(err);
-        // 로그인 안 된 경우 경고창 띄우기
-        const shouldLogin = window.confirm("로그인 후 이용 가능합니다. 로그인 페이지로 이동할까요?");
-        if (shouldLogin) {
-          navigate("/login"); // 로그인 페이지로 이동
-        } else {
-          navigate(-1); // 이전 페이지로 돌아가기
-        }
+        setProfile({
+          boardWriterProfileUrl: "/images/default-profile.png",
+          boardWriterNickname: "테스트유저",
+          boardWriterGender: "M",
+          boardWriterBirth: "1995-08-15",
+          boardWriterMbti: "ENTP",
+        });
       }
     };
     fetchProfile();
   }, [navigate]);
 
-  // 게시글 작성 함수
   const handleSubmit = async () => {
     if (!selectedCategory || !boardTitle.trim() || !boardContent.trim()) {
       alert("카테고리, 제목, 글 내용을 모두 입력해주세요.");
@@ -49,51 +72,63 @@ export default function JoinBoardWrite() {
         boardContent,
       });
       alert("게시글이 작성되었습니다.");
-      navigate("/join/board"); // 작성 완료 후 게시판으로 이동
+      navigate("/join/board");
     } catch (err) {
       console.error(err);
       alert("게시글 작성에 실패했습니다.");
     }
   };
 
-  // view
   return (
     <>
       {/* <Header loginState="login" /> */}
       <div className="container py-4">
-        {/* 프로필 영역 */}
+        {/* --- 목록으로 버튼 추가 --- */}
+        <div className="mb-5">
+          <Link to="/join/board" className="btn btn-outline-secondary btn-sm">
+            목록으로
+          </Link>
+        </div>
+
+        {/* --- 프로필 영역 --- */}
         {profile && (
           <div className="d-flex align-items-center mb-4">
             <img
-              src={profile.boardWriterProfileUrl || "/images/default-profile.png"}
+              src={
+                profile.boardWriterProfileUrl || "/images/default-profile.png"
+              }
               alt="프로필"
               className="rounded-circle me-3"
               style={{
                 width: "3rem",
                 height: "3rem",
-                objectFit: "cover"
+                objectFit: "cover",
               }}
             />
             <div>
               <strong>{profile.boardWriterNickname}</strong>
               <div className="text-muted" style={{ fontSize: "0.85rem" }}>
-                {profile.boardWriterGender === "M" ? "남성" : "여성"} · {profile.boardWriterBirth} · {profile.boardWriterMbti}
+                {profile.boardWriterGender === "M" ? "남성" : "여성"} ·{" "}
+                {profile.boardWriterBirth} · {profile.boardWriterMbti}
               </div>
             </div>
           </div>
         )}
 
-        {/* 카테고리 선택 */}
+        {/* --- 카테고리 선택 --- */}
         <div className="d-flex flex-wrap gap-2 mb-4">
           {categories.map((cat) => (
             <button
               key={cat}
               type="button"
-              className={`btn btn-sm rounded-pill px-3 ${selectedCategory === cat ? "text-white" : "text-pink-400"}`}
+              className={`btn btn-sm rounded-pill px-3 ${
+                selectedCategory === cat ? "text-white" : "text-pink-400"
+              }`}
               style={{
-                backgroundColor: selectedCategory === cat ? "#F9B4ED" : "#ffffff",
+                backgroundColor:
+                  selectedCategory === cat ? "#F9B4ED" : "#ffffff",
                 border: selectedCategory === cat ? "none" : "1px solid #F9B4ED",
-                fontSize: "0.95rem"
+                fontSize: "0.95rem",
               }}
               onClick={() => setSelectedCategory(cat)}
             >
@@ -102,7 +137,7 @@ export default function JoinBoardWrite() {
           ))}
         </div>
 
-        {/* 제목 입력 */}
+        {/* --- 제목 입력 --- */}
         <div className="mb-3">
           <input
             type="text"
@@ -114,19 +149,24 @@ export default function JoinBoardWrite() {
           />
         </div>
 
-        {/* 내용 입력 */}
+        {/* --- 내용 입력 --- */}
         <div className="mb-4">
           <textarea
             className="form-control"
-            rows="8"
+            rows="15"
             placeholder="글 내용을 입력하세요"
             value={boardContent}
             onChange={(e) => setBoardContent(e.target.value)}
-            style={{ fontSize: "1rem", padding: "1rem" }}
+            style={{
+              fontSize: "1rem",
+              padding: "1.2rem",
+              minHeight: "400px", // 추가
+              resize: "vertical", // 사용자가 크기 조정 가능하게
+            }}
           ></textarea>
         </div>
 
-        {/* 작성 버튼 */}
+        {/* --- 작성 버튼 --- */}
         <div className="text-center">
           <button
             className="btn btn-primary px-5 py-2"

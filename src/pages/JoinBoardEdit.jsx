@@ -54,7 +54,7 @@ export default function JoinBoardEdit() {
 
   return (
     <>
-      <Header loginState="login" />
+      {/* <Header loginState="login" /> */}
       <div className="container" style={{ padding: "2rem" }}>
         {/* 목록으로 돌아가기 */}
         <div style={{ marginBottom: "2rem" }}>

@@ -4,13 +4,16 @@ import axios from "axios";
 import Header from "../components/Header";
 
 export default function JoinBoard() {
+  //state
+  //카테고리 목록
   const categories = [
     "전체", "스포츠", "사교", "독서", "여행", "음악", "게임", "공연", "자기개발", "요리"
   ];
-  const [selectedCategory, setSelectedCategory] = useState("전체");
-  const [boardList, setBoardList] = useState([]);
-  const [visibleCount, setVisibleCount] = useState(4);
+  const [selectedCategory, setSelectedCategory] = useState("전체"); //선택된 카테고리 상태 
+  const [boardList, setBoardList] = useState([]); //게시글 리스트 상태
+  const [visibleCount, setVisibleCount] = useState(4); //화면에 표시할 게시글 개수
 
+  //effect
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -26,23 +29,27 @@ export default function JoinBoard() {
     fetchData();
   }, [selectedCategory]);
 
+  //카테고리 버튼 클릭시 호출되는 함수
   const handleCategoryClick = (cat) => {
     setSelectedCategory(cat);
   };
 
+  //더보기 클릭시 호출되는 함수
   const handleLoadMore = () => {
     setVisibleCount(prev => prev + 4);
   };
 
+  //view
   return (
     <>
-      <Header loginState="login" />
+      {/* <Header loginState="login" /> */}
       <div className="container py-4">
         {/* 메인 타이틀 */}
         <h2 className="mb-4 fw-bold" style={{ fontSize: "2rem" }}>모임 가입 게시판</h2>
 
         {/* 카테고리 선택 + 글쓰기 버튼 */}
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          {/* 카테고리 버튼 */}
           <div className="d-flex flex-wrap gap-2">
             {categories.map((cat) => (
               <button
@@ -61,6 +68,7 @@ export default function JoinBoard() {
               </button>
             ))}
           </div>
+          {/* 글쓰기 버튼 */}
           <Link
             to="/join/board/write"
             className="btn btn-outline-primary btn-sm"
@@ -71,13 +79,16 @@ export default function JoinBoard() {
 
         {/* 게시글 목록 */}
         <div className="row">
+          {/* 게시글 없을때 */}
           {boardList.length === 0 && (
             <p className="text-muted text-center mt-5" style={{ fontSize: "1rem" }}>
               게시글이 없습니다.
             </p>
           )}
+          {/* 게시글 리스트 */}
           {boardList.slice(0, visibleCount).map((board) => (
             <div key={board.boardNo} className="col-md-6 mb-4">
+              {/* 게시글 클릭시 상세페이지 이동 */}
               <Link
                 to={`/join/board/detail/${board.boardNo}`}
                 className="text-decoration-none text-dark">
@@ -89,7 +100,7 @@ export default function JoinBoard() {
                         src={board.boardWriterProfileUrl || "/images/default-profile.png"}
                         alt="프로필"
                         className="rounded-circle me-3"
-                        style={{ width: "3rem", height: "3rem", objectFit: "cover" }}/>
+                        style={{ width: "3rem", height: "3rem", objectFit: "cover" }} />
                       <div>
                         <strong>{board.boardWriterNickname}</strong>
                         <div className="text-muted" style={{ fontSize: "0.85rem" }}>
@@ -121,7 +132,12 @@ export default function JoinBoard() {
 
                     {/* 작성일 + 댓글 수 */}
                     <small className="text-muted">
-                      {board.formattedWriteTime} / 댓글 {board.boardReply}
+                      {board.boardWriteTime
+                        ? new Date(board.boardWriteTime).toLocaleString("ko-KR", {
+                            year: "numeric", month: "2-digit", day: "2-digit",
+                            hour: "2-digit", minute: "2-digit"
+                          })
+                        : "시간 정보 없음"} / 댓글 {board.boardReply}
                     </small>
                   </div>
                 </div>

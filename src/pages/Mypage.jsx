@@ -8,21 +8,33 @@ import { userIdState } from "../utils/storage";
 
 export default function Mypage() {
   //recoil
-  const userId = useRecoilValue(userIdState);
+  // const userId = useRecoilValue(userIdState);
+  const userId = "testuser1";
 
   //state
   const [member, setMember] = useState(null);//회원정보
   const [createList, setCreateList] = useState([]); //만든모임
   const [joinList, setJoinList] = useState([]); //가입한모임
-  const [likeList, setLikeList] = useState([]); //찜한모임
+  const [likeGroupList, setLikeGroupList] = useState([]); //찜한모임
   const [meetingList, setMeetingList] = useState([]); //정모일정
   const [activeTab, setActiveTab] = useState("create"); //현재탭상태
 
   //effect
   useEffect(() => {
-    console.log("현재 userId는?", userId); // ✅ 여기 추가
-    loadMember();
-    loadCreateList();
+    const dummyMember = {
+      memberId: "testuser1",
+      memberNickname: "홍길동",
+      mbti: "INTP",
+      location: "서울",
+      school: "KH정보교육원",
+      birth: "1997-03-21",
+      statusMessage: "새로운 모임을 찾는 중이에요!",
+      like: "독서",
+      profileImageUrl: "", // 추가로 이미지 있으면 여기
+    };
+    setMember(dummyMember);
+    // loadMember();
+    // loadCreateList();
   }, []);
 
   //callback
@@ -48,7 +60,7 @@ export default function Mypage() {
   const loadLikeList = useCallback(async () => {
     const resp = await axios.get(`/crew/like/${userId}`);
     const list = Array.isArray(resp.data) ? resp.data : [];
-    setLikeList(list);
+    setLikeGroupList(list);
   }, [userId]);
 
   const loadMeetingList = useCallback(async () => {
@@ -62,16 +74,16 @@ const handleTabClick = useCallback((tab) => {
   // 선택된 탭에 맞는 목록을 필요한 경우만 불러오기
   if (tab === "create" && createList.length === 0) loadCreateList();
   if (tab === "join" && joinList.length === 0) loadJoinList();
-  if (tab === "like" && likeList.length === 0) loadLikeList();
+  if (tab === "like" && likeGroupList.length === 0) loadLikeGroupList();
   if (tab === "meeting" && meetingList.length === 0) loadMeetingList();
-}, [createList, joinList, likeList, meetingList, loadCreateList, loadJoinList, loadLikeList, loadMeetingList]);
+}, [createList, joinList, likeGroupList, meetingList, loadCreateList, loadJoinList, loadLikeList, loadMeetingList]);
 
   
   //view
   return (
     <>
       {/* 헤더 */}
-      <Header/>
+      {/* <Header/> */}
       {/* 마이페이지 프로필 */}
       <ProfileCard member={member}/>
 
@@ -120,7 +132,7 @@ const handleTabClick = useCallback((tab) => {
         )}
 
         {activeTab === "like" && (
-          likeList.length > 0 ? (
+          likeGroupList.length > 0 ? (
             <div className="d-flex flex-wrap gap-4 justify-content-start">
               {/* {likeList.map((crew) => <CrewCard key={crew.id} crew={crew} />)} */}
               찜한 모임 있습니다

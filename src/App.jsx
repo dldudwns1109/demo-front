@@ -89,7 +89,7 @@ function App() {
         <Route path="/signup-finish" element={<SignupFinish />} />
         <Route path="/find-id" element={<FindId />} />
         <Route path="/find-password" element={<FindPassword />} />
-        <Route path="/mypage/:memberId" element={<Mypage />} />
+        <Route path="/mypage" element={<Mypage />} />
         <Route path="/mypage/edit" element={<MyPageEdit />} />
         <Route path="/mypage/edit/password" element={<MypageEditPassword />} />
         <Route path="/mypage/exit" element={<MyPageExit />} />

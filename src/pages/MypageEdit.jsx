@@ -1,17 +1,24 @@
 import "../css/Mypage.css";
 import Header from "../components/Header";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const likeList = ["스포츠", "사교", "독서", "여행", "음악", "게임", "공연", "자기계발", "요리"];
 const mbtiList = ["ISFJ", "ISTJ", "ESTJ", "ESFJ", "ENFJ", "ENTJ", "INTJ", "INFJ", "ENFP", "ENTP", "INTP", "INFP", "ESFP", "ESTP", "ISTP", "ISFP"];
 const locationList = ["김포시", "서울시", "대전시"];
 const schollList = ["가톨릭대학교", "고려대학교", "연세대학교"];
 export default function MypageEdit() {
+  const navigate = useNavigate();
+
+  const fileInputRef = useRef(null);
+
   //state
   const [selectedLikeList, setSelectedLikeList] = useState([]);
   const [selectedMbti, setSelectedMbti] = useState("");
+  const [attach, setAttach] = useState(undefined);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
-  //callbacks
+  //callback
   const clickLikeBtn = useCallback((like) => {
     setSelectedLikeList((prev) => 
       prev.includes(like) ? 
@@ -23,21 +30,49 @@ export default function MypageEdit() {
     setSelectedMbti(mbti);
   }, []);
 
+  // 파일 선택창 열기 (이미지 클릭시)
+  const ChangeImage = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  }, []);
+
+  // 파일 선택했을 때 처리
+  const handleFileChange = useCallback((e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setAttach(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  }, []);
+
   //view
   return (
     <>
       {/* 헤더 */}
-      <Header/>
+      {/* <Header/> */}
       {/* 수정 페이지 */}
-      <div className="d-flex flex-column align-items-center" style={{ marginTop:"80px" }}>
+      <div className="d-flex flex-column align-items-center" style={{ paddingTop:"70px" }}>
         <div style={{ marginBottom:"48px" }}>
           <span style={{ fontSize: "24px", fontWeight: "bold", color: "#111111" }}>
             개인정보수정
           </span>
         </div>
-        <div >
-          <img className="memberProfile"/>
+        <div>
+          <img 
+            src={previewUrl || "/images/default.png"}
+            onClick={ChangeImage}
+            className="memberProfile"
+            style={{ cursor: "pointer" }}
+          />
         </div>
+        <input type="file" className="form-control"
+          name="crewImg"
+          accept=".png, .jpg"
+          onChange={handleFileChange}
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          />
         <div style={{ width: "360px", margin: "0 auto", marginBottom:"16px"}}>
           <label className="label-text">
             아이디
@@ -56,7 +91,8 @@ export default function MypageEdit() {
           <label className="label-text">
             비밀번호
           </label>
-          <button className="light-gray-btn" style={{ backgroundColor:"#6C757D", color: "#ffffff" }}>
+          <button className="light-gray-btn" style={{ backgroundColor:"#6C757D", color: "#ffffff" }}
+              onClick={() => navigate("/mypage/edit/password")}>
             비밀번호 변경하기
           </button>
         </div>

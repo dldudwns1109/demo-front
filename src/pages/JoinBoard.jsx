@@ -92,7 +92,7 @@ export default function JoinBoard() {
           {boardList.slice(0, visibleCount).map((board) => (
             <div key={board.boardNo} className="col-md-6 mb-4 position-relative">
               <Link to={`/join/board/detail/${board.boardNo}`} className="text-decoration-none text-dark">
-                <div className="card shadow-sm h-100">
+                <div className="card shadow-sm h-100" style={{ backgroundColor: "rgb(241, 243, 245)", border: "none" }}>
                   <div className="card-body" style={{ padding: "1.5rem" }}>
                     <div className="d-flex align-items-center mb-3">
                       <img

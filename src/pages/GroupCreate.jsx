@@ -40,7 +40,7 @@ export default function GroupCreate() {
   }, []);
 
   // 이미지 클릭 시 파일 선택창 열기
-  const handleImageClick = useCallback(() => {
+  const ChangeImage = useCallback(() => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
@@ -72,11 +72,11 @@ export default function GroupCreate() {
           </span>
         </div>
         <div>
-        <img
-          src={previewUrl || "/images/default.png"}
-          onClick={handleImageClick}
-          className="memberProfile"
-        />
+          <img
+            src={previewUrl || "/images/default.png"}
+            onClick={ChangeImage}
+            className="memberProfile"
+          />
         </div>
         <input type="file" className="form-control"
           name="crewImg"

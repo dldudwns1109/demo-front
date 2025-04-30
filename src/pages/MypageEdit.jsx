@@ -15,6 +15,8 @@ export default function MypageEdit() {
   //state
   const [selectedLikeList, setSelectedLikeList] = useState([]);
   const [selectedMbti, setSelectedMbti] = useState("");
+  const [attach, setAttach] = useState(undefined);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   //callback
   const clickLikeBtn = useCallback((like) => {
@@ -39,7 +41,8 @@ export default function MypageEdit() {
   const handleFileChange = useCallback((e) => {
     const file = e.target.files[0];
     if (file) {
-      setPreviewImage(URL.createObjectURL(file));
+      setAttach(file);
+      setPreviewUrl(URL.createObjectURL(file));
     }
   }, []);
 
@@ -56,15 +59,19 @@ export default function MypageEdit() {
           </span>
         </div>
         <div>
-          <img className="memberProfile" onClick={ChangeImage}/>
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            style={{ display: "none" }}
-            onChange={handleFileChange}
+          <img 
+            src={previewUrl || "/images/default.png"}
+            onClick={ChangeImage}
+            className="memberProfile"
           />
         </div>
+        <input type="file" className="form-control"
+          name="crewImg"
+          accept=".png, .jpg"
+          onChange={handleFileChange}
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          />
         <div style={{ width: "360px", margin: "0 auto", marginBottom:"16px"}}>
           <label className="label-text">
             아이디

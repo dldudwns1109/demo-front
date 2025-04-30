@@ -63,6 +63,7 @@ export default function MypageEdit() {
             src={previewUrl || "/images/default.png"}
             onClick={ChangeImage}
             className="memberProfile"
+            style={{ cursor: "pointer" }}
           />
         </div>
         <input type="file" className="form-control"

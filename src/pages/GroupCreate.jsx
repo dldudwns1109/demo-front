@@ -20,23 +20,43 @@ const locationList = [
 const crewLimitList = Array.from({ length: 20 }, (_, i) => 5 * (i + 1));
 export default function GroupCreate() {
   //state
-  const [selectedLikeList, setSelectedLikeList] = useState("");
-  const [crewLimit, setCrewLimit] = useState(5);
-  const [totalPrice, setTotalPrice] = useState(1000);
-  const [attach, setAttach] = useState(undefined);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [crew, setCrew] = useState({
+    crewNo: "",
+    crewName: "",
+    crewCategory: "",
+    crewLocation: "",
+    crewLimit: 5,
+    crewIntro: "",
+  });
+  const [totalPrice, setTotalPrice] = useState(1000);//결제 금액
+  const [attach, setAttach] = useState(undefined);//파일
+  const [previewUrl, setPreviewUrl] = useState(null);//이미지 미리보기
 
   const fileInputRef = useRef();
 
   //callback
-  const clickLikeBtn = useCallback((like) => {
-    setSelectedLikeList(like);
+  const changeCrew = useCallback((e) => {
+    const { name, value } = e.target;
+    setCrew(prev => ({
+      ...prev,
+      [name]: value
+    }));
   }, []);
 
   const changeCrewLimit = useCallback((e) => {
-    const count = parseInt(e.target.value);
-    setCrewLimit(count);
-    setTotalPrice(Math.ceil(count / 5) * 1000);
+    const value = parseInt(e.target.value);
+    setCrew(prev => ({
+      ...prev,
+      crewLimit: value,
+    }));
+    setTotalPrice(Math.ceil(value / 5) * 1000);
+  }, []);
+
+  const changeCrewCategory = useCallback((like) => {
+    setCrew(prev => ({
+      ...prev,
+      crewCategory: like,
+    }));
   }, []);
 
   // 이미지 클릭 시 파일 선택창 열기
@@ -90,22 +110,26 @@ export default function GroupCreate() {
           <label className="label-text">모임명</label>
           <input className="member-input" 
             placeholder="모임 이름을 작성해주세요!"
-            name="crewName">
-
+            name="crewName"
+            value={crew.crewName}
+            onChange={changeCrew}>
             </input>
         </div>
         <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
           <label className="label-text">모임 소개</label>
           <textarea style={{ width: "360px", height:"125px", margin: "0 auto" }}
             placeholder="모임을 소개하는 글을 작성해주세요!"
-            name="crewIntro">
-
-          </textarea>
+            name="crewIntro"
+            value={crew.crewIntro}
+            onChange={changeCrew}/>
         </div>
         <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
           <label className="label-text">활동 지역</label>
-          <select className="form-control" 
-              name="crewLocation">
+          <select className="form-control"
+              name="crewLocation" 
+              value={crew.crewLocation}
+              onChange={changeCrew}
+            >
               <option value="">선택하세요</option>
                 {locationList.map((v) => (
                 <option key={v}>{v}</option>
@@ -125,12 +149,9 @@ export default function GroupCreate() {
             {likeList.map((like) => (
               <button
                 key={like}
-                className={`mbti-badge ${
-                  selectedLikeList.includes(like) ? "active" : ""
-                }`}
-                onClick={() => clickLikeBtn(like)}
+                className={`mbti-badge ${crew.crewCategory === like ? "active" : ""}`}
+                onClick={() => changeCrewCategory(like)}
                 type="button"
-                name="crewCategory"
               >
                 {like}
               </button>
@@ -141,16 +162,13 @@ export default function GroupCreate() {
           <label className="label-text">인원 수</label>
           <p style={{ fontSize: "14px", color:"#6C757D", marginBottom: "8px" }}>* 인원 수에 따라 결제 금액이 상이할 수 있습니다</p>
           <select 
-            className="form-control" 
+            className="form-control"
             name="crewLimit"
-            value={crewLimit}
+            value={crew.crewLimit}
             onChange={changeCrewLimit}
-            style={{ marginBottom: "8px" }}
-            >
-              {crewLimitList.map((count) => (
-              <option key={count} value={count}>
-                {count}명
-              </option>
+          >
+            {crewLimitList.map((count) => (
+              <option key={count} value={count}>{count}명</option>
             ))}
           </select>
           <p> 

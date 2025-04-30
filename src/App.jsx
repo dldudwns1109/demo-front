@@ -56,14 +56,18 @@ function App() {
         <Route path="/join/board/write" element={<JoinBoardWrite />} />
         <Route path="/join/board/edit/:boardNo" element={<JoinBoardEdit />} />
         <Route path="/crew/list" element={<CrewList />} />
+        {/* <Route path="/crew/:crewNo/detail" element={<CrewDetail />} /> */}
         <Route path="/crew/detail" element={<CrewDetail />} />
-        <Route path="/crew/edit" element={<CrewEdit />} />
-        <Route path="/crew/delete" element={<CrewDelete />} />
-        <Route path="/crew/delete-finish" element={<CrewDeleteFinish />} />
-        <Route path="/crew/board" element={<CrewBoard />} />
-        <Route path="/crew/board/detail" element={<CrewBoardDetail />} />
-        <Route path="/crew/board/write" element={<CrewBoardWrite />} />
-        <Route path="/crew/board/edit" element={<CrewBoardEdit />} />
+        <Route path="/crew/:crewNo/edit" element={<CrewEdit />} />
+        <Route path="/crew/:crewNo/delete" element={<CrewDelete />} />
+        <Route path="/crew/:crewNo/delete-finish" element={<CrewDeleteFinish />} />
+        {/* isCrewMember={true} CrewBoard옆에 넣을 예정 */}
+        {/* <Route path="/crew/:crewNo/board" element={<CrewBoard />} />  */}
+        <Route path="/crew/board" element={<CrewBoard />} /> 
+        <Route path="/crew/:crewNo/board/detail/:boardNo" element={<CrewBoardDetail />} />
+        <Route path="/crew/:crewNo/board/write" element={<CrewBoardWrite />} />
+        <Route path="/crew/:crewNo/board/edit/:boardNo" element={<CrewBoardEdit />} />
+        {/* <Route path="/crew/:crewNo/chat" element={<CrewChat />} /> */}
         <Route path="/crew/chat" element={<CrewChat />} />
         <Route path="/meeting/create" element={<MeetingCreate />} />
         <Route path="/meeting/detail" element={<MeetingDetail />} />

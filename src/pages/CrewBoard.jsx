@@ -1,19 +1,12 @@
-import { useEffect, useState, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { useRecoilValue } from "recoil";
 import { replyCountState } from "../store/replyCountState";
+import CrewTopNav from "../components/CrewTopNav"; // 상단 탭바 컴포넌트 import
 
+// 크루 게시판 컴포넌트
 export default function CrewBoard({ isCrewMember }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const tabs = [
-    { name: "홈", path: "/crew/detail" },
-    { name: "게시판", path: "/crew/board" },
-    { name: "채팅", path: "/crew/chat" },
-  ];
-
   const categories = ["전체", "공지", "후기", "자유"];
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [boardList, setBoardList] = useState([]);
@@ -21,6 +14,7 @@ export default function CrewBoard({ isCrewMember }) {
 
   const replyCounts = useRecoilValue(replyCountState);
 
+  // 카테고리 변경 시 게시글 리스트 요청
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -29,7 +23,7 @@ export default function CrewBoard({ isCrewMember }) {
             selectedCategory !== "전체" ? { category: selectedCategory } : {},
         });
         setBoardList(res.data);
-        setVisibleCount(4);
+        setVisibleCount(4); // 카테고리 변경 시 초기 4개만 보여줌
       } catch (err) {
         console.error(err);
       }
@@ -37,51 +31,27 @@ export default function CrewBoard({ isCrewMember }) {
     fetchData();
   }, [selectedCategory]);
 
+  // 카테고리 버튼 클릭 핸들러
   const handleCategoryClick = (cat) => {
     setSelectedCategory(cat);
   };
 
+  // 더보기 버튼 클릭 시 추가 게시글 표시
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 4);
   };
 
+  //view
   return (
     <>
+      {/* <Header loginState="login" /> */}
       <div className="container py-4">
-        {/* 상단 탭 */}
-        <div className="d-flex justify-content-between border-bottom mb-4">
-          {tabs.map((tab) => (
-            <button
-              key={tab.name}
-              onClick={() => navigate(tab.path)}
-              className="btn btn-link position-relative text-center"
-              style={{
-                flex: 1,
-                textDecoration: "none",
-                color: location.pathname === tab.path ? "#000" : "#888",
-                fontWeight: location.pathname === tab.path ? "bold" : "normal",
-                padding: "1rem 0",
-              }}
-            >
-              {tab.name}
-              {location.pathname === tab.path && (
-                <div
-                  style={{
-                    height: "3px",
-                    backgroundColor: "#000",
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                  }}
-                ></div>
-              )}
-            </button>
-          ))}
-        </div>
+        {/* 상단 탭바 */}
+        <CrewTopNav />
 
-        {/* 카테고리 + 작성 버튼 */}
+        {/* 카테고리 버튼 + 게시글 작성 버튼 */}
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          {/* 카테고리 필터 */}
           <div className="d-flex flex-wrap gap-2">
             {categories.map((cat) => (
               <button
@@ -90,10 +60,9 @@ export default function CrewBoard({ isCrewMember }) {
                 className="btn btn-sm rounded-pill"
                 style={{
                   backgroundColor:
-                    selectedCategory === cat ? "#F9B4ED" : "#ffffff",
-                  color: selectedCategory === cat ? "#ffffff" : "#F9B4ED",
-                  border:
-                    selectedCategory === cat ? "none" : "1px solid #F9B4ED",
+                    selectedCategory === cat ? "#000000" : "rgb(241, 243, 245)",
+                  color: selectedCategory === cat ? "#ffffff" : "#000000",
+                  border: "none",
                   padding: "0.5rem 1rem",
                   fontSize: "0.95rem",
                 }}
@@ -103,6 +72,8 @@ export default function CrewBoard({ isCrewMember }) {
               </button>
             ))}
           </div>
+
+          {/* 게시글 작성 버튼 (모임 회원만 보임) */}
           {isCrewMember && (
             <Link
               to="/crew/board/write"
@@ -114,8 +85,9 @@ export default function CrewBoard({ isCrewMember }) {
           )}
         </div>
 
-        {/* 게시글 카드 */}
+        {/* 게시글 카드 목록 */}
         <div className="row">
+          {/* 게시글이 없을 경우 */}
           {boardList.length === 0 && (
             <p
               className="text-muted text-center mt-5"
@@ -124,6 +96,8 @@ export default function CrewBoard({ isCrewMember }) {
               게시글이 없습니다.
             </p>
           )}
+
+          {/* 게시글 카드 출력 */}
           {boardList.slice(0, visibleCount).map((board) => (
             <div
               key={board.boardNo}
@@ -141,6 +115,7 @@ export default function CrewBoard({ isCrewMember }) {
                   }}
                 >
                   <div className="card-body" style={{ padding: "1.5rem" }}>
+                    {/* 작성자 정보 */}
                     <div className="d-flex align-items-center mb-3">
                       <img
                         src={
@@ -161,6 +136,7 @@ export default function CrewBoard({ isCrewMember }) {
                           className="text-muted"
                           style={{ fontSize: "0.85rem" }}
                         >
+                          {/* 카테고리 · 작성 시간 */}
                           {board.boardCategory} ·{" "}
                           {new Date(board.boardWriteTime).toLocaleString(
                             "ko-KR",
@@ -176,10 +152,12 @@ export default function CrewBoard({ isCrewMember }) {
                       </div>
                     </div>
 
+                    {/* 게시글 제목 */}
                     <h5 className="fw-bold mb-2" style={{ fontSize: "1.2rem" }}>
                       {board.boardTitle}
                     </h5>
 
+                    {/* 게시글 내용 요약 */}
                     <p
                       className="text-truncate mb-2"
                       style={{ fontSize: "0.95rem", maxWidth: "100%" }}
@@ -189,6 +167,7 @@ export default function CrewBoard({ isCrewMember }) {
                         : board.boardContent}
                     </p>
 
+                    {/* 댓글 수 */}
                     <small className="text-muted">
                       댓글 {replyCounts[board.boardNo] ?? board.boardReply}
                     </small>
@@ -199,6 +178,7 @@ export default function CrewBoard({ isCrewMember }) {
           ))}
         </div>
 
+        {/* 더보기 버튼 */}
         {visibleCount < boardList.length && (
           <div className="text-center mt-4">
             <button

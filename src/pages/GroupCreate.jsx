@@ -117,7 +117,7 @@ export default function GroupCreate() {
         </div>
         <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
           <label className="label-text">모임 소개</label>
-          <textarea style={{ width: "360px", height:"125px", margin: "0 auto" }}
+          <textarea style={{ width: "360px", height:"155px", margin: "0 auto" }}
             placeholder="모임을 소개하는 글을 작성해주세요!"
             name="crewIntro"
             value={crew.crewIntro}

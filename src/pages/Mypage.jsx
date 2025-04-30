@@ -57,7 +57,7 @@ export default function Mypage() {
     setJoinList(list);
   }, [userId]);
 
-  const loadLikeList = useCallback(async () => {
+  const loadLikeGroupList = useCallback(async () => {
     const resp = await axios.get(`/crew/like/${userId}`);
     const list = Array.isArray(resp.data) ? resp.data : [];
     setLikeGroupList(list);
@@ -76,7 +76,7 @@ const handleTabClick = useCallback((tab) => {
   if (tab === "join" && joinList.length === 0) loadJoinList();
   if (tab === "like" && likeGroupList.length === 0) loadLikeGroupList();
   if (tab === "meeting" && meetingList.length === 0) loadMeetingList();
-}, [createList, joinList, likeGroupList, meetingList, loadCreateList, loadJoinList, loadLikeList, loadMeetingList]);
+}, [createList, joinList, likeGroupList, meetingList, loadCreateList, loadJoinList, loadLikeGroupList, loadMeetingList]);
 
   
   //view

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
 import Header from "../components/Header";
 import { loginState, userIdState, windowWidthState } from "../utils/storage";
 
@@ -20,6 +21,8 @@ export default function Signin() {
   const memberIdRef = useRef(null);
   const memberPwRef = useRef(null);
   const saveIdRef = useRef(null);
+
+  const errorToastify = (message) => toast.error(message);
 
   const navigate = useNavigate();
 
@@ -152,6 +155,23 @@ export default function Signin() {
                 className="btn btn-primary text-white mb-3"
                 style={{ width: "256px" }}
                 onClick={async () => {
+                  if (!memberId.length || !memberPw.length) {
+                    errorToastify("아이디와 비밀번호를 입력해주세요!");
+                    return;
+                  }
+
+                  if (memberId.length > 14 || memberId.length < 4) {
+                    errorToastify("아이디는 영문 4~14자 입니다.");
+                    return;
+                  }
+
+                  if (memberPw.length > 30 || memberPw.length < 6) {
+                    errorToastify(
+                      "비밀번호는 영문,숫자,특수문자 조합 6~30자 입니다."
+                    );
+                    return;
+                  }
+
                   localStorage.setItem("isSaved", saveId);
                   if (saveId) localStorage.setItem("saveId", memberId);
                   else {
@@ -181,7 +201,10 @@ export default function Signin() {
                       );
                     }
                   } catch (e) {
-                    console.log(e);
+                    const errMessage =
+                      "아이디 또는 비밀번호가 일치하지 않습니다.";
+                    console.error(errMessage);
+                    errorToastify(errMessage);
                   }
                 }}
               >
@@ -198,12 +221,14 @@ export default function Signin() {
                     color: "#666666",
                     fontSize: "14px",
                   }}
+                  onClick={() => navigate("/find-id")}
                 >
                   아이디 찾기
                 </button>
                 <button
                   className="bg-white px-2 border-0"
                   style={{ color: "#666666", fontSize: "14px" }}
+                  onClick={() => navigate("/find-password")}
                 >
                   비밀번호 찾기
                 </button>
@@ -212,6 +237,13 @@ export default function Signin() {
           </div>
         </div>
       </div>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={2000}
+        pauseOnHover={false}
+        theme="light"
+        limit={1}
+      />
     </div>
   );
 }

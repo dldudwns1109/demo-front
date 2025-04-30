@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+// JoinBoardDetail.jsx (정확한 수정 버전)
+
+import { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiMoreVertical } from "react-icons/fi";
 import { FaPaperPlane } from "react-icons/fa";
-import Header from "../components/Header";
+import { useRecoilState } from "recoil";
+import { replyCountState } from "../store/replyCountState";
 
 export default function JoinBoardDetail() {
   const { boardNo } = useParams();
@@ -12,6 +15,11 @@ export default function JoinBoardDetail() {
   const [newReply, setNewReply] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [boardDropdownOpen, setBoardDropdownOpen] = useState(false);
+  const [setReplyCounts] = useRecoilState(replyCountState);
+  const [showBoardWriterPopover, setShowBoardWriterPopover] = useState(false);
+  const [replyPopoverIndex, setReplyPopoverIndex] = useState(null);
+  const boardPopoverRef = useRef();
+  const replyPopoverRefs = useRef([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,24 +36,47 @@ export default function JoinBoardDetail() {
     fetchData();
   }, [boardNo]);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        boardPopoverRef.current &&
+        !boardPopoverRef.current.contains(e.target)
+      ) {
+        setShowBoardWriterPopover(false);
+      }
+      if (
+        !replyPopoverRefs.current.some((ref) => ref && ref.contains(e.target))
+      ) {
+        setReplyPopoverIndex(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleReplySubmit = () => {
     if (newReply.trim()) {
       const reply = {
-        writer: "댓글작성자", // 추후 API 연동 예정
+        writer: "댓글작성자", // 더미
         profileUrl: "/images/default-profile.png",
         content: newReply,
         writeTime: new Date(),
         isEditing: false,
+        memberLocation: "서울",
+        memberSchool: "서울대학교",
+        memberMbti: "ENTP",
       };
       setReplies([reply, ...replies]);
       setNewReply("");
+      setReplyCounts((prev) => ({
+        ...prev,
+        [boardNo]: (prev[boardNo] ?? board?.boardReply ?? 0) + 1,
+      }));
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      handleReplySubmit();
-    }
+    if (e.key === "Enter") handleReplySubmit();
   };
 
   const toggleDropdown = (idx) => {
@@ -80,6 +111,10 @@ export default function JoinBoardDetail() {
       const updatedReplies = replies.filter((_, i) => i !== idx);
       setReplies(updatedReplies);
       setDropdownOpen(null);
+      setReplyCounts((prev) => ({
+        ...prev,
+        [boardNo]: (prev[boardNo] ?? board?.boardReply ?? 1) - 1,
+      }));
     }
   };
 
@@ -102,26 +137,42 @@ export default function JoinBoardDetail() {
 
   return (
     <>
-      <Header loginState="login" />
+      {/* <Header loginState="login" /> */}
       <div className="container py-4">
-        {/* 목록으로 돌아가기 */}
-        <div className="mb-3">
+        <div className="mb-5">
           <Link to="/join/board" className="btn btn-outline-secondary btn-sm">
             목록으로
           </Link>
         </div>
 
-        {/* 프로필 영역 + 게시글 수정/삭제 드롭다운 */}
-        <div className="d-flex justify-content-between align-items-start mb-3">
+        {/* 작성자 프로필 + 드롭다운 */}
+        <div className="d-flex justify-content-between align-items-start mb-4 position-relative">
           <div className="d-flex align-items-center">
             <img
               src={board.boardWriterProfileUrl || "/images/default-profile.png"}
               alt="프로필"
               className="rounded-circle me-3"
-              style={{ width: "3rem", height: "3rem", objectFit: "cover" }}
+              style={{
+                width: "3rem",
+                height: "3rem",
+                objectFit: "cover",
+                cursor: "pointer",
+              }}
+              onClick={() => setShowBoardWriterPopover(!showBoardWriterPopover)}
             />
             <div>
-              <strong>{board.boardWriterNickname}</strong>
+              <div className="d-flex align-items-center">
+                <strong className="me-2">{board.boardWriterNickname}</strong>
+                <small className="text-muted">
+                  {new Date(board.boardWriteTime).toLocaleString("ko-KR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </small>
+              </div>
               <div className="text-muted" style={{ fontSize: "0.85rem" }}>
                 {board.boardWriterGender === "M" ? "남성" : "여성"} ·{" "}
                 {board.boardWriterBirth} · {board.boardWriterMbti}
@@ -129,13 +180,12 @@ export default function JoinBoardDetail() {
             </div>
           </div>
 
-          {/* 게시글 수정 삭제 드롭다운 */}
+          {/* 게시글 드롭다운 */}
           <div className="position-relative">
             <button
               className="btn btn-link p-0"
-              type="button"
               onClick={toggleBoardDropdown}
-              style={{ color: "#0d6efd" }}
+              style={{ color: "#F9B4ED" }}
             >
               <FiMoreVertical size="1.5rem" />
             </button>
@@ -157,16 +207,74 @@ export default function JoinBoardDetail() {
               </ul>
             )}
           </div>
+
+          {/* 작성자 팝오버 */}
+          {showBoardWriterPopover && (
+            <div
+              ref={boardPopoverRef}
+              className="shadow position-absolute bg-white rounded p-3"
+              style={{
+                top: "5rem",
+                left: "1rem",
+                zIndex: 10,
+                width: "300px",
+                fontSize: "0.9rem",
+                border: "1px solid #ddd",
+              }}
+            >
+              <div className="d-flex align-items-center mb-3">
+                <img
+                  src={
+                    board.boardWriterProfileUrl || "/images/default-profile.png"
+                  }
+                  alt="프로필"
+                  className="rounded-circle me-3"
+                  style={{
+                    width: "3.5rem",
+                    height: "3.5rem",
+                    objectFit: "cover",
+                  }}
+                />
+                <div>
+                  <div className="fw-bold">{board.boardWriterNickname}</div>
+                  <div className="badge bg-info text-white me-1">
+                    {board.boardWriterMbti || "MBTI"}
+                  </div>
+                </div>
+              </div>
+              <div className="text-muted mb-2">
+                {board.boardWriterLocation} · {board.boardWriterSchool} ·{" "}
+                {board.boardWriterBirth}
+              </div>
+              <hr />
+              <div className="fw-bold">가입한 모임 예시</div>
+              <div className="d-flex align-items-center mt-2">
+                <img
+                  src="/images/sample-group.jpg"
+                  className="me-2 rounded"
+                  style={{ width: "2rem", height: "2rem" }}
+                  alt="모임"
+                />
+                <div className="text-muted" style={{ fontSize: "0.8rem" }}>
+                  모임 이름
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* 글 내용 */}
-        <div className="mb-4">
+        {/* 게시글 내용 */}
+        <div className="mb-5">
           <div style={{ whiteSpace: "pre-wrap", fontSize: "1rem" }}>
             {board.boardContent}
           </div>
         </div>
 
-        {/* 댓글 리스트 */}
+        <hr className="my-5" />
+
+        {/* 댓글 목록 */}
+        <h5 className="fw-bold mb-3">댓글 {replies.length}개</h5>
+
         <div className="mb-3">
           {replies.length === 0 ? (
             <p className="text-muted">아직 댓글이 없습니다.</p>
@@ -174,7 +282,7 @@ export default function JoinBoardDetail() {
             replies.map((reply, idx) => (
               <div
                 key={idx}
-                className="d-flex align-items-start border-bottom py-3"
+                className="d-flex align-items-start border-bottom py-3 position-relative"
                 style={{ fontSize: "0.95rem" }}
               >
                 <img
@@ -185,7 +293,11 @@ export default function JoinBoardDetail() {
                     width: "2.5rem",
                     height: "2.5rem",
                     objectFit: "cover",
+                    cursor: "pointer",
                   }}
+                  onClick={() =>
+                    setReplyPopoverIndex(replyPopoverIndex === idx ? null : idx)
+                  }
                 />
                 <div className="flex-grow-1">
                   <div className="fw-bold">{reply.writer}</div>
@@ -225,9 +337,8 @@ export default function JoinBoardDetail() {
                 >
                   <button
                     className="btn btn-link p-0"
-                    type="button"
                     onClick={() => toggleDropdown(idx)}
-                    style={{ color: "#0d6efd" }}
+                    style={{ color: "#F9B4ED" }}
                   >
                     <FiMoreVertical size="1.5rem" />
                   </button>
@@ -255,12 +366,33 @@ export default function JoinBoardDetail() {
                     </ul>
                   )}
                 </div>
+
+                {/* 댓글 작성자 팝오버 */}
+                {replyPopoverIndex === idx && (
+                  <div
+                    ref={(el) => (replyPopoverRefs.current[idx] = el)}
+                    className="shadow position-absolute bg-white rounded p-3"
+                    style={{
+                      top: "3.5rem",
+                      left: "0",
+                      zIndex: 10,
+                      width: "250px",
+                      border: "1px solid #ddd",
+                    }}
+                  >
+                    <div className="fw-bold mb-2">댓글 작성자 프로필</div>
+                    <div className="text-muted mb-2">
+                      {reply.memberLocation} · {reply.memberSchool} ·{" "}
+                      {reply.memberMbti}
+                    </div>
+                  </div>
+                )}
               </div>
             ))
           )}
         </div>
 
-        {/* 댓글 작성 */}
+        {/* 댓글 작성 폼 */}
         <div className="position-relative border rounded p-2">
           <input
             type="text"
@@ -277,7 +409,7 @@ export default function JoinBoardDetail() {
               top: "50%",
               right: "1rem",
               transform: "translateY(-50%)",
-              color: "#0d6efd",
+              color: "#F9B4ED",
             }}
             onClick={handleReplySubmit}
           >

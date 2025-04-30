@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import Header from "../components/Header";
+import { useRecoilValue } from "recoil";
+import { replyCountState } from "../store/replyCountState";
 
 export default function JoinBoard() {
   const categories = [
@@ -11,6 +13,12 @@ export default function JoinBoard() {
   const [boardList, setBoardList] = useState([]);
   const [visibleCount, setVisibleCount] = useState(4);
 
+  const replyCounts = useRecoilValue(replyCountState);
+
+  // 팝오버 관련 상태 추가
+  const [showPopoverId, setShowPopoverId] = useState(null);
+  const popoverRef = useRef();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -18,13 +26,24 @@ export default function JoinBoard() {
           params: selectedCategory !== "전체" ? { category: selectedCategory } : {},
         });
         setBoardList(res.data);
-        setVisibleCount(4); // 카테고리 바뀌면 다시 4개로 리셋
+        setVisibleCount(4);
       } catch (err) {
         console.error(err);
       }
     };
     fetchData();
   }, [selectedCategory]);
+
+  // 팝오버 외부 클릭 감지해서 닫기
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target)) {
+        setShowPopoverId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleCategoryClick = (cat) => {
     setSelectedCategory(cat);
@@ -36,12 +55,10 @@ export default function JoinBoard() {
 
   return (
     <>
-      <Header loginState="login" />
+      {/* <Header loginState="login" /> */}
       <div className="container py-4">
-        {/* 메인 타이틀 */}
         <h2 className="mb-4 fw-bold" style={{ fontSize: "2rem" }}>모임 가입 게시판</h2>
 
-        {/* 카테고리 선택 + 글쓰기 버튼 */}
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div className="d-flex flex-wrap gap-2">
             {categories.map((cat) => (
@@ -61,15 +78,11 @@ export default function JoinBoard() {
               </button>
             ))}
           </div>
-          <Link
-            to="/join/board/write"
-            className="btn btn-outline-primary btn-sm"
-            style={{ padding: "0.5rem 1rem", fontSize: "0.95rem" }}>
+          <Link to="/join/board/write" className="btn btn-outline-primary btn-sm" style={{ padding: "0.5rem 1rem", fontSize: "0.95rem" }}>
             게시글 작성
           </Link>
         </div>
 
-        {/* 게시글 목록 */}
         <div className="row">
           {boardList.length === 0 && (
             <p className="text-muted text-center mt-5" style={{ fontSize: "1rem" }}>
@@ -77,19 +90,21 @@ export default function JoinBoard() {
             </p>
           )}
           {boardList.slice(0, visibleCount).map((board) => (
-            <div key={board.boardNo} className="col-md-6 mb-4">
-              <Link
-                to={`/join/board/detail/${board.boardNo}`}
-                className="text-decoration-none text-dark">
-                <div className="card shadow-sm h-100">
+            <div key={board.boardNo} className="col-md-6 mb-4 position-relative">
+              <Link to={`/join/board/detail/${board.boardNo}`} className="text-decoration-none text-dark">
+                <div className="card shadow-sm h-100" style={{ backgroundColor: "rgb(241, 243, 245)", border: "none" }}>
                   <div className="card-body" style={{ padding: "1.5rem" }}>
-                    {/* 작성자 */}
                     <div className="d-flex align-items-center mb-3">
                       <img
                         src={board.boardWriterProfileUrl || "/images/default-profile.png"}
                         alt="프로필"
                         className="rounded-circle me-3"
-                        style={{ width: "3rem", height: "3rem", objectFit: "cover" }}/>
+                        style={{ width: "3rem", height: "3rem", objectFit: "cover", cursor: "pointer" }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowPopoverId(board.boardNo === showPopoverId ? null : board.boardNo);
+                        }}
+                      />
                       <div>
                         <strong>{board.boardWriterNickname}</strong>
                         <div className="text-muted" style={{ fontSize: "0.85rem" }}>
@@ -98,39 +113,70 @@ export default function JoinBoard() {
                       </div>
                     </div>
 
-                    {/* 카테고리 */}
-                    <div
-                      className="mb-2"
-                      style={{ color: "#DABFFF", fontWeight: "bold", fontSize: "0.9rem" }}>
+                    <div className="mb-2" style={{ color: "#DABFFF", fontWeight: "bold", fontSize: "0.9rem" }}>
                       {board.boardCategory}
                     </div>
 
-                    {/* 제목 */}
                     <h5 className="fw-bold mb-2" style={{ fontSize: "1.2rem" }}>
                       {board.boardTitle}
                     </h5>
 
-                    {/* 내용 일부 출력 */}
-                    <p
-                      className="text-truncate mb-2"
-                      style={{ fontSize: "0.95rem", maxWidth: "100%" }}>
-                      {board.boardContent?.length > 20
-                        ? board.boardContent.slice(0, 20) + "..."
-                        : board.boardContent}
+                    <p className="text-truncate mb-2" style={{ fontSize: "0.95rem", maxWidth: "100%" }}>
+                      {board.boardContent?.length > 20 ? board.boardContent.slice(0, 20) + "..." : board.boardContent}
                     </p>
 
-                    {/* 작성일 + 댓글 수 */}
                     <small className="text-muted">
-                      {board.formattedWriteTime} / 댓글 {board.boardReply}
+                      {board.boardWriteTime
+                        ? new Date(board.boardWriteTime).toLocaleString("ko-KR", {
+                            year: "numeric", month: "2-digit", day: "2-digit",
+                            hour: "2-digit", minute: "2-digit"
+                          })
+                        : "시간 정보 없음"} / 댓글 {replyCounts[board.boardNo] ?? board.boardReply}
                     </small>
                   </div>
                 </div>
               </Link>
+
+              {/* 팝오버 */}
+              {showPopoverId === board.boardNo && (
+                <div
+                  ref={popoverRef}
+                  className="shadow position-absolute bg-white rounded p-3"
+                  style={{
+                    top: "5rem",
+                    left: "1rem",
+                    zIndex: 10,
+                    width: "300px",
+                    fontSize: "0.9rem",
+                    border: "1px solid #ddd"
+                  }}>
+                  <div className="d-flex align-items-center mb-3">
+                    <img
+                      src={board.boardWriterProfileUrl || "/images/default-profile.png"}
+                      alt="프로필"
+                      className="rounded-circle me-3"
+                      style={{ width: "3.5rem", height: "3.5rem", objectFit: "cover" }}
+                    />
+                    <div>
+                      <div className="fw-bold">{board.boardWriterNickname}</div>
+                      <div className="badge bg-info text-white me-1">{board.boardWriterMbti || "MBTI"}</div>
+                    </div>
+                  </div>
+                  <div className="text-muted mb-2">
+                    {board.boardWriterLocation} · {board.boardWriterSchool} · {board.boardWriterBirth}
+                  </div>
+                  <hr />
+                  <div className="fw-bold">가입한 모임 예시</div>
+                  <div className="d-flex align-items-center mt-2">
+                    <img src="/images/sample-group.jpg" className="me-2 rounded" style={{ width: "2rem", height: "2rem" }} />
+                    <div className="text-muted" style={{ fontSize: "0.8rem" }}>모임 이름</div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
 
-        {/* 더보기 버튼 */}
         {visibleCount < boardList.length && (
           <div className="text-center mt-4">
             <button

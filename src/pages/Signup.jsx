@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
+import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import Header from "../components/Header";
 import { locationState } from "../utils/storage";
@@ -19,6 +20,7 @@ const mbtiOptions = mbtiData;
 
 export default function Signup() {
   const [location, setLocation] = useRecoilState(locationState);
+  const [city, setCity] = useState("서울특별시");
   const [member, setMember] = useState({
     memberImg: null,
     memberId: "",
@@ -46,14 +48,14 @@ export default function Signup() {
   });
 
   const areaList = useMemo(() => {
-    if (location !== null) {
+    if (city !== null) {
       let list = null;
       locationData.forEach((v) => {
-        list = v.city === location.city ? v.area : list;
+        list = v.city === city ? v.area : list;
       });
       return list;
     }
-  }, [location]);
+  }, [city]);
 
   const locationRef = useRef(null);
   const schoolRef = useRef(null);
@@ -61,11 +63,12 @@ export default function Signup() {
   const errorToastify = (message) => toast.error(message);
 
   useEffect(() => {
+    console.log(location);
     setMember({
       ...member,
       memberLocation: `${location.city} ${location.area}`,
     });
-  }, [location]);
+  }, [location, city]);
 
   useEffect(() => {
     if (!member.memberLike.size) {
@@ -402,22 +405,20 @@ export default function Signup() {
                 onBlur={() => {
                   if (!member.memberEmail.length) {
                     setBlurMessage({
-                      ...member,
+                      ...blurMessage,
                       memberEmail: "이메일 주소를 입력해주세요.",
                     });
                     return;
                   }
-
                   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(member.memberEmail)) {
                     setBlurMessage({
-                      ...member,
+                      ...blurMessage,
                       memberEmail: "올바른 이메일 주소를 입력해주세요.",
                     });
                     return;
                   }
-
                   setBlurMessage({
-                    ...member,
+                    ...blurMessage,
                     memberEmail: "",
                   });
                 }}
@@ -525,9 +526,7 @@ export default function Signup() {
                   color: "#111111",
                   borderColor: "#EBEBEB",
                 }}
-                onClick={() => {
-                  setIsOpenLocationRef(true);
-                }}
+                onClick={() => setIsOpenLocationRef(true)}
               >
                 <div className="d-flex align-items-center gap-2">
                   {location.area}
@@ -550,7 +549,7 @@ export default function Signup() {
                         <button
                           key={i}
                           className={`text-start border-0 ${
-                            location.city === v.city
+                            city === v.city
                               ? "bg-primary text-white"
                               : "bg-white"
                           } ps-2 pe-4 py-2`}
@@ -558,12 +557,7 @@ export default function Signup() {
                             fontSize: "14px",
                             borderRadius: "8px",
                           }}
-                          onClick={() => {
-                            setLocation({
-                              ...location,
-                              city: v.city,
-                            });
-                          }}
+                          onClick={() => setCity(v.city)}
                         >
                           {v.city}
                         </button>
@@ -587,7 +581,7 @@ export default function Signup() {
                           }}
                           onClick={() => {
                             setLocation({
-                              ...location,
+                              city,
                               area: v,
                             });
                           }}
@@ -738,20 +732,10 @@ export default function Signup() {
             className="btn btn-primary text-white"
             style={{ marginTop: "48px" }}
             onClick={async () => {
-              if (!memberEmail.length) {
-                errorToastify("이메일 주소를 입력해주세요.");
-                return;
-              }
-
-              const res = await axios.get(
-                `http://localhost:8080/api/member/memberEmail/${memberEmail}`
-              );
-
-              if (res.data === "") {
-                errorToastify("존재하지 않는 아이디입니다.");
-              }
-
-              setFindId(res.data);
+              await axios.post("http://localhost:8080/api/member/signup", {
+                ...member,
+                memberLike: Array.from(member.memberLike),
+              });
             }}
             // disabled={!isValid}
           >

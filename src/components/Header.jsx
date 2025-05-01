@@ -24,6 +24,7 @@ export default function Header({
   setLocation = null,
 }) {
   const windowWidth = useRecoilValue(windowWidthState);
+  const [city, setCity] = useState("서울특별시");
   const [isOpenCategoryRef, setIsOpenCategoryRef] = useState(false);
   const [isOpenLocationRef, setIsOpenLocationRef] = useState(false);
   const [searchInput, setSearchInput] = useState("");
@@ -31,14 +32,14 @@ export default function Header({
   const [isOpenSearchRef, setIsOpenSearchRef] = useState(false);
 
   const areaList = useMemo(() => {
-    if (location !== null) {
+    if (city !== null) {
       let list = null;
       locationData.forEach((v) => {
-        list = v.city === location.city ? v.area : list;
+        list = v.city === city ? v.area : list;
       });
       return list;
     }
-  }, [location]);
+  }, [city]);
 
   const categoryRef = useRef(null);
   const locationRef = useRef(null);
@@ -195,7 +196,7 @@ export default function Header({
                               <button
                                 key={i}
                                 className={`text-start border-0 ${
-                                  location.city === v.city
+                                  city === v.city
                                     ? "bg-primary text-white"
                                     : "bg-white"
                                 } ps-2 pe-4 py-2`}
@@ -203,12 +204,7 @@ export default function Header({
                                   fontSize: "14px",
                                   borderRadius: "8px",
                                 }}
-                                onClick={() =>
-                                  setLocation({
-                                    ...location,
-                                    city: v.city,
-                                  })
-                                }
+                                onClick={() => setCity(v.city)}
                               >
                                 {v.city}
                               </button>
@@ -230,12 +226,12 @@ export default function Header({
                                   fontSize: "14px",
                                   borderRadius: "8px",
                                 }}
-                                onClick={() =>
+                                onClick={() => {
                                   setLocation({
-                                    ...location,
+                                    city,
                                     area: v,
-                                  })
-                                }
+                                  });
+                                }}
                               >
                                 {v}
                               </button>

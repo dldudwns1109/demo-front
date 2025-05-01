@@ -9,6 +9,7 @@ import {
   windowWidthState,
   loginState,
   userIdState,
+  categoryState,
 } from "../utils/storage";
 
 import { IoLocationSharp } from "react-icons/io5";
@@ -380,6 +381,7 @@ export default function Home() {
   const windowWidth = useRecoilValue(windowWidthState);
   const login = useRecoilValue(loginState);
   const userId = useRecoilValue(userIdState);
+  const [category, setCategory] = useRecoilState(categoryState);
   const [location, setLocation] = useRecoilState(locationState);
   const [isAroundMore, setIsAroundMore] = useState(false);
   const [aroundRenderItem, setAroundRenderItem] = useState(6);
@@ -405,6 +407,8 @@ export default function Home() {
     <>
       <Header
         loginState={`${login ? "loggined" : "login"}`}
+        category={category}
+        setCategory={setCategory}
         location={location}
         setLocation={setLocation}
       />

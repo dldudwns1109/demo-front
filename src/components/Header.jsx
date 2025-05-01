@@ -18,11 +18,12 @@ const locationOptions = locationData;
 export default function Header({
   input = true,
   loginState = "",
+  category = null,
+  setCategory = null,
   location = null,
   setLocation = null,
 }) {
   const windowWidth = useRecoilValue(windowWidthState);
-  const [category, setCategory] = useState("전체");
   const [isOpenCategoryRef, setIsOpenCategoryRef] = useState(false);
   const [isOpenLocationRef, setIsOpenLocationRef] = useState(false);
   const [searchInput, setSearchInput] = useState("");
@@ -50,6 +51,21 @@ export default function Header({
   }, [searchKeyword]);
 
   useEffect(() => {
+    category
+      ? localStorage.setItem("category", category)
+      : localStorage.removeItem("category");
+  }, [category]);
+
+  useEffect(() => {
+    location?.city
+      ? localStorage.setItem("city", location.city)
+      : localStorage.removeItem("city");
+    location?.area
+      ? localStorage.setItem("area", location.area)
+      : localStorage.removeItem("area");
+  }, [location]);
+
+  useEffect(() => {
     const clickCategoryRefOutside = (e) => {
       if (!categoryRef.current?.contains(e.target)) {
         setIsOpenCategoryRef(false);
@@ -69,7 +85,7 @@ export default function Header({
       document.removeEventListener("mousedown", clickCategoryRefOutside);
       document.removeEventListener("mousedown", clickLocationRefOutside);
     };
-  }, [locationRef]);
+  }, [categoryRef, locationRef]);
 
   return (
     <div
@@ -83,7 +99,9 @@ export default function Header({
     >
       {!isOpenSearchRef ? (
         <>
-          <img src="/images/logo.svg" />
+          <button className="border-0 btn" onClick={() => navigate("/")}>
+            <img src="/images/logo.svg" />
+          </button>
 
           <div className="d-flex">
             {input && (
@@ -153,9 +171,7 @@ export default function Header({
                         color: "#111111",
                         borderColor: "#EBEBEB",
                       }}
-                      onClick={() => {
-                        setIsOpenLocationRef(true);
-                      }}
+                      onClick={() => setIsOpenLocationRef(true)}
                     >
                       <div className="d-flex align-items-center gap-2">
                         <IoLocationSharp size={20} color="#6C757D" />
@@ -187,12 +203,12 @@ export default function Header({
                                   fontSize: "14px",
                                   borderRadius: "8px",
                                 }}
-                                onClick={() => {
+                                onClick={() =>
                                   setLocation({
                                     ...location,
                                     city: v.city,
-                                  });
-                                }}
+                                  })
+                                }
                               >
                                 {v.city}
                               </button>
@@ -214,12 +230,12 @@ export default function Header({
                                   fontSize: "14px",
                                   borderRadius: "8px",
                                 }}
-                                onClick={() => {
+                                onClick={() =>
                                   setLocation({
                                     ...location,
                                     area: v,
-                                  });
-                                }}
+                                  })
+                                }
                               >
                                 {v}
                               </button>

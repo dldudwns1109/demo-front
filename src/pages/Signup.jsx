@@ -19,21 +19,31 @@ const mbtiOptions = mbtiData;
 
 export default function Signup() {
   const [location, setLocation] = useRecoilState(locationState);
-  const [profileImg, setProfileImg] = useState(null);
   const [member, setMember] = useState({
+    memberImg: null,
     memberId: "",
-    memberPw: "",
     memberNickname: "",
+    memberPw: "",
     memberEmail: "",
-    memberLocation: "",
-    memberSchool: "가천대학교",
-    memberGender: "m",
     memberBirth: "",
-    memberMbti: "ISTJ",
+    memberGender: "m",
+    memberLocation: "",
+    memberSchool: schoolData[0],
+    memberLike: new Set([]),
+    memberMbti: mbtiData[0],
   });
-  const [memberLike, setMemberLike] = useState(new Set([]));
+  const [memberPwConfirm, setMemberPwConfirm] = useState("");
   const [isOpenLocationRef, setIsOpenLocationRef] = useState(false);
   const [isOpenSchoolRef, setIsOpenSchoolRef] = useState(false);
+  const [blurMessage, setBlurMessage] = useState({
+    memberId: "",
+    memberNickname: "",
+    memberPw: "",
+    memberPwConfirm: "",
+    memberEmail: "",
+    memberBirth: "",
+    memberLike: "",
+  });
 
   const areaList = useMemo(() => {
     if (location !== null) {
@@ -58,8 +68,42 @@ export default function Signup() {
   }, [location]);
 
   useEffect(() => {
-    console.log(member.memberLocation);
-  }, [member]);
+    if (!member.memberLike.size) {
+      setBlurMessage({
+        ...blurMessage,
+        memberLike: "최소한 한 개의 관심사를 선택해주세요.",
+      });
+      return;
+    }
+
+    setBlurMessage({
+      ...blurMessage,
+      memberLike: "",
+    });
+  }, [member.memberLike]);
+
+  useEffect(() => {
+    if (member.memberPw !== "" && memberPwConfirm === "") {
+      setBlurMessage({
+        ...blurMessage,
+        memberPwConfirm: "비밀번호 확인을 입력해주세요.",
+      });
+      return;
+    }
+
+    if (member.memberPw !== memberPwConfirm) {
+      setBlurMessage({
+        ...blurMessage,
+        memberPwConfirm: "입력한 비밀번호와 다릅니다.",
+      });
+      return;
+    }
+
+    setBlurMessage({
+      ...blurMessage,
+      memberPwConfirm: "",
+    });
+  }, [member.memberPw, memberPwConfirm]);
 
   useEffect(() => {
     const clickLocationRefOutside = (e) => {
@@ -83,7 +127,7 @@ export default function Signup() {
   }, [locationRef, schoolRef]);
 
   return (
-    <div className="vh-100">
+    <div>
       <Header input={false} />
       <div
         className="d-flex justify-content-center h-100"
@@ -91,6 +135,7 @@ export default function Signup() {
           paddingTop: "70px",
           paddingLeft: "8.33%",
           paddingRight: "8.33%",
+          paddingBottom: "80px",
         }}
       >
         <div
@@ -109,7 +154,7 @@ export default function Signup() {
           >
             <label htmlFor="file" className="position-relative">
               <img
-                src={profileImg ?? "images/default-profile.svg"}
+                src={member.memberImg ?? "images/default-profile.svg"}
                 className="shadow-sm"
                 width={200}
                 height={200}
@@ -138,9 +183,8 @@ export default function Signup() {
                 const file = e.target.files[0];
                 if (file && file.type.startsWith("image/")) {
                   const reader = new FileReader();
-                  reader.onload = () => {
-                    setProfileImg(reader.result);
-                  };
+                  reader.onload = () =>
+                    setMember({ ...member, memberImg: reader.result });
                   reader.readAsDataURL(file);
                 } else {
                   errorToastify("이미지 파일을 선택해주세요.");
@@ -164,29 +208,42 @@ export default function Signup() {
                   outline: 0,
                 }}
                 placeholder="4~14자 / 영문,숫자 사용 가능"
-                // ref={emailInputRef}
-                // value={memberEmail}
-                // onChange={(e) => setMemberEmail(e.target.value)}
-                // onBlur={() => {
-                //   if (!memberEmail.length) {
-                //     setBlurMessage("이메일 주소를 입력해주세요.");
-                //     return;
-                //   }
+                value={member.memberId}
+                onChange={(e) =>
+                  setMember({
+                    ...member,
+                    memberId: e.target.value,
+                  })
+                }
+                onBlur={() => {
+                  if (!member.memberId.length) {
+                    setBlurMessage({
+                      ...blurMessage,
+                      memberId: "아이디를 입력해주세요.",
+                    });
+                    return;
+                  }
 
-                //   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(memberEmail)) {
-                //     setBlurMessage("올바른 이메일 주소를 입력해주세요.");
-                //     return;
-                //   }
+                  if (!/^[a-z][a-z0-9]{4,14}$/.test(member.memberId)) {
+                    setBlurMessage({
+                      ...blurMessage,
+                      memberId: "4~14자 / 영문,숫자로만 입력 가능합니다.",
+                    });
+                    return;
+                  }
 
-                //   setBlurMessage("");
-                // }}
+                  setBlurMessage({
+                    ...blurMessage,
+                    memberId: "",
+                  });
+                }}
               />
             </div>
-            {/* <div>
+            <div>
               <span className="text-danger" style={{ fontSize: "14px" }}>
-                {blurMessage}
+                {blurMessage.memberId}
               </span>
-            </div> */}
+            </div>
           </div>
           <div>
             <div className="d-flex flex-column gap-2 mt-3">
@@ -204,29 +261,42 @@ export default function Signup() {
                   outline: 0,
                 }}
                 placeholder="2~10자 / 한글,숫자 사용 가능"
-                // ref={emailInputRef}
-                // value={memberEmail}
-                // onChange={(e) => setMemberEmail(e.target.value)}
-                // onBlur={() => {
-                //   if (!memberEmail.length) {
-                //     setBlurMessage("이메일 주소를 입력해주세요.");
-                //     return;
-                //   }
+                value={member.memberNickname}
+                onChange={(e) =>
+                  setMember({
+                    ...member,
+                    memberNickname: e.target.value,
+                  })
+                }
+                onBlur={() => {
+                  if (!member.memberNickname.length) {
+                    setBlurMessage({
+                      ...blurMessage,
+                      memberNickname: "닉네임을 입력해주세요.",
+                    });
+                    return;
+                  }
 
-                //   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(memberEmail)) {
-                //     setBlurMessage("올바른 이메일 주소를 입력해주세요.");
-                //     return;
-                //   }
+                  if (!/^[가-힣0-9]{2,10}$/.test(member.memberNickname)) {
+                    setBlurMessage({
+                      ...blurMessage,
+                      memberNickname: "2~10자 / 한글,숫자로만 입력 가능합니다.",
+                    });
+                    return;
+                  }
 
-                //   setBlurMessage("");
-                // }}
+                  setBlurMessage({
+                    ...blurMessage,
+                    memberNickname: "",
+                  });
+                }}
               />
             </div>
-            {/* <div>
+            <div>
               <span className="text-danger" style={{ fontSize: "14px" }}>
-                {blurMessage}
+                {blurMessage.memberNickname}
               </span>
-            </div> */}
+            </div>
           </div>
           <div>
             <div className="d-flex flex-column gap-2 mt-3">
@@ -243,30 +313,43 @@ export default function Signup() {
                   borderRadius: "8px",
                   outline: 0,
                 }}
-                placeholder="8~16자 / 영어,특수문자 조합"
-                // ref={emailInputRef}
-                // value={memberEmail}
-                // onChange={(e) => setMemberEmail(e.target.value)}
-                // onBlur={() => {
-                //   if (!memberEmail.length) {
-                //     setBlurMessage("이메일 주소를 입력해주세요.");
-                //     return;
-                //   }
+                placeholder="비밀번호를 입력해주세요."
+                value={member.memberPw}
+                onChange={(e) =>
+                  setMember({
+                    ...member,
+                    memberPw: e.target.value,
+                  })
+                }
+                onBlur={() => {
+                  if (!member.memberPw.length) {
+                    setBlurMessage({
+                      ...blurMessage,
+                      memberPw: "비밀번호를 입력해주세요.",
+                    });
+                    return;
+                  }
 
-                //   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(memberEmail)) {
-                //     setBlurMessage("올바른 이메일 주소를 입력해주세요.");
-                //     return;
-                //   }
+                  if (member.memberPw.length > 85) {
+                    setBlurMessage({
+                      ...blurMessage,
+                      memberPw: "비밀번호가 길어 제한됩니다.",
+                    });
+                    return;
+                  }
 
-                //   setBlurMessage("");
-                // }}
+                  setBlurMessage({
+                    ...blurMessage,
+                    memberPw: "",
+                  });
+                }}
               />
             </div>
-            {/* <div>
+            <div>
               <span className="text-danger" style={{ fontSize: "14px" }}>
-                {blurMessage}
+                {blurMessage.memberPw}
               </span>
-            </div> */}
+            </div>
           </div>
           <div>
             <div className="d-flex flex-column gap-2 mt-3">
@@ -283,29 +366,15 @@ export default function Signup() {
                   borderRadius: "8px",
                   outline: 0,
                 }}
-                // ref={emailInputRef}
-                // value={memberEmail}
-                // onChange={(e) => setMemberEmail(e.target.value)}
-                // onBlur={() => {
-                //   if (!memberEmail.length) {
-                //     setBlurMessage("이메일 주소를 입력해주세요.");
-                //     return;
-                //   }
-
-                //   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(memberEmail)) {
-                //     setBlurMessage("올바른 이메일 주소를 입력해주세요.");
-                //     return;
-                //   }
-
-                //   setBlurMessage("");
-                // }}
+                value={memberPwConfirm}
+                onChange={(e) => setMemberPwConfirm(e.target.value)}
               />
             </div>
-            {/* <div>
+            <div>
               <span className="text-danger" style={{ fontSize: "14px" }}>
-                {blurMessage}
+                {blurMessage.memberPwConfirm}
               </span>
-            </div> */}
+            </div>
           </div>
           <div>
             <div className="d-flex flex-column gap-2 mt-3">
@@ -323,29 +392,42 @@ export default function Signup() {
                   outline: 0,
                 }}
                 placeholder="이메일을 입력해주세요."
-                // ref={emailInputRef}
-                // value={memberEmail}
-                // onChange={(e) => setMemberEmail(e.target.value)}
-                // onBlur={() => {
-                //   if (!memberEmail.length) {
-                //     setBlurMessage("이메일 주소를 입력해주세요.");
-                //     return;
-                //   }
+                value={member.memberEmail}
+                onChange={(e) =>
+                  setMember({
+                    ...member,
+                    memberEmail: e.target.value,
+                  })
+                }
+                onBlur={() => {
+                  if (!member.memberEmail.length) {
+                    setBlurMessage({
+                      ...member,
+                      memberEmail: "이메일 주소를 입력해주세요.",
+                    });
+                    return;
+                  }
 
-                //   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(memberEmail)) {
-                //     setBlurMessage("올바른 이메일 주소를 입력해주세요.");
-                //     return;
-                //   }
+                  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(member.memberEmail)) {
+                    setBlurMessage({
+                      ...member,
+                      memberEmail: "올바른 이메일 주소를 입력해주세요.",
+                    });
+                    return;
+                  }
 
-                //   setBlurMessage("");
-                // }}
+                  setBlurMessage({
+                    ...member,
+                    memberEmail: "",
+                  });
+                }}
               />
             </div>
-            {/* <div>
+            <div>
               <span className="text-danger" style={{ fontSize: "14px" }}>
-                {blurMessage}
+                {blurMessage.memberEmail}
               </span>
-            </div> */}
+            </div>
           </div>
           <div>
             <div className="d-flex flex-column gap-2 mt-3">
@@ -353,7 +435,7 @@ export default function Signup() {
                 생년월일
               </label>
               <input
-                type="datetime-local"
+                type="date"
                 className="border-0 py-2"
                 style={{
                   backgroundColor: "#F1F3F5",
@@ -363,29 +445,34 @@ export default function Signup() {
                   outline: 0,
                 }}
                 placeholder="2000-01-01"
-                // ref={emailInputRef}
-                // value={memberEmail}
-                // onChange={(e) => setMemberEmail(e.target.value)}
-                // onBlur={() => {
-                //   if (!memberEmail.length) {
-                //     setBlurMessage("이메일 주소를 입력해주세요.");
-                //     return;
-                //   }
+                value={member.memberBirth}
+                onChange={(e) =>
+                  setMember({
+                    ...member,
+                    memberBirth: e.target.value,
+                  })
+                }
+                onBlur={() => {
+                  if (!member.memberBirth.length) {
+                    setBlurMessage({
+                      ...blurMessage,
+                      memberBirth: "생년월일을 입력해주세요.",
+                    });
+                    return;
+                  }
 
-                //   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(memberEmail)) {
-                //     setBlurMessage("올바른 이메일 주소를 입력해주세요.");
-                //     return;
-                //   }
-
-                //   setBlurMessage("");
-                // }}
+                  setBlurMessage({
+                    ...blurMessage,
+                    memberBirth: "",
+                  });
+                }}
               />
             </div>
-            {/* <div>
+            <div>
               <span className="text-danger" style={{ fontSize: "14px" }}>
-                {blurMessage}
+                {blurMessage.memberBirth}
               </span>
-            </div> */}
+            </div>
           </div>
           <div>
             <div className="d-flex flex-column gap-2 mt-3">
@@ -587,23 +674,33 @@ export default function Signup() {
                   className="btn"
                   style={{
                     borderColor: "#F9B4ED",
-                    color: `${memberLike.has(v) ? "#FFFFFF" : "#333333"}`,
+                    color: `${
+                      member.memberLike.has(v) ? "#FFFFFF" : "#333333"
+                    }`,
                     backgroundColor: `${
-                      memberLike.has(v) ? "#F9B4ED" : "#FFFFFF"
+                      member.memberLike.has(v) ? "#F9B4ED" : "#FFFFFF"
                     }`,
                     borderRadius: "8px",
                   }}
                   onClick={() => {
-                    setMemberLike((memberLike) => {
-                      const newSet = new Set(memberLike);
+                    setMember(() => {
+                      const newSet = new Set(member.memberLike);
                       newSet.has(v) ? newSet.delete(v) : newSet.add(v);
-                      return newSet;
+                      return {
+                        ...member,
+                        memberLike: newSet,
+                      };
                     });
                   }}
                 >
                   {v}
                 </button>
               ))}
+            </div>
+            <div>
+              <span className="text-danger" style={{ fontSize: "14px" }}>
+                {blurMessage.memberLike}
+              </span>
             </div>
           </div>
 

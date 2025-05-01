@@ -6,11 +6,16 @@ export const userIdState = atom({
   default: null,
 });
 
+export const categoryState = atom({
+  key: "categoryState",
+  default: localStorage.getItem("category") ?? "전체",
+});
+
 export const locationState = atom({
   key: "locationState",
   default: {
-    city: "서울특별시",
-    area: "강남구",
+    city: localStorage.getItem("city") ?? "서울특별시",
+    area: localStorage.getItem("area") ?? "강남구",
   },
 });
 

@@ -8,6 +8,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootswatch/dist/cosmo/bootstrap.min.css";
 import "./index.css";
 
+// 요청 헤더에 현재 페이지의 주소를 담아서 전송
+axios.interceptors.request.use((config) => {
+  config.headers["Frontend-URL"] = window.location.href;
+  return config;
+});
 axios.interceptors.response.use(
   (response) => {
     const token = response.headers["access-token"];

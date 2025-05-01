@@ -30,6 +30,7 @@ export default function Header({
   const [searchInput, setSearchInput] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isOpenSearchRef, setIsOpenSearchRef] = useState(false);
+  const [isOpenProfileMenuRef, setIsOpenProfileMenuRef] = useState(false);
 
   const areaList = useMemo(() => {
     if (city !== null) {
@@ -44,6 +45,7 @@ export default function Header({
   const categoryRef = useRef(null);
   const locationRef = useRef(null);
   const searchRef = useRef(null);
+  const profileMenuRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -79,14 +81,22 @@ export default function Header({
       }
     };
 
+    const clickProfileMenuRefOutside = (e) => {
+      if (!profileMenuRef.current?.contains(e.target)) {
+        setIsOpenProfileMenuRef(false);
+      }
+    };
+
     document.addEventListener("mousedown", clickCategoryRefOutside);
     document.addEventListener("mousedown", clickLocationRefOutside);
+    document.addEventListener("mousedown", clickProfileMenuRefOutside);
 
     return () => {
       document.removeEventListener("mousedown", clickCategoryRefOutside);
       document.removeEventListener("mousedown", clickLocationRefOutside);
+      document.removeEventListener("mousedown", clickProfileMenuRefOutside);
     };
-  }, [categoryRef, locationRef]);
+  }, [categoryRef, locationRef, profileMenuRef]);
 
   return (
     <div
@@ -294,9 +304,63 @@ export default function Header({
                 로그인
               </button>
             ) : loginState === "loggined" ? (
-              <button className="bg-white p-2 border-0">
-                <IoPersonCircle size={22} color="#6C757D" />
-              </button>
+              <div>
+                <button
+                  className="bg-white p-2 border-0"
+                  onClick={() => setIsOpenProfileMenuRef(true)}
+                >
+                  <IoPersonCircle size={22} color="#6C757D" />
+                </button>
+                {isOpenProfileMenuRef && (
+                  <div
+                    ref={profileMenuRef}
+                    className="d-flex flex-column bg-white position-absolute shadow"
+                    style={{ borderRadius: "8px" }}
+                  >
+                    <button
+                      className="btn"
+                      style={{
+                        paddingLeft: "24px",
+                        paddingRight: "24px",
+                        paddingTop: "12px",
+                        paddingBottom: "12px",
+                        borderBottom: "1px solid #EBEBEB",
+                        outline: "none",
+                      }}
+                      onClick={() => navigate("/mypage")}
+                    >
+                      마이페이지
+                    </button>
+                    <button
+                      className="btn"
+                      style={{
+                        paddingLeft: "24px",
+                        paddingRight: "24px",
+                        paddingTop: "12px",
+                        paddingBottom: "12px",
+                        outline: "none",
+                      }}
+                      onClick={() => navigate("/chat")}
+                    >
+                      채팅
+                    </button>
+                    <button
+                      className="btn"
+                      style={{
+                        paddingLeft: "24px",
+                        paddingRight: "24px",
+                        paddingTop: "12px",
+                        paddingBottom: "12px",
+                        borderTop: "1px solid #EBEBEB",
+                        outline: "none",
+                      }}
+                      // onClick={() => }
+                    >
+                      로그아웃
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : null}
           </div>
         </>

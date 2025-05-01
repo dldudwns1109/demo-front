@@ -165,12 +165,12 @@ export default function Signin() {
                     return;
                   }
 
-                  if (memberPw.length > 30 || memberPw.length < 6) {
-                    errorToastify(
-                      "비밀번호는 영문,숫자,특수문자 조합 6~30자 입니다."
-                    );
-                    return;
-                  }
+                  // if (memberPw.length > 30 || memberPw.length < 6) {
+                  //   errorToastify(
+                  //     "비밀번호는 영문,숫자,특수문자 조합 6~30자 입니다."
+                  //   );
+                  //   return;
+                  // }
 
                   localStorage.setItem("isSaved", saveId);
                   if (saveId) localStorage.setItem("saveId", memberId);

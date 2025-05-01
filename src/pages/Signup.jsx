@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
 import Header from "../components/Header";
 import { locationState } from "../utils/storage";
 
@@ -46,6 +46,15 @@ export default function Signup() {
     memberBirth: "",
     memberLike: "",
   });
+  const [isValid, setIsValid] = useState({
+    memberId: false,
+    memberNickname: false,
+    memberPw: false,
+    memberPwConfirm: false,
+    memberEmail: false,
+    memberBirth: false,
+    memberLike: false,
+  });
 
   const areaList = useMemo(() => {
     if (city !== null) {
@@ -57,13 +66,17 @@ export default function Signup() {
     }
   }, [city]);
 
+  const isTotalValid = useMemo(() => {
+    return Object.values(isValid).every((val) => val);
+  }, [isValid]);
+
+  const isFirstRender = useRef(true);
   const locationRef = useRef(null);
   const schoolRef = useRef(null);
 
-  const errorToastify = (message) => toast.error(message);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(location);
     setMember({
       ...member,
       memberLocation: `${location.city} ${location.area}`,
@@ -71,25 +84,14 @@ export default function Signup() {
   }, [location, city]);
 
   useEffect(() => {
-    if (!member.memberLike.size) {
-      setBlurMessage({
-        ...blurMessage,
-        memberLike: "최소한 한 개의 관심사를 선택해주세요.",
-      });
-      return;
-    }
-
-    setBlurMessage({
-      ...blurMessage,
-      memberLike: "",
-    });
-  }, [member.memberLike]);
-
-  useEffect(() => {
     if (member.memberPw !== "" && memberPwConfirm === "") {
       setBlurMessage({
         ...blurMessage,
         memberPwConfirm: "비밀번호 확인을 입력해주세요.",
+      });
+      setIsValid({
+        ...isValid,
+        memberPwConfirm: false,
       });
       return;
     }
@@ -99,6 +101,10 @@ export default function Signup() {
         ...blurMessage,
         memberPwConfirm: "입력한 비밀번호와 다릅니다.",
       });
+      setIsValid({
+        ...isValid,
+        memberPwConfirm: false,
+      });
       return;
     }
 
@@ -106,7 +112,39 @@ export default function Signup() {
       ...blurMessage,
       memberPwConfirm: "",
     });
+    setIsValid({
+      ...isValid,
+      memberPwConfirm: true,
+    });
   }, [member.memberPw, memberPwConfirm]);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (!member.memberLike.size) {
+      setBlurMessage({
+        ...blurMessage,
+        memberLike: "최소한 한 개의 관심사를 선택해주세요.",
+      });
+      setIsValid({
+        ...isValid,
+        memberLike: false,
+      });
+      return;
+    }
+
+    setBlurMessage({
+      ...blurMessage,
+      memberLike: "",
+    });
+    setIsValid({
+      ...isValid,
+      memberLike: true,
+    });
+  }, [member.memberLike]);
 
   useEffect(() => {
     const clickLocationRefOutside = (e) => {
@@ -210,19 +248,23 @@ export default function Signup() {
                   borderRadius: "8px",
                   outline: 0,
                 }}
-                placeholder="4~14자 / 영문,숫자 사용 가능"
+                placeholder="5~14자 / 영문,숫자 사용 가능"
                 value={member.memberId}
-                onChange={(e) =>
+                onChange={(e) => {
                   setMember({
                     ...member,
                     memberId: e.target.value,
-                  })
-                }
-                onBlur={() => {
+                  });
+                }}
+                onBlur={async () => {
                   if (!member.memberId.length) {
                     setBlurMessage({
                       ...blurMessage,
                       memberId: "아이디를 입력해주세요.",
+                    });
+                    setIsValid({
+                      ...isValid,
+                      memberId: false,
                     });
                     return;
                   }
@@ -230,7 +272,26 @@ export default function Signup() {
                   if (!/^[a-z][a-z0-9]{4,14}$/.test(member.memberId)) {
                     setBlurMessage({
                       ...blurMessage,
-                      memberId: "4~14자 / 영문,숫자로만 입력 가능합니다.",
+                      memberId: "5~14자 / 영문,숫자로만 입력 가능합니다.",
+                    });
+                    setIsValid({
+                      ...isValid,
+                      memberId: false,
+                    });
+                    return;
+                  }
+
+                  const res = await axios.get(
+                    `http://localhost:8080/api/member/checkDuplicatedId/${member.memberId}`
+                  );
+                  if (res.data) {
+                    setBlurMessage({
+                      ...blurMessage,
+                      memberId: "사용중인 아이디입니다.",
+                    });
+                    setIsValid({
+                      ...isValid,
+                      memberId: false,
                     });
                     return;
                   }
@@ -238,6 +299,10 @@ export default function Signup() {
                   setBlurMessage({
                     ...blurMessage,
                     memberId: "",
+                  });
+                  setIsValid({
+                    ...isValid,
+                    memberId: true,
                   });
                 }}
               />
@@ -271,11 +336,15 @@ export default function Signup() {
                     memberNickname: e.target.value,
                   })
                 }
-                onBlur={() => {
+                onBlur={async () => {
                   if (!member.memberNickname.length) {
                     setBlurMessage({
                       ...blurMessage,
                       memberNickname: "닉네임을 입력해주세요.",
+                    });
+                    setIsValid({
+                      ...isValid,
+                      memberNickname: false,
                     });
                     return;
                   }
@@ -285,12 +354,35 @@ export default function Signup() {
                       ...blurMessage,
                       memberNickname: "2~10자 / 한글,숫자로만 입력 가능합니다.",
                     });
+                    setIsValid({
+                      ...isValid,
+                      memberNickname: false,
+                    });
+                    return;
+                  }
+
+                  const res = await axios.get(
+                    `http://localhost:8080/api/member/checkDuplicatedNickname/${member.memberNickname}`
+                  );
+                  if (res.data) {
+                    setBlurMessage({
+                      ...blurMessage,
+                      memberNickname: "사용중인 닉네임입니다.",
+                    });
+                    setIsValid({
+                      ...isValid,
+                      memberNickname: false,
+                    });
                     return;
                   }
 
                   setBlurMessage({
                     ...blurMessage,
                     memberNickname: "",
+                  });
+                  setIsValid({
+                    ...isValid,
+                    memberNickname: true,
                   });
                 }}
               />
@@ -330,6 +422,10 @@ export default function Signup() {
                       ...blurMessage,
                       memberPw: "비밀번호를 입력해주세요.",
                     });
+                    setIsValid({
+                      ...isValid,
+                      memberPw: false,
+                    });
                     return;
                   }
 
@@ -338,12 +434,20 @@ export default function Signup() {
                       ...blurMessage,
                       memberPw: "비밀번호가 길어 제한됩니다.",
                     });
+                    setIsValid({
+                      ...isValid,
+                      memberPw: false,
+                    });
                     return;
                   }
 
                   setBlurMessage({
                     ...blurMessage,
                     memberPw: "",
+                  });
+                  setIsValid({
+                    ...isValid,
+                    memberPw: true,
                   });
                 }}
               />
@@ -402,24 +506,53 @@ export default function Signup() {
                     memberEmail: e.target.value,
                   })
                 }
-                onBlur={() => {
+                onBlur={async () => {
                   if (!member.memberEmail.length) {
                     setBlurMessage({
                       ...blurMessage,
                       memberEmail: "이메일 주소를 입력해주세요.",
                     });
+                    setIsValid({
+                      ...isValid,
+                      memberEmail: false,
+                    });
                     return;
                   }
+
                   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(member.memberEmail)) {
                     setBlurMessage({
                       ...blurMessage,
                       memberEmail: "올바른 이메일 주소를 입력해주세요.",
                     });
+                    setIsValid({
+                      ...isValid,
+                      memberEmail: false,
+                    });
                     return;
                   }
+
+                  const res = await axios.get(
+                    `http://localhost:8080/api/member/checkDuplicatedEmail/${member.memberEmail}`
+                  );
+                  if (res.data) {
+                    setBlurMessage({
+                      ...blurMessage,
+                      memberEmail: "사용중인 이메일입니다.",
+                    });
+                    setIsValid({
+                      ...isValid,
+                      memberEmail: false,
+                    });
+                    return;
+                  }
+
                   setBlurMessage({
                     ...blurMessage,
                     memberEmail: "",
+                  });
+                  setIsValid({
+                    ...isValid,
+                    memberEmail: true,
                   });
                 }}
               />
@@ -459,12 +592,20 @@ export default function Signup() {
                       ...blurMessage,
                       memberBirth: "생년월일을 입력해주세요.",
                     });
+                    setIsValid({
+                      ...isValid,
+                      memberBirth: false,
+                    });
                     return;
                   }
 
                   setBlurMessage({
                     ...blurMessage,
                     memberBirth: "",
+                  });
+                  setIsValid({
+                    ...isValid,
+                    memberBirth: true,
                   });
                 }}
               />
@@ -732,24 +873,25 @@ export default function Signup() {
             className="btn btn-primary text-white"
             style={{ marginTop: "48px" }}
             onClick={async () => {
-              await axios.post("http://localhost:8080/api/member/signup", {
-                ...member,
-                memberLike: Array.from(member.memberLike),
-              });
+              try {
+                await axios.post("http://localhost:8080/api/member/signup", {
+                  ...member,
+                  memberLike: Array.from(member.memberLike),
+                });
+
+                navigate("/signup-finish", {
+                  state: { userNickname: member.memberNickname },
+                });
+              } catch (e) {
+                console.error("");
+              }
             }}
-            // disabled={!isValid}
+            disabled={!isTotalValid}
           >
             회원가입
           </button>
         </div>
       </div>
-      <ToastContainer
-        position="bottom-right"
-        autoClose={2000}
-        pauseOnHover={false}
-        theme="light"
-        limit={1}
-      />
     </div>
   );
 }

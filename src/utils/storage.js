@@ -28,3 +28,17 @@ export const loginState = selector({
   key: "loginState",
   get: (state) => state.get(userIdState) !== null,
 });
+
+export const userProfileState = atom({
+  key: "userProfileState",
+  default: {
+    memberNo: null, //로그인 여부 판단용
+    nickname: "",
+    profileUrl: "",
+    gender: "",
+    birth: "",
+    mbti: "",
+    location: "",
+    school: "",
+  },
+});

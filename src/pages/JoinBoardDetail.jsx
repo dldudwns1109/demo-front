@@ -1,12 +1,12 @@
-// JoinBoardDetail.jsx (정확한 수정 버전)
-
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiMoreVertical } from "react-icons/fi";
 import { FaPaperPlane } from "react-icons/fa";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { replyCountState } from "../store/replyCountState";
+import { loginState, locationState } from "../utils/storage";
+import Header from "../components/Header";
 
 export default function JoinBoardDetail() {
   const { boardNo } = useParams();
@@ -35,6 +35,10 @@ export default function JoinBoardDetail() {
     };
     fetchData();
   }, [boardNo]);
+
+  //로그인 관련
+  const login = useRecoilValue(loginState);
+  const [location, setLocation] = useRecoilState(locationState);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -137,10 +141,21 @@ export default function JoinBoardDetail() {
 
   return (
     <>
-      {/* <Header loginState="login" /> */}
-      <div className="container py-4">
+      <Header
+        loginState={`${login ? "loggined" : "login"}`}
+        location={location}
+        setLocation={setLocation}
+      />
+      <div
+        className="container"
+        style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
+      >
         <div className="mb-5">
-          <Link to="/join/board" className="btn btn-outline-secondary btn-sm">
+          <Link
+            to="/join/board"
+            className="btn btn-outline-secondary btn-sm"
+            style={{ marginTop: "3rem" }}
+          >
             목록으로
           </Link>
         </div>
@@ -185,7 +200,7 @@ export default function JoinBoardDetail() {
             <button
               className="btn btn-link p-0"
               onClick={toggleBoardDropdown}
-              style={{ color: "#F9B4ED" }}
+              style={{ color: "#6C757D" }}
             >
               <FiMoreVertical size="1.5rem" />
             </button>
@@ -338,7 +353,7 @@ export default function JoinBoardDetail() {
                   <button
                     className="btn btn-link p-0"
                     onClick={() => toggleDropdown(idx)}
-                    style={{ color: "#F9B4ED" }}
+                    style={{ color: "#6C757D" }}
                   >
                     <FiMoreVertical size="1.5rem" />
                   </button>
@@ -409,7 +424,7 @@ export default function JoinBoardDetail() {
               top: "50%",
               right: "1rem",
               transform: "translateY(-50%)",
-              color: "#F9B4ED",
+              color: "#6C757D",
             }}
             onClick={handleReplySubmit}
           >

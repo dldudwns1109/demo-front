@@ -4,8 +4,6 @@ import { useRecoilState } from "recoil";
 import axios from "axios";
 import Header from "../components/Header";
 import { locationState } from "../utils/storage";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 
 import { MdEdit } from "react-icons/md";
 import { RiArrowDropDownLine } from "react-icons/ri";
@@ -29,7 +27,9 @@ export default function Signup() {
     memberNickname: "",
     memberPw: "",
     memberEmail: "",
-    memberBirth: new Date().toISOString().slice(0, 10),
+    memberBirth: new Date(new Date().setFullYear(new Date().getFullYear() - 20))
+      .toISOString()
+      .slice(0, 10),
     memberGender: "m",
     memberLocation: "",
     memberSchool: schoolData[0],
@@ -45,6 +45,7 @@ export default function Signup() {
     memberPw: "",
     memberPwConfirm: "",
     memberEmail: "",
+    memberBirth: "",
     memberLike: "",
   });
   const [isValid, setIsValid] = useState({
@@ -53,6 +54,7 @@ export default function Signup() {
     memberPw: false,
     memberPwConfirm: false,
     memberEmail: false,
+    memberBirth: false,
     memberLike: false,
   });
 
@@ -572,7 +574,7 @@ export default function Signup() {
               <label className="fs-6 fw-bold" style={{ color: "#111111" }}>
                 생년월일
               </label>
-              <DatePicker
+              {/* <DatePicker
                 selected={member.memberBirth}
                 onChange={(date) =>
                   setMember({
@@ -595,8 +597,55 @@ export default function Signup() {
                   </button>
                 }
                 dateFormat="yyyy-MM-dd"
-                maxDate={new Date()}
+                maxDate={new Date().setFullYear(new Date().getFullYear() - 20)}
+              /> */}
+              <input
+                type="date"
+                className="border-0 py-2"
+                style={{
+                  backgroundColor: "#F1F3F5",
+                  paddingLeft: "12px",
+                  paddingRight: "12px",
+                  borderRadius: "8px",
+                  outline: 0,
+                }}
+                placeholder="2000-01-01"
+                value={member.memberBirth}
+                max={new Date().setFullYear(new Date().getFullYear() - 20)}
+                onChange={(e) =>
+                  setMember({
+                    ...member,
+                    memberBirth: e.target.value,
+                  })
+                }
+                onBlur={() => {
+                  if (!member.memberBirth.length) {
+                    setBlurMessage({
+                      ...blurMessage,
+                      memberBirth: "생년월일을 입력해주세요.",
+                    });
+                    setIsValid({
+                      ...isValid,
+                      memberBirth: false,
+                    });
+                    return;
+                  }
+
+                  setBlurMessage({
+                    ...blurMessage,
+                    memberBirth: "",
+                  });
+                  setIsValid({
+                    ...isValid,
+                    memberBirth: true,
+                  });
+                }}
               />
+            </div>
+            <div>
+              <span className="text-danger" style={{ fontSize: "14px" }}>
+                {blurMessage.memberBirth}
+              </span>
             </div>
           </div>
           <div>

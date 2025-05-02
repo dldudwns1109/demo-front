@@ -4,6 +4,8 @@ import { useRecoilState } from "recoil";
 import axios from "axios";
 import Header from "../components/Header";
 import { locationState } from "../utils/storage";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import { MdEdit } from "react-icons/md";
 import { RiArrowDropDownLine } from "react-icons/ri";
@@ -27,7 +29,7 @@ export default function Signup() {
     memberNickname: "",
     memberPw: "",
     memberEmail: "",
-    memberBirth: "",
+    memberBirth: new Date().toISOString().slice(0, 10),
     memberGender: "m",
     memberLocation: "",
     memberSchool: schoolData[0],
@@ -199,7 +201,11 @@ export default function Signup() {
                 className="shadow-sm"
                 width={200}
                 height={200}
-                style={{ borderRadius: "999px", objectFit: "cover" }}
+                style={{
+                  borderRadius: "999px",
+                  objectFit: "cover",
+                  cursor: "pointer",
+                }}
               />
               <div
                 className="position-absolute bg-white d-flex align-items-center"
@@ -568,46 +574,30 @@ export default function Signup() {
               <label className="fs-6 fw-bold" style={{ color: "#111111" }}>
                 생년월일
               </label>
-              <input
-                type="date"
-                className="border-0 py-2"
-                style={{
-                  backgroundColor: "#F1F3F5",
-                  paddingLeft: "12px",
-                  paddingRight: "12px",
-                  borderRadius: "8px",
-                  outline: 0,
-                }}
-                placeholder="2000-01-01"
-                value={member.memberBirth}
-                onChange={(e) =>
+              <DatePicker
+                selected={member.memberBirth}
+                onChange={(date) =>
                   setMember({
                     ...member,
-                    memberBirth: e.target.value,
+                    memberBirth: date.toISOString().slice(0, 10),
                   })
                 }
-                onBlur={() => {
-                  if (!member.memberBirth.length) {
-                    setBlurMessage({
-                      ...blurMessage,
-                      memberBirth: "생년월일을 입력해주세요.",
-                    });
-                    setIsValid({
-                      ...isValid,
-                      memberBirth: false,
-                    });
-                    return;
-                  }
-
-                  setBlurMessage({
-                    ...blurMessage,
-                    memberBirth: "",
-                  });
-                  setIsValid({
-                    ...isValid,
-                    memberBirth: true,
-                  });
-                }}
+                customInput={
+                  <button
+                    className="d-flex border-0 py-2 w-100"
+                    style={{
+                      backgroundColor: "#F1F3F5",
+                      paddingLeft: "12px",
+                      paddingRight: "12px",
+                      borderRadius: "8px",
+                      outline: 0,
+                    }}
+                  >
+                    {member.memberBirth}
+                  </button>
+                }
+                dateFormat="yyyy-MM-dd"
+                maxDate={new Date()}
               />
             </div>
             <div>

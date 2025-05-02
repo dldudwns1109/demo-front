@@ -426,52 +426,56 @@ export default function Home() {
           </div>
         )}
 
-        <div
-          style={{ marginTop: "120px", marginBottom: "40px" }}
-          className="d-flex align-items-center fw-bold fs-4"
-        >
-          나의 관심사와 일치하는 모임
-        </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: `${
-              windowWidth > 1024
-                ? "repeat(3, 1fr)"
-                : windowWidth > 768
-                ? "repeat(2, 1fr)"
-                : "repeat(1, 1fr)"
-            }`,
-            gap: "60px",
-          }}
-        >
-          {likedGroupData.map((group, idx) => {
-            return (
-              idx < likedRenderItem && <GroupItem key={idx} data={group} />
-            );
-          })}
-        </div>
-        {isLikedMore && (
-          <div
-            className="d-flex justify-content-center"
-            style={{ marginTop: "60px" }}
-          >
-            <button
-              className="border-0 bg-primary text-white"
-              style={{
-                borderRadius: "8px",
-                paddingLeft: "12px",
-                paddingRight: "12px",
-                paddingTop: "7px",
-                paddingBottom: "7px",
-              }}
-              onClick={() =>
-                setLikedRenderItem((likedRenderItem) => likedRenderItem + 6)
-              }
+        {login && (
+          <>
+            <div
+              style={{ marginTop: "120px", marginBottom: "40px" }}
+              className="d-flex align-items-center fw-bold fs-4"
             >
-              모임 더보기
-            </button>
-          </div>
+              나의 관심사와 일치하는 모임
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: `${
+                  windowWidth > 1024
+                    ? "repeat(3, 1fr)"
+                    : windowWidth > 768
+                    ? "repeat(2, 1fr)"
+                    : "repeat(1, 1fr)"
+                }`,
+                gap: "60px",
+              }}
+            >
+              {likedGroupData.map((group, idx) => {
+                return (
+                  idx < likedRenderItem && <GroupItem key={idx} data={group} />
+                );
+              })}
+            </div>
+            {isLikedMore && (
+              <div
+                className="d-flex justify-content-center"
+                style={{ marginTop: "60px" }}
+              >
+                <button
+                  className="border-0 bg-primary text-white"
+                  style={{
+                    borderRadius: "8px",
+                    paddingLeft: "12px",
+                    paddingRight: "12px",
+                    paddingTop: "7px",
+                    paddingBottom: "7px",
+                  }}
+                  onClick={() =>
+                    setLikedRenderItem((likedRenderItem) => likedRenderItem + 6)
+                  }
+                >
+                  모임 더보기
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         <div
@@ -491,8 +495,8 @@ export default function Home() {
         >
           {joinBoardItem.map((joinBoard, idx) => {
             joinBoard.context =
-              joinBoard.context.length >= 53 &&
-              joinBoard.context.slice(0, 53) + "...";
+              joinBoard.context.length >= 60 &&
+              joinBoard.context.slice(0, 60) + "...";
             return idx < 2 && <JoinBoardItem key={idx} data={joinBoard} />;
           })}
         </div>

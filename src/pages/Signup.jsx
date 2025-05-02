@@ -45,7 +45,6 @@ export default function Signup() {
     memberPw: "",
     memberPwConfirm: "",
     memberEmail: "",
-    memberBirth: "",
     memberLike: "",
   });
   const [isValid, setIsValid] = useState({
@@ -54,7 +53,6 @@ export default function Signup() {
     memberPw: false,
     memberPwConfirm: false,
     memberEmail: false,
-    memberBirth: false,
     memberLike: false,
   });
 
@@ -599,11 +597,6 @@ export default function Signup() {
                 dateFormat="yyyy-MM-dd"
                 maxDate={new Date()}
               />
-            </div>
-            <div>
-              <span className="text-danger" style={{ fontSize: "14px" }}>
-                {blurMessage.memberBirth}
-              </span>
             </div>
           </div>
           <div>

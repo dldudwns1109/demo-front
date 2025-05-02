@@ -193,12 +193,15 @@ export default function Signin() {
                       axios.defaults.headers.common[
                         "Authorization"
                       ] = `Bearer ${res.data.accessToken}`;
-                      navigate("/");
-
+                      localStorage.setItem(
+                        "accessToken", 
+                        res.data.accessToken
+                      );
                       localStorage.setItem(
                         "refreshToken",
                         res.data.refreshToken
                       );
+                      navigate("/");
                     }
                   } catch (e) {
                     const errMessage =

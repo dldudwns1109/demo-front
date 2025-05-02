@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiMoreVertical } from "react-icons/fi";
 import { FaPaperPlane } from "react-icons/fa";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { replyCountState } from "../store/replyCountState";
 import { loginState, locationState } from "../utils/storage";
 import Header from "../components/Header";
@@ -15,7 +15,7 @@ export default function JoinBoardDetail() {
   const [newReply, setNewReply] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [boardDropdownOpen, setBoardDropdownOpen] = useState(false);
-  const [setReplyCounts] = useRecoilState(replyCountState);
+  const setReplyCounts = useSetRecoilState(replyCountState);
   const [showBoardWriterPopover, setShowBoardWriterPopover] = useState(false);
   const [replyPopoverIndex, setReplyPopoverIndex] = useState(null);
   const boardPopoverRef = useRef();

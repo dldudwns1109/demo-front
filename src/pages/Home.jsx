@@ -8,158 +8,159 @@ import {
   locationState,
   windowWidthState,
   loginState,
-  userIdState,
+  userNoState,
   categoryState,
 } from "../utils/storage";
 
 import { IoLocationSharp } from "react-icons/io5";
+import axios from "axios";
 
-const aroundGroupData = [
-  {
-    img: "https://picsum.photos/seed/87/360/270",
-    isLiked: false,
-    title: "디자인 스터디 그룹",
-    content: "UI/UX 디자인을 함께 공부하는 모임입니다",
-    category: "자기계발",
-    location: "강남구",
-    member: "26",
-  },
-  {
-    img: "https://picsum.photos/seed/43/360/270",
-    isLiked: true,
-    title: "주말 요리 클래스",
-    content: "함께 모여 다양한 나라의 요리를 배우는 모임",
-    category: "요리",
-    location: "강남구",
-    member: "15",
-  },
-  {
-    img: "https://picsum.photos/seed/21/360/270",
-    isLiked: false,
-    title: "아침 달리기 크루",
-    content: "매일 아침 함께 달리며 건강을 챙기는 러닝 그룹",
-    category: "스포츠",
-    location: "강남구",
-    member: "33",
-  },
-  {
-    img: "https://picsum.photos/seed/105/360/270",
-    isLiked: true,
-    title: "마음챙김 명상 모임",
-    content: "일상 속 스트레스를 내려놓는 명상 프랙티스",
-    category: "자기계발",
-    location: "강남구",
-    member: "19",
-  },
-  {
-    img: "https://picsum.photos/seed/62/360/270",
-    isLiked: false,
-    title: "클래식 음악 감상회",
-    content: "매월 다른 작곡가의 음악을 감상하고 토론하는 모임",
-    category: "사교",
-    location: "강남구",
-    member: "22",
-  },
-  {
-    img: "https://picsum.photos/seed/79/360/270",
-    isLiked: true,
-    title: "농구 동호회",
-    content: "실력과 상관없이 함께 농구를 즐기는 모임",
-    category: "스포츠",
-    location: "강남구",
-    member: "27",
-  },
-  {
-    img: "https://picsum.photos/seed/36/360/270",
-    isLiked: false,
-    title: "소설 읽기 모임",
-    content: "한 달에 한 권씩 소설을 읽고 함께 토론해요",
-    category: "독서",
-    location: "강남구",
-    member: "14",
-  },
-  {
-    img: "https://picsum.photos/seed/51/360/270",
-    isLiked: true,
-    title: "커피 애호가 모임",
-    content: "다양한 원두와 추출 방법을 함께 탐구하는 모임",
-    category: "사교",
-    location: "강남구",
-    member: "24",
-  },
-  {
-    img: "https://picsum.photos/seed/93/360/270",
-    isLiked: false,
-    title: "주식 투자 클럽",
-    content: "투자 정보를 공유하고 함께 공부하는 모임",
-    category: "자기계발",
-    location: "강남구",
-    member: "18",
-  },
-  {
-    img: "https://picsum.photos/seed/115/360/270",
-    isLiked: true,
-    title: "배드민턴 동호회",
-    content: "주말마다 실내 체육관에서 배드민턴을 즐겨요",
-    category: "스포츠",
-    location: "강남구",
-    member: "31",
-  },
-  {
-    img: "https://picsum.photos/seed/47/360/270",
-    isLiked: false,
-    title: "이탈리안 요리 클래스",
-    content: "정통 이탈리아 요리를 배우는 쿠킹 클래스",
-    category: "요리",
-    location: "강남구",
-    member: "12",
-  },
-  {
-    img: "https://picsum.photos/seed/74/360/270",
-    isLiked: true,
-    title: "보드게임 모임",
-    content: "새로운 보드게임을 발굴하고 함께 즐기는 모임",
-    category: "사교",
-    location: "강남구",
-    member: "29",
-  },
-  {
-    img: "https://picsum.photos/seed/28/360/270",
-    isLiked: false,
-    title: "블로그 작성 스터디",
-    content: "함께 글쓰기 실력을 향상시키는 블로거 모임",
-    category: "자기계발",
-    location: "강남구",
-    member: "16",
-  },
-  {
-    img: "https://picsum.photos/seed/83/360/270",
-    isLiked: true,
-    title: "시 낭독 모임",
-    content: "좋아하는 시를 함께 낭독하고 감상을 나누는 모임",
-    category: "독서",
-    location: "강남구",
-    member: "13",
-  },
-  {
-    img: "https://picsum.photos/seed/69/360/270",
-    isLiked: false,
-    title: "와인 테이스팅 클럽",
-    content: "다양한 와인을 시음하고 평가하는 소셜 모임",
-    category: "사교",
-    location: "강남구",
-    member: "23",
-  },
-  {
-    img: "https://picsum.photos/seed/102/360/270",
-    isLiked: true,
-    title: "수영 동호회",
-    content: "초보자부터 경험자까지 함께하는 수영 동호회",
-    category: "스포츠",
-    location: "강남구",
-    member: "35",
-  },
-];
+// const aroundGroupData = [
+//   {
+//     img: "https://picsum.photos/seed/87/360/270",
+//     isLiked: false,
+//     title: "디자인 스터디 그룹",
+//     content: "UI/UX 디자인을 함께 공부하는 모임입니다",
+//     category: "자기계발",
+//     location: "서울특별시 강남구",
+//     member: "26",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/43/360/270",
+//     isLiked: true,
+//     title: "주말 요리 클래스",
+//     content: "함께 모여 다양한 나라의 요리를 배우는 모임",
+//     category: "요리",
+//     location: "서울특별시 마포구",
+//     member: "15",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/21/360/270",
+//     isLiked: false,
+//     title: "아침 달리기 크루",
+//     content: "매일 아침 함께 달리며 건강을 챙기는 러닝 그룹",
+//     category: "스포츠",
+//     location: "경기도 성남시",
+//     member: "33",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/105/360/270",
+//     isLiked: true,
+//     title: "마음챙김 명상 모임",
+//     content: "일상 속 스트레스를 내려놓는 명상 프랙티스",
+//     category: "자기계발",
+//     location: "부산광역시 해운대구",
+//     member: "19",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/62/360/270",
+//     isLiked: false,
+//     title: "클래식 음악 감상회",
+//     content: "매월 다른 작곡가의 음악을 감상하고 토론하는 모임",
+//     category: "사교",
+//     location: "대구광역시 수성구",
+//     member: "22",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/79/360/270",
+//     isLiked: true,
+//     title: "농구 동호회",
+//     content: "실력과 상관없이 함께 농구를 즐기는 모임",
+//     category: "스포츠",
+//     location: "인천광역시 남동구",
+//     member: "27",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/36/360/270",
+//     isLiked: false,
+//     title: "소설 읽기 모임",
+//     content: "한 달에 한 권씩 소설을 읽고 함께 토론해요",
+//     category: "독서",
+//     location: "경기도 고양시",
+//     member: "14",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/51/360/270",
+//     isLiked: true,
+//     title: "커피 애호가 모임",
+//     content: "다양한 원두와 추출 방법을 함께 탐구하는 모임",
+//     category: "사교",
+//     location: "서울특별시 종로구",
+//     member: "24",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/93/360/270",
+//     isLiked: false,
+//     title: "주식 투자 클럽",
+//     content: "투자 정보를 공유하고 함께 공부하는 모임",
+//     category: "자기계발",
+//     location: "대전광역시 서구",
+//     member: "18",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/115/360/270",
+//     isLiked: true,
+//     title: "배드민턴 동호회",
+//     content: "주말마다 실내 체육관에서 배드민턴을 즐겨요",
+//     category: "스포츠",
+//     location: "광주광역시 북구",
+//     member: "31",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/47/360/270",
+//     isLiked: false,
+//     title: "이탈리안 요리 클래스",
+//     content: "정통 이탈리아 요리를 배우는 쿠킹 클래스",
+//     category: "요리",
+//     location: "경상남도 창원시",
+//     member: "12",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/74/360/270",
+//     isLiked: true,
+//     title: "보드게임 모임",
+//     content: "새로운 보드게임을 발굴하고 함께 즐기는 모임",
+//     category: "사교",
+//     location: "울산광역시 남구",
+//     member: "29",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/28/360/270",
+//     isLiked: false,
+//     title: "블로그 작성 스터디",
+//     content: "함께 글쓰기 실력을 향상시키는 블로거 모임",
+//     category: "자기계발",
+//     location: "세종특별자치시",
+//     member: "16",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/83/360/270",
+//     isLiked: true,
+//     title: "시 낭독 모임",
+//     content: "좋아하는 시를 함께 낭독하고 감상을 나누는 모임",
+//     category: "독서",
+//     location: "전라북도 전주시",
+//     member: "13",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/69/360/270",
+//     isLiked: false,
+//     title: "와인 테이스팅 클럽",
+//     content: "다양한 와인을 시음하고 평가하는 소셜 모임",
+//     category: "사교",
+//     location: "제주특별자치도 제주시",
+//     member: "23",
+//   },
+//   {
+//     img: "https://picsum.photos/seed/102/360/270",
+//     isLiked: true,
+//     title: "수영 동호회",
+//     content: "초보자부터 경험자까지 함께하는 수영 동호회",
+//     category: "스포츠",
+//     location: "충청북도 청주시",
+//     member: "35",
+//   },
+// ];
 
 const likedGroupData = [
   {
@@ -336,20 +337,17 @@ const joinBoardItem = [
 export default function Home() {
   const windowWidth = useRecoilValue(windowWidthState);
   const login = useRecoilValue(loginState);
-  const userId = useRecoilValue(userIdState);
+  const userNo = useRecoilValue(userNoState);
   const [category, setCategory] = useRecoilState(categoryState);
   const [location, setLocation] = useRecoilState(locationState);
+  const [keyword, setKeyword] = useState("");
   const [isAroundMore, setIsAroundMore] = useState(false);
   const [aroundRenderItem, setAroundRenderItem] = useState(6);
   const [isLikedMore, setIsLikedMore] = useState(false);
   const [likedRenderItem, setLikedRenderItem] = useState(6);
+  const [aroundGroupData, setAroundGroupData] = useState([]);
 
   const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   console.log(login);
-  //   console.log(userId);
-  // }, [login, userId]);
 
   useEffect(() => {
     setIsAroundMore(aroundGroupData.length > aroundRenderItem);
@@ -359,6 +357,22 @@ export default function Home() {
     setIsLikedMore(likedGroupData.length > likedRenderItem);
   }, [location, likedRenderItem]);
 
+  // useEffect(() => {
+  //   console.log(aroundGroupData);
+  // }, [aroundGroupData]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await axios.post("http://localhost:8080/api/crew/search", {
+        memberNo: userNo,
+        category,
+        location: `${location.city} ${location.area}`,
+      });
+      setAroundGroupData([...res.data]);
+    };
+    fetchData();
+  }, [userNo, category, location]);
+
   return (
     <>
       <Header
@@ -367,6 +381,8 @@ export default function Home() {
         setCategory={setCategory}
         location={location}
         setLocation={setLocation}
+        searchKeyword={keyword}
+        setSearchKeyword={setKeyword}
       />
       <div
         style={{
@@ -381,7 +397,9 @@ export default function Home() {
           className="d-flex align-items-center fw-bold fs-4"
         >
           <IoLocationSharp color="#DABFFF" size={20} className="me-2" />
-          <span style={{ color: "#F9B4ED" }}>{location.area}</span>
+          <span style={{ color: "#F9B4ED" }}>
+            {`${location.city} ${location.area}`}
+          </span>
           &nbsp;근처 모임
         </div>
         <div
@@ -399,7 +417,9 @@ export default function Home() {
         >
           {aroundGroupData.map((group, idx) => {
             return (
-              idx < aroundRenderItem && <GroupItem key={idx} data={group} />
+              idx < aroundRenderItem && (
+                <GroupItem key={idx} data={group} userNo={userNo} />
+              )
             );
           })}
         </div>
@@ -426,7 +446,7 @@ export default function Home() {
           </div>
         )}
 
-        {login && (
+        {/* {login && (
           <>
             <div
               style={{ marginTop: "120px", marginBottom: "40px" }}
@@ -476,7 +496,7 @@ export default function Home() {
               </div>
             )}
           </>
-        )}
+        )} */}
 
         <div
           style={{ marginTop: "120px", marginBottom: "40px", color: "#111111" }}

@@ -4,12 +4,12 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import Header from "../components/Header";
-import { loginState, userIdState, windowWidthState } from "../utils/storage";
+import { loginState, userNoState, windowWidthState } from "../utils/storage";
 
 export default function Signin() {
   const windowWidth = useRecoilValue(windowWidthState);
   const login = useRecoilValue(loginState);
-  const setUserId = useSetRecoilState(userIdState);
+  const setUserNo = useSetRecoilState(userNoState);
   const [memberId, setMemberId] = useState(
     localStorage.getItem("saveId") ?? ""
   );
@@ -189,7 +189,7 @@ export default function Signin() {
                     );
 
                     if (res.status === 200) {
-                      setUserId(res.data.memberId);
+                      setUserNo(res.data.memberNo);
                       axios.defaults.headers.common[
                         "Authorization"
                       ] = `Bearer ${res.data.accessToken}`;

@@ -1,17 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
 
 import { IoLocationSharp } from "react-icons/io5";
 import { IoPeople } from "react-icons/io5";
 import { IoHeartSharp } from "react-icons/io5";
 import { IoHeartOutline } from "react-icons/io5";
 
-export default function GroupItem({ data }) {
-  const [toggle, setToggle] = useState(data.isLiked);
+export default function GroupItem({ data, userNo }) {
+  const [toggle, setToggle] = useState(data.crewIsLiked);
+
+  useEffect(() => {
+    setToggle(data.crewIsLiked);
+  }, [data.crewIsLiked]);
 
   return (
     <div className="d-flex flex-column" style={{ cursor: "pointer" }}>
       <div className="position-relative" style={{ marginBottom: "12px" }}>
-        <img src={data.img} className="w-100" style={{ borderRadius: "8px" }} />
+        <img
+          src={`http://localhost:8080/api/attachment/${data.crewAttachmentNo}`}
+          className="w-100"
+          style={{ borderRadius: "8px", objectFit: "cover" }}
+        />
         <button
           className="d-flex justify-content-center align-items-center position-absolute border-0 p-2 bg-white"
           style={{
@@ -21,7 +30,22 @@ export default function GroupItem({ data }) {
             width: "36px",
             height: "36px",
           }}
-          onClick={() => setToggle((toggle) => !toggle)}
+          onClick={async () => {
+            if (toggle) {
+              await axios.delete("http://localhost:8080/api/crew/deleteLike", {
+                data: {
+                  memberNo: userNo,
+                  crewNo: data.crewNo,
+                },
+              });
+            } else {
+              await axios.post("http://localhost:8080/api/crew/updateLike", {
+                memberNo: userNo,
+                crewNo: data.crewNo,
+              });
+            }
+            setToggle((toggle) => !toggle);
+          }}
         >
           {toggle ? (
             <IoHeartSharp size={20} color="#DC3545" />
@@ -31,7 +55,7 @@ export default function GroupItem({ data }) {
         </button>
       </div>
       <span className="fs-5 fw-bold mb-2" style={{ color: "#111111" }}>
-        {data.title}
+        {data.crewName}
       </span>
       <p
         style={{
@@ -40,16 +64,17 @@ export default function GroupItem({ data }) {
           marginBottom: "12px",
         }}
       >
-        {data.content}
+        {data.crewIntro}
       </p>
       <div
         className="d-flex align-items-center gap-1"
         style={{ color: "#666666" }}
       >
         <IoPeople size={18} color="#6C757D" />
-        <span>{data.category}</span> ·
+        <span>{data.crewCategory}</span> ·
         <IoLocationSharp size={18} color="#6C757D" />
-        <span>{data.location}</span> · <span>회원 {data.member}명</span>
+        <span>{data.crewLocation}</span> ·{" "}
+        <span>회원 {data.crewMemberCnt}명</span>
       </div>
     </div>
   );

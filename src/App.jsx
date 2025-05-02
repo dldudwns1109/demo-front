@@ -34,13 +34,13 @@ import CrewChat from "./pages/CrewChat";
 import MeetingCreate from "./pages/MeetingCreate";
 import MeetingDetail from "./pages/MeetingDetail";
 import MeetingEdit from "./pages/MeetingEdit";
-import { loginState, userIdState, windowWidthState } from "./utils/storage";
+import { loginState, userNoState, windowWidthState } from "./utils/storage";
 import "./App.css";
 
 function App() {
   const setWindowWidth = useSetRecoilState(windowWidthState);
   const login = useRecoilValue(loginState);
-  const setUserId = useSetRecoilState(userIdState);
+  const setUserNo = useSetRecoilState(userNoState);
 
   useEffect(() => {
     const handleResize = () => {
@@ -60,7 +60,7 @@ function App() {
           "http://localhost:8080/api/member/refresh"
         );
 
-        setUserId(res.data.memberId);
+        setUserNo(res.data.memberNo);
 
         axios.defaults.headers.common[
           "Authorization"
@@ -108,12 +108,21 @@ function App() {
         <Route path="/crew/detail" element={<CrewDetail />} />
         <Route path="/crew/:crewNo/edit" element={<CrewEdit />} />
         <Route path="/crew/:crewNo/delete" element={<CrewDelete />} />
-        <Route path="/crew/:crewNo/delete-finish" element={<CrewDeleteFinish />} />
+        <Route
+          path="/crew/:crewNo/delete-finish"
+          element={<CrewDeleteFinish />}
+        />
         {/* isCrewMember={true} CrewBoard옆에 넣을 예정 */}
-        <Route path="/crew/:crewNo/board" element={<CrewBoard />} /> 
-        <Route path="/crew/:crewNo/board/detail/:boardNo" element={<CrewBoardDetail />} />
+        <Route path="/crew/:crewNo/board" element={<CrewBoard />} />
+        <Route
+          path="/crew/:crewNo/board/detail/:boardNo"
+          element={<CrewBoardDetail />}
+        />
         <Route path="/crew/:crewNo/board/write" element={<CrewBoardWrite />} />
-        <Route path="/crew/:crewNo/board/edit/:boardNo" element={<CrewBoardEdit />} />
+        <Route
+          path="/crew/:crewNo/board/edit/:boardNo"
+          element={<CrewBoardEdit />}
+        />
         <Route path="/crew/:crewNo/chat" element={<CrewChat />} />
         <Route path="/meeting/create" element={<MeetingCreate />} />
         <Route path="/meeting/detail" element={<MeetingDetail />} />

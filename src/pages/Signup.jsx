@@ -21,6 +21,7 @@ const mbtiOptions = mbtiData;
 export default function Signup() {
   const [location, setLocation] = useRecoilState(locationState);
   const [city, setCity] = useState("서울특별시");
+  const [previewImg, setPreviewImg] = useState(null);
   const [member, setMember] = useState({
     memberImg: null,
     memberId: "",
@@ -54,7 +55,7 @@ export default function Signup() {
     memberPw: false,
     memberPwConfirm: false,
     memberEmail: false,
-    memberBirth: false,
+    memberBirth: true,
     memberLike: false,
   });
 
@@ -197,7 +198,7 @@ export default function Signup() {
           >
             <label htmlFor="file" className="position-relative">
               <img
-                src={member.memberImg ?? "images/default-profile.svg"}
+                src={previewImg ?? "images/default-profile.svg"}
                 className="shadow-sm"
                 width={200}
                 height={200}
@@ -230,8 +231,8 @@ export default function Signup() {
                 const file = e.target.files[0];
                 if (file && file.type.startsWith("image/")) {
                   const reader = new FileReader();
-                  reader.onload = () =>
-                    setMember({ ...member, memberImg: reader.result });
+                  reader.onload = () => setPreviewImg(reader.result);
+                  setMember({ ...member, memberImg: file });
                   reader.readAsDataURL(file);
                 } else {
                   errorToastify("이미지 파일을 선택해주세요.");
@@ -574,31 +575,6 @@ export default function Signup() {
               <label className="fs-6 fw-bold" style={{ color: "#111111" }}>
                 생년월일
               </label>
-              {/* <DatePicker
-                selected={member.memberBirth}
-                onChange={(date) =>
-                  setMember({
-                    ...member,
-                    memberBirth: date.toISOString().slice(0, 10),
-                  })
-                }
-                customInput={
-                  <button
-                    className="d-flex border-0 py-2 w-100"
-                    style={{
-                      backgroundColor: "#F1F3F5",
-                      paddingLeft: "12px",
-                      paddingRight: "12px",
-                      borderRadius: "8px",
-                      outline: 0,
-                    }}
-                  >
-                    {member.memberBirth}
-                  </button>
-                }
-                dateFormat="yyyy-MM-dd"
-                maxDate={new Date().setFullYear(new Date().getFullYear() - 20)}
-              /> */}
               <input
                 type="date"
                 className="border-0 py-2"
@@ -905,11 +881,26 @@ export default function Signup() {
             className="btn btn-primary text-white"
             style={{ marginTop: "48px" }}
             onClick={async () => {
+              const formData = new FormData();
+              for (let attr of Object.keys(member)) {
+                formData.append(
+                  attr,
+                  attr !== "memberLike"
+                    ? member[attr]
+                    : Array.from(member[attr])
+                );
+              }
+
               try {
-                await axios.post("http://localhost:8080/api/member/signup", {
-                  ...member,
-                  memberLike: Array.from(member.memberLike),
-                });
+                await axios.post(
+                  "http://localhost:8080/api/member/signup",
+                  formData,
+                  {
+                    headers: {
+                      "Content-Type": "multipart/form-data",
+                    },
+                  }
+                );
 
                 navigate("/signup-finish", {
                   state: { userNickname: member.memberNickname },

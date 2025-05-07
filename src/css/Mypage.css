@@ -44,7 +44,7 @@
   display: inline-block;
   padding: 7px 12px;
   color: #333333;
-  border: 1px solid #F9B4ED;
+  border: 1px solid #f9b4ed;
   border-radius: 8px;
   line-height: 1;
   font-size: 16px;
@@ -56,7 +56,7 @@
   padding: 7px 12px;
   color: #ffffff;
   font-weight: bold;
-  background-color: #007BFF;
+  background-color: #007bff;
   border: none;
   border-radius: 8px;
 }
@@ -73,7 +73,7 @@
   margin-bottom: 8px;
   font-size: 16px;
   font-weight: bold;
-  color: "#333333"
+  color: "#333333";
 }
 
 .member-input {
@@ -106,7 +106,7 @@
   padding: 12px;
   padding-top: 7px;
   padding-bottom: 7px;
-  background-color: #DC3545;
+  background-color: #dc3545;
   color: #ffffff;
   font-size: 16px;
   font-weight: bold;
@@ -120,7 +120,7 @@
   padding-top: 7px;
   padding-bottom: 7px;
   background-color: #f1f3f5;
-  color: #6C757D;
+  color: #6c757d;
   font-size: 16px;
   font-weight: bold;
   border: none;
@@ -128,7 +128,7 @@
 }
 
 .mbti-badge.active {
-  background-color: #F9B4ED;
+  background-color: #f9b4ed;
   color: #ffffff;
 }
 

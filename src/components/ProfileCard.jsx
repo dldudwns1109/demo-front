@@ -1,113 +1,201 @@
-import { FaCog } from "react-icons/fa";
-import "../css/Mypage.css";
-import { useNavigate } from "react-router-dom";
-import { Modal } from "bootstrap";
 import { useCallback, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import { Modal } from "bootstrap";
+import { windowWidthState } from "../utils/storage";
+
+import { FaCog } from "react-icons/fa";
+
+import "../css/Mypage.css";
 
 export default function ProfileCard({ member }) {
+  const windowWidth = useRecoilValue(windowWidthState);
+
   const navigate = useNavigate();
 
-  {/* 모달(Modal) */}
   const modal = useRef();
-  
-  const openModal = useCallback(()=>{
+
+  const openModal = useCallback(() => {
     const target = Modal.getOrCreateInstance(modal.current);
     target.show();
   }, []);
-  const closeModal = useCallback(()=>{
+
+  const closeModal = useCallback(() => {
     const target = Modal.getInstance(modal.current);
-    if(target !== null) target.hide();
-}, [modal]);
+    if (target !== null) target.hide();
+  }, [modal]);
 
-  //effect
-
-  //callback
-
-  if (!member) return <div className="text-center">회원 정보를 불러오는 중입니다...</div>;
   return (
-    <div className="container">
-      <div className="d-flex align-items-start justify-content-center mt-4">
-        {/* 이미지 박스 */}
-        <div className="profile-left">
-          <img className="memberProfile" />
-        </div>
+    <>
+      {!member ? (
+        <div className="text-center">회원 정보를 불러오는 중입니다...</div>
+      ) : (
+        <div className="container">
+          <div
+            className={`d-flex ${
+              windowWidth < 768
+                ? "flex-column align-items-center"
+                : "justify-content-center"
+            }`}
+            style={{ gap: "48px" }}
+          >
+            <img
+              className="shadow"
+              style={{
+                borderRadius: "999px",
+                width: "200px",
+                height: "200px",
+                objectFit: "cover",
+              }}
+              src={`http://localhost:8080/api/member/image/${member.memberNo}`}
+            />
 
-        {/* 정보 박스 */}
-        <div className="profile-right ms-5">
-          <div className="d-flex align-items-center gap-3 mb-3">
-            <span style={{ fontSize: "24px", fontWeight: "bold", color: "#111111" }}>
-              {member.memberNickname}
-            </span>
-            <span className="mbti-badge">{member.mbti}</span>
-            <button className="creat-crew-btn"
-                onClick={() => navigate("/group/create")}>
-              모임 개설
-            </button>
-            <button className="btn btn-light btn-sm" 
-              style={{ backgroundColor: "transparent", border: "none" }}
-              onClick={openModal}
-            >
-              <FaCog/>
-            </button>
-          </div>
-          <div className="d-flex align-items-center gap-3 mb-4 text-muted small">
-            <div>{member.location}</div>
-            <span>·</span>
-            <div>{member.school}</div>
-            <span>·</span>
-            <div>{member.birth}</div>
-          </div>
-          <p style={{ marginBottom: "40px" }}>{member.statusMessage}</p>
-          <div className="d-flex flex-wrap gap-2">
-            {member.likeList.map((like, v) => (
-              <span key={v} className="mbti-badge">{like}</span>
-            ))}
-          </div>
-        </div>
-      </div>
-      {/* 모달(Modal) */}
-      <div className="modal fade" ref={modal} tabIndex="-1">
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-body d-flex flex-column p-0">
-              {/* 개인정보수정 */}
-              <button type="button" 
-                className="custom-modal-button custom-modal-button-first"
-                onClick={() => {
-                  closeModal();
-                  navigate("/mypage/edit");
-                }}
+            <div className="d-flex flex-column justify-content-between">
+              <div>
+                <div
+                  className="d-flex align-items-center mb-3"
+                  style={{ gap: "12px" }}
+                >
+                  <span
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: "bold",
+                      color: "#111111",
+                    }}
+                  >
+                    {member.memberNickname}
+                  </span>
+                  <span
+                    style={{
+                      paddingLeft: "12px",
+                      paddingRight: "12px",
+                      paddingTop: "7px",
+                      paddingBottom: "7px",
+                      border: "1px solid #F9B4ED",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    {member.memberMbti}
+                  </span>
+                  <button
+                    className="btn btn-primary"
+                    style={{ borderRadius: "8px" }}
+                    onClick={() => navigate("/crew/create")}
+                  >
+                    모임 개설
+                  </button>
+                  <button
+                    className="btn bg-transparent p-0"
+                    style={{ border: "none" }}
+                    onClick={openModal}
+                  >
+                    <FaCog size={18} color="#6C757D" />
+                  </button>
+                </div>
+                <div
+                  className="d-flex align-items-center gap-1 fs-6"
+                  style={{ color: "#666666" }}
+                >
+                  <div>{member.memberLocation}</div>
+                  <span>·</span>
+                  <div>{member.memberSchool}</div>
+                  <span>·</span>
+                  <div>{member.memberBirth}</div>
+                </div>
+                {/* <p style={{ marginBottom: "40px" }}>{member.statusMessage}</p> */}
+              </div>
+              <div
+                className={`d-flex flex-wrap ${windowWidth < 768 && "mt-4"}`}
+                style={{ gap: "12px" }}
               >
-                개인정보변경
-              </button>
-              {/* 로그아웃 */}
-              <button type="button"
-                className="custom-modal-button"
-                onClick={() => {
-                  const choice = window.confirm("정말 로그아웃 하시겠습니까?");
-                  if (!choice) {
-                    return;
-                  }
-                  closeModal();
-                  navigate("/");
-                }}
-              >
-                로그아웃
-              </button>
-              {/* 회원탈퇴 */}
-              <button type="button" 
-                className="custom-modal-button custom-modal-button-last"
-                onClick={() => {
-                  closeModal();
-                  navigate("/mypage/exit");
-                }}
-              >
-                회원탈퇴
-              </button>
+                {member.memberLike.map((like, idx) => (
+                  <span key={idx} className="mbti-badge">
+                    {like}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="modal fade" ref={modal} tabIndex="-1">
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-body d-flex flex-column p-0">
+                  <button
+                    className="btn text-white"
+                    style={{
+                      backgroundColor: "#333333",
+                      borderTopLeftRadius: "8px",
+                      borderTopRightRadius: "8px",
+                      borderBottomLeftRadius: "0px",
+                      borderBottomRightRadius: "0px",
+                      borderBottom: "1px solid #EBEBEB",
+                    }}
+                    onClick={() => {
+                      closeModal();
+                      navigate("/mypage/edit");
+                    }}
+                  >
+                    개인정보변경
+                  </button>
+                  <button
+                    className="btn text-white"
+                    style={{
+                      backgroundColor: "#333333",
+                      borderRadius: "0px",
+                      border: "0",
+                    }}
+                    onClick={async () => {
+                      const choice =
+                        window.confirm("정말 로그아웃 하시겠습니까?");
+                      if (!choice) {
+                        return;
+                      }
+
+                      let accessToken = localStorage.getItem("accessToken");
+                      try {
+                        axios.defaults.headers.common[
+                          "Authorization"
+                        ] = `Bearer ${accessToken}`;
+
+                        await axios.post(
+                          "http://localhost:8080/api/member/signout"
+                        );
+                      } catch (e) {
+                      } finally {
+                        localStorage.removeItem("accessToken");
+                        localStorage.removeItem("refreshToken");
+                        closeModal();
+                        navigate("/");
+                        window.location.reload();
+                      }
+                    }}
+                  >
+                    로그아웃
+                  </button>
+                  <button
+                    className="btn text-danger"
+                    style={{
+                      backgroundColor: "#333333",
+                      borderTopLeftRadius: "0px",
+                      borderTopRightRadius: "0px",
+                      borderBottomLeftRadius: "8px",
+                      borderBottomRightRadius: "8px",
+                      borderTop: "1px solid #EBEBEB",
+                    }}
+                    onClick={() => {
+                      closeModal();
+                      navigate("/mypage/exit");
+                    }}
+                  >
+                    회원탈퇴
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

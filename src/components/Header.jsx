@@ -370,11 +370,12 @@ export default function Header({
                           await axios.post(
                             "http://localhost:8080/api/member/signout"
                           );
+                        } catch (e) {
+                        } finally {
                           localStorage.removeItem("accessToken");
                           localStorage.removeItem("refreshToken");
+                          navigate("/");
                           window.location.reload();
-                        } catch (e) {
-                          console.log(e);
                         }
                       }}
                     >

@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
+import { useRecoilValue } from "recoil";
 import axios from "axios";
 
 import { IoLocationSharp } from "react-icons/io5";
 import { IoPeople } from "react-icons/io5";
 import { IoHeartSharp } from "react-icons/io5";
 import { IoHeartOutline } from "react-icons/io5";
+import { userNoState } from "../utils/storage";
 
-export default function GroupItem({ data, userNo }) {
+export default function GroupItem({ data }) {
+  const userNo = useRecoilValue(userNoState);
   const [toggle, setToggle] = useState(data.crewIsLiked);
 
   useEffect(() => {
@@ -32,6 +35,7 @@ export default function GroupItem({ data, userNo }) {
           }}
           onClick={async () => {
             if (toggle) {
+              console.log(toggle);
               await axios.delete("http://localhost:8080/api/crew/deleteLike", {
                 data: {
                   memberNo: userNo,
@@ -64,7 +68,9 @@ export default function GroupItem({ data, userNo }) {
           marginBottom: "12px",
         }}
       >
-        {data.crewIntro}
+        {data.crewIntro.length > 50
+          ? data.crewIntro.slice(0, 50)
+          : data.crewIntro}
       </p>
       <div
         className="d-flex align-items-center gap-1"

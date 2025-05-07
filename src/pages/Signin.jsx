@@ -81,6 +81,7 @@ export default function Signin() {
                   paddingRight: "12px",
                   paddingTop: "7px",
                   paddingBottom: "7px",
+                  maxWidth: "256px",
                 }}
                 onClick={() => navigate("/signup")}
               >
@@ -193,10 +194,7 @@ export default function Signin() {
                       axios.defaults.headers.common[
                         "Authorization"
                       ] = `Bearer ${res.data.accessToken}`;
-                      localStorage.setItem(
-                        "accessToken", 
-                        res.data.accessToken
-                      );
+                      localStorage.setItem("accessToken", res.data.accessToken);
                       localStorage.setItem(
                         "refreshToken",
                         res.data.refreshToken

@@ -11,6 +11,7 @@ import { IoClose } from "react-icons/io5";
 
 import categoryData from "../json/category.json";
 import locationData from "../json/location.json";
+import axios from "axios";
 
 const categoryOptions = categoryData;
 const locationOptions = locationData;
@@ -305,7 +306,7 @@ export default function Header({
                 로그인
               </button>
             ) : loginState === "loggined" ? (
-              <div>
+              <div className="position-relative">
                 <button
                   className="bg-white p-2 border-0"
                   onClick={() => setIsOpenProfileMenuRef(true)}
@@ -315,47 +316,67 @@ export default function Header({
                 {isOpenProfileMenuRef && (
                   <div
                     ref={profileMenuRef}
-                    className="d-flex flex-column bg-white position-absolute shadow"
-                    style={{ borderRadius: "8px" }}
+                    className="bg-white position-absolute shadow"
+                    style={{
+                      borderRadius: "8px",
+                      right: "0px",
+                      width: "140px",
+                    }}
                   >
                     <button
-                      className="btn"
+                      className="btn w-100"
                       style={{
                         paddingLeft: "24px",
                         paddingRight: "24px",
                         paddingTop: "12px",
                         paddingBottom: "12px",
                         borderBottom: "1px solid #EBEBEB",
-                        outline: "none",
+                        borderRadius: "0px",
                       }}
                       onClick={() => navigate("/mypage")}
                     >
                       마이페이지
                     </button>
                     <button
-                      className="btn"
+                      className="btn w-100"
                       style={{
                         paddingLeft: "24px",
                         paddingRight: "24px",
                         paddingTop: "12px",
                         paddingBottom: "12px",
-                        outline: "none",
+                        borderRadius: "0px",
                       }}
                       onClick={() => navigate("/chat")}
                     >
                       채팅
                     </button>
                     <button
-                      className="btn"
+                      className="btn w-100"
                       style={{
                         paddingLeft: "24px",
                         paddingRight: "24px",
                         paddingTop: "12px",
                         paddingBottom: "12px",
                         borderTop: "1px solid #EBEBEB",
-                        outline: "none",
+                        borderRadius: "0px",
                       }}
-                      // onClick={() => }
+                      onClick={async () => {
+                        let accessToken = localStorage.getItem("accessToken");
+                        try {
+                          axios.defaults.headers.common[
+                            "Authorization"
+                          ] = `Bearer ${accessToken}`;
+
+                          await axios.post(
+                            "http://localhost:8080/api/member/signout"
+                          );
+                          localStorage.removeItem("accessToken");
+                          localStorage.removeItem("refreshToken");
+                          window.location.reload();
+                        } catch (e) {
+                          console.log(e);
+                        }
+                      }}
                     >
                       로그아웃
                     </button>

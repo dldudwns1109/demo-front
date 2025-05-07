@@ -233,9 +233,9 @@ export default function CrewCreate() {
       <Header input={false} />
       <div
         className="d-flex flex-column align-items-center"
-        style={{ paddingTop: "70px" }}
+        style={{ paddingTop: "70px", paddingBottom: "80px" }}
       >
-        <div style={{ marginBottom: "48px" }}>
+        <div style={{ marginBottom: "48px", marginTop: "80px" }}>
           <span
             style={{ fontSize: "24px", fontWeight: "bold", color: "#111111" }}
           >

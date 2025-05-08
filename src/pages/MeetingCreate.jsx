@@ -1,5 +1,9 @@
 import { useCallback, useRef, useState } from "react";
+import PostcodeModal from "../components/PostcodeModal";
+import Header from "../components/Header";
+import { at } from "lodash";
 
+const meetingLimitList = [3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15];
 export default function MeetingCreate() {
   //state
   const [meeting, setMeeting] = useState({
@@ -14,7 +18,7 @@ export default function MeetingCreate() {
   });
   const [attach, setAttach] = useState(undefined); //파일
   const [previewUrl, setPreviewUrl] = useState(null); //이미지 미리보기
-
+  const [isPostcodeOpen, setIsPostcodeOpen] = useState(false); //지도모달
   const fileInputRef = useRef();
 
   //callback
@@ -41,15 +45,21 @@ export default function MeetingCreate() {
       setPreviewUrl(URL.createObjectURL(file));
     }
   }, []);
+
+  //지도모달오픈
+  const openPostModal = useCallback((address) => {
+    setMeeting((prev) => ({ ...prev, meetingLocation: address }));
+  }, []);
+
   return (
     <>
       {/* 헤더 */}
-      {/* <Header/> */}
+      <Header input={false} />
       <div
         className="d-flex flex-column align-items-center"
-        style={{ paddingTop: "70px" }}
+        style={{ paddingTop: "70px", paddingBottom: "80px" }}
       >
-        <div style={{ marginBottom: "48px" }}>
+        <div style={{ marginBottom: "48px", marginTop: "80px" }}>
           <span
             style={{ fontSize: "24px", fontWeight: "bold", color: "#111111" }}
           >
@@ -58,7 +68,7 @@ export default function MeetingCreate() {
         </div>
         <div>
           <img
-            src={previewUrl || "/images/default.png"}
+            src={previewUrl || "/images/default-profile.svg"}
             onClick={ChangeImage}
             className="memberProfile"
             style={{ cursor: "pointer" }}
@@ -103,18 +113,26 @@ export default function MeetingCreate() {
             onClick={() => setIsPostcodeOpen(true)}> 
             {meeting.meetingLocation || "정모 위치를 검색해주세요!"}
           </div>
-            <button
-              className="light-gray-btn mt-2"
-              style={{ backgroundColor:"#6C757D", color: "#ffffff" }}
-            >
-              장소 검색하기
-            </button>
-          </div>
+          <button
+            className="light-gray-btn mt-2"
+            style={{ backgroundColor: "#6C757D", color: "#ffffff" }}
+            onClick={() => setIsPostcodeOpen(true)}
+          >
+            장소 검색하기
+          </button>
+
+          {isPostcodeOpen && (
+            <PostcodeModal
+              onClose={() => setIsPostcodeOpen(false)}
+              onComplete={openPostModal}
+            />
+          )}
+        </div>
         <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
           <label className="label-text">정모 비용</label>
           <input
             className="member-input"
-            placeholder="정모 비용을 작성해주세요!"
+            placeholder="정모 비용을 작성해주세요! (ex) 인당 10000원!"
             name="meetingPrice"
             value={meeting.meetingPrice}
             onChange={changeMeeting}
@@ -127,7 +145,13 @@ export default function MeetingCreate() {
             name="meetingLimit"
             value={meeting.meetingLimit}
             onChange={changeMeeting}
-          />
+          >
+          {meetingLimitList.map((count) => (
+              <option key={count} value={count}>
+                {count}명
+              </option>
+            ))}
+          </select>
         </div>
         <div style={{ width: "360px", margin: "0 auto" }}>
           <button className="light-gray-btn">정모 추가하기</button>

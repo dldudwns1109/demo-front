@@ -73,6 +73,24 @@ export default function Signup() {
     return Object.values(isValid).every((val) => val);
   }, [isValid]);
 
+  const checkWrite = useMemo(
+    () =>
+      member.memberId !== "" ||
+      member.memberPw !== "" ||
+      member.memberNickname !== "" ||
+      member.memberImg !== null ||
+      member.memberEmail !== "" ||
+      member.memberLike.size !== 0,
+    [
+      member.memberId,
+      member.memberPw,
+      member.memberNickname,
+      member.memberImg,
+      member.memberEmail,
+      member.memberLike,
+    ]
+  );
+
   const isFirstRender = useRef(true);
   const locationRef = useRef(null);
   const schoolRef = useRef(null);
@@ -97,7 +115,9 @@ export default function Signup() {
         });
 
         navigate("/signup-finish", {
-          state: { userNickname: member.memberNickname },
+          state: {
+            userNickname: member.memberNickname,
+          },
         });
       } catch (e) {
         console.error("모든 칸을 입력해주세요.");
@@ -112,6 +132,21 @@ export default function Signup() {
       window.removeEventListener("keydown", checkSignup);
     };
   }, [member]);
+
+  useEffect(() => {
+    const checkBeforeUnload = (e) => {
+      if (checkWrite) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", checkBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", checkBeforeUnload);
+    };
+  }, [checkWrite]);
 
   useEffect(() => {
     setMember({

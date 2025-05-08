@@ -90,7 +90,7 @@ export default function Mypage() {
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
 
       <div style={{ paddingTop: "70px" }}>
-        <div style={{ marginTop: "80px" }}>
+        <div>
           <ProfileCard member={member} />
         </div>
 

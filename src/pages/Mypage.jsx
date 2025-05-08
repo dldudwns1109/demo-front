@@ -68,10 +68,10 @@ export default function Mypage() {
   const handleTabClick = useCallback(
     (tab) => {
       setActiveTab(tab);
-      if (tab === "create" && createList.length === 0) loadCreateList();
-      if (tab === "join" && joinList.length === 0) loadJoinList();
-      if (tab === "like" && likeList.length === 0) loadLikeGroupList();
-      if (tab === "meeting" && meetingList.length === 0) loadMeetingList();
+      if (tab === "create") loadCreateList();
+      if (tab === "join") loadJoinList();
+      if (tab === "like") loadLikeGroupList();
+      if (tab === "meeting") loadMeetingList();
     },
     [
       createList,

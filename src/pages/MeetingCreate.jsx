@@ -1,32 +1,60 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import PostcodeModal from "../components/PostcodeModal";
 import Header from "../components/Header";
-import { at } from "lodash";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useRecoilValue } from "recoil";
+import { crewNoState, userNoState } from "../utils/storage";
 
 const meetingLimitList = [3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15];
 export default function MeetingCreate() {
+  const userNo = useRecoilValue(userNoState);
+  const crewNo = useRecoilValue(crewNoState);
+
+  const navigate = useNavigate();
+
   //state
   const [meeting, setMeeting] = useState({
-    meetingNo: "",
-    meetingCrewNo:"",
-    meetingOwnerId: "",
     meetingName: "",
     meetingDate: "",
     meetingLocation: "",
     meetingPrice: "",
-    meetingLimit: "",
+    meetingLimit: 3,
   });
   const [attach, setAttach] = useState(undefined); //파일
   const [previewUrl, setPreviewUrl] = useState(null); //이미지 미리보기
   const [isPostcodeOpen, setIsPostcodeOpen] = useState(false); //지도모달
   const fileInputRef = useRef();
 
+  //memo
+  const isTotalValid = useMemo(() => {
+    return (
+      !!meeting.meetingName &&
+      !!meeting.meetingDate &&
+      !!meeting.meetingLocation &&
+      !!meeting.meetingPrice &&
+      !!meeting.meetingLimit &&
+      !!attach
+    );
+  }, [meeting, attach]);
+
   //callback
   const changeMeeting = useCallback((e) => {
     const { name, value } = e.target;
-    setMeeting(prev => ({
-      ...prev,
-      [name]: value
+  
+    if (name === "meetingPrice") {
+      const numeric = value.replace(/[^0-9]/g, "");
+      const withComma = numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      setMeeting(prev => ({ 
+        ...prev, 
+        [name]: withComma 
+      }));
+      return;
+    }
+  
+    setMeeting(prev => ({ 
+      ...prev, 
+      [name]: value 
     }));
   }, []);
 
@@ -50,6 +78,45 @@ export default function MeetingCreate() {
   const openPostModal = useCallback((address) => {
     setMeeting((prev) => ({ ...prev, meetingLocation: address }));
   }, []);
+
+  const meetingAdd = useCallback(async () => {
+    if (!attach) {
+      alert("대표 이미지를 선택해주세요.");
+      return;
+    }
+  
+    const formData = new FormData();
+  
+    Object.entries(meeting).forEach(([key, value]) => {
+      const cleanValue = key === "meetingPrice" ? value.replaceAll(",", "") : value;
+      formData.append(key, cleanValue);
+    });
+  
+    // 반드시 crewNo 추가!
+    formData.append("crewNo", crewNo);
+    formData.append("attach", attach);
+  
+    // 디버깅 로그
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+  
+    try {
+      const response = await axios.post("http://localhost:8080/api/meeting/", formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          "Refresh-Token": localStorage.getItem("refreshToken"),
+          "Frontend-URL": "http://localhost:5173",
+        },
+      });
+  
+      const meetingNo = response.data.meetingNo;
+      navigate(`/meeting/${meetingNo}/detail`);
+    } catch (err) {
+      console.error("정모 등록 오류", err);
+      alert("정모 등록 중 오류가 발생했습니다.");
+    }
+  }, [meeting, attach, crewNo, navigate]);
 
   return (
     <>
@@ -131,8 +198,10 @@ export default function MeetingCreate() {
         <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
           <label className="label-text">정모 비용</label>
           <input
+            type="text"
+            inputMode="numeric"
             className="member-input"
-            placeholder="정모 비용을 작성해주세요! (ex) 인당 10000원!"
+            placeholder="정모 비용을 작성해주세요!"
             name="meetingPrice"
             value={meeting.meetingPrice}
             onChange={changeMeeting}
@@ -154,7 +223,13 @@ export default function MeetingCreate() {
           </select>
         </div>
         <div style={{ width: "360px", margin: "0 auto" }}>
-          <button className="light-gray-btn">정모 추가하기</button>
+        <button
+          className={isTotalValid ? "blue-btn" : "light-gray-btn"}
+          onClick={meetingAdd}
+          disabled={!isTotalValid}
+        >
+          정모 추가하기
+        </button>
         </div>
       </div>
     </>

@@ -73,9 +73,9 @@ export default function CrewCreateFinish() {
               backgroundColor: "#F1F3F5",
               color: "#6C757D",
             }}
-            onClick={() => navigate("/")}
+            onClick={() => navigate(`/crew/${crewNo}/detail`)}
           >
-            홈으로 이동
+            모임 상세페이지로 이동
           </button>
         </div>
       </div>

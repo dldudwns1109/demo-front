@@ -79,6 +79,40 @@ export default function Signup() {
 
   const navigate = useNavigate();
 
+  const checkSignup = async (e) => {
+    if (e.key === "Enter" || e.key === undefined) {
+      const formData = new FormData();
+      for (let attr of Object.keys(member)) {
+        formData.append(
+          attr,
+          attr !== "memberLike" ? member[attr] : Array.from(member[attr])
+        );
+      }
+
+      try {
+        await axios.post("http://localhost:8080/api/member/signup", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        navigate("/signup-finish", {
+          state: { userNickname: member.memberNickname },
+        });
+      } catch (e) {
+        console.error("모든 칸을 입력해주세요.");
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", checkSignup);
+
+    return () => {
+      window.removeEventListener("keydown", checkSignup);
+    };
+  }, [member]);
+
   useEffect(() => {
     setMember({
       ...member,
@@ -880,35 +914,7 @@ export default function Signup() {
           <button
             className="btn btn-primary text-white"
             style={{ marginTop: "48px" }}
-            onClick={async () => {
-              const formData = new FormData();
-              for (let attr of Object.keys(member)) {
-                formData.append(
-                  attr,
-                  attr !== "memberLike"
-                    ? member[attr]
-                    : Array.from(member[attr])
-                );
-              }
-
-              try {
-                await axios.post(
-                  "http://localhost:8080/api/member/signup",
-                  formData,
-                  {
-                    headers: {
-                      "Content-Type": "multipart/form-data",
-                    },
-                  }
-                );
-
-                navigate("/signup-finish", {
-                  state: { userNickname: member.memberNickname },
-                });
-              } catch (e) {
-                console.error("");
-              }
-            }}
+            onClick={(e) => checkSignup(e)}
             disabled={!isTotalValid}
           >
             회원가입

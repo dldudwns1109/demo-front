@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
@@ -16,6 +16,33 @@ export default function FindId() {
   const errorToastify = (message) => toast.error(message);
 
   const navigate = useNavigate();
+
+  const checkFindId = async (e) => {
+    if (e.key === "Enter" || e.key === undefined) {
+      if (!memberEmail.length) {
+        errorToastify("이메일 주소를 입력해주세요.");
+        return;
+      }
+
+      const res = await axios.get(
+        `http://localhost:8080/api/member/memberEmail/${memberEmail}`
+      );
+
+      if (res.data === "") {
+        errorToastify("존재하지 않는 아이디입니다.");
+      }
+
+      setFindId(res.data);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", checkFindId);
+
+    return () => {
+      window.removeEventListener("keydown", checkFindId);
+    };
+  }, [memberEmail]);
 
   return (
     <div className="vh-100">
@@ -94,22 +121,7 @@ export default function FindId() {
             <button
               className="btn btn-primary text-white"
               style={{ marginTop: "48px" }}
-              onClick={async () => {
-                if (!memberEmail.length) {
-                  errorToastify("이메일 주소를 입력해주세요.");
-                  return;
-                }
-
-                const res = await axios.get(
-                  `http://localhost:8080/api/member/memberEmail/${memberEmail}`
-                );
-
-                if (res.data === "") {
-                  errorToastify("존재하지 않는 아이디입니다.");
-                }
-
-                setFindId(res.data);
-              }}
+              onClick={(e) => checkFindId(e)}
               disabled={!isValid}
             >
               아이디 찾기

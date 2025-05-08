@@ -26,6 +26,59 @@ export default function Signin() {
 
   const navigate = useNavigate();
 
+  const checkSignin = async (e) => {
+    if (e.key === "Enter" || e.key === undefined) {
+      if (!memberId.length || !memberPw.length) {
+        errorToastify("아이디와 비밀번호를 입력해주세요!");
+        return;
+      }
+
+      if (memberId.length > 14 || memberId.length < 4) {
+        errorToastify("아이디는 영문 4~14자 입니다.");
+        return;
+      }
+
+      localStorage.setItem("isSaved", saveId);
+      if (saveId) localStorage.setItem("saveId", memberId);
+      else {
+        localStorage.removeItem("saveId");
+        localStorage.removeItem("isSaveId");
+      }
+
+      try {
+        const res = await axios.post(
+          "http://localhost:8080/api/member/signin",
+          {
+            memberId,
+            memberPw,
+          }
+        );
+
+        if (res.status === 200) {
+          setUserNo(res.data.memberNo);
+          axios.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${res.data.accessToken}`;
+          localStorage.setItem("accessToken", res.data.accessToken);
+          localStorage.setItem("refreshToken", res.data.refreshToken);
+          navigate("/");
+        }
+      } catch (e) {
+        const errMessage = "아이디 또는 비밀번호가 일치하지 않습니다.";
+        console.error(errMessage);
+        errorToastify(errMessage);
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", checkSignin);
+
+    return () => {
+      window.removeEventListener("keydown", checkSignin);
+    };
+  }, [memberId, memberPw]);
+
   useEffect(() => {
     if (login) navigate("/");
   }, [login]);
@@ -155,59 +208,7 @@ export default function Signin() {
               <button
                 className="btn btn-primary text-white mb-3"
                 style={{ width: "256px" }}
-                onClick={async () => {
-                  if (!memberId.length || !memberPw.length) {
-                    errorToastify("아이디와 비밀번호를 입력해주세요!");
-                    return;
-                  }
-
-                  if (memberId.length > 14 || memberId.length < 4) {
-                    errorToastify("아이디는 영문 4~14자 입니다.");
-                    return;
-                  }
-
-                  // if (memberPw.length > 30 || memberPw.length < 6) {
-                  //   errorToastify(
-                  //     "비밀번호는 영문,숫자,특수문자 조합 6~30자 입니다."
-                  //   );
-                  //   return;
-                  // }
-
-                  localStorage.setItem("isSaved", saveId);
-                  if (saveId) localStorage.setItem("saveId", memberId);
-                  else {
-                    localStorage.removeItem("saveId");
-                    localStorage.removeItem("isSaveId");
-                  }
-
-                  try {
-                    const res = await axios.post(
-                      "http://localhost:8080/api/member/signin",
-                      {
-                        memberId,
-                        memberPw,
-                      }
-                    );
-
-                    if (res.status === 200) {
-                      setUserNo(res.data.memberNo);
-                      axios.defaults.headers.common[
-                        "Authorization"
-                      ] = `Bearer ${res.data.accessToken}`;
-                      localStorage.setItem("accessToken", res.data.accessToken);
-                      localStorage.setItem(
-                        "refreshToken",
-                        res.data.refreshToken
-                      );
-                      navigate("/");
-                    }
-                  } catch (e) {
-                    const errMessage =
-                      "아이디 또는 비밀번호가 일치하지 않습니다.";
-                    console.error(errMessage);
-                    errorToastify(errMessage);
-                  }
-                }}
+                onClick={(e) => checkSignin(e)}
               >
                 로그인
               </button>

@@ -20,6 +20,36 @@ export default function FindPassword() {
 
   const navigate = useNavigate();
 
+  const checkFindPassword = async (e) => {
+    if (e.key === "Enter" || e.key === undefined) {
+      if (!memberEmail.length) {
+        errorToastify("이메일 주소를 입력해주세요.");
+        return;
+      }
+
+      setIsLoading(true);
+
+      try {
+        const res = await axios.patch(
+          `http://localhost:8080/api/member/updatePw`,
+          { memberEmail }
+        );
+
+        if (res.status === 200) setIsLoading(false);
+      } catch (e) {
+        setBlurMessage("임시 비밀번호 전송에 실패했습니다.");
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", checkFindPassword);
+
+    return () => {
+      window.removeEventListener("keydown", checkFindPassword);
+    };
+  }, [memberEmail]);
+
   return (
     <div className="vh-100">
       <Header input={false} />
@@ -119,25 +149,7 @@ export default function FindPassword() {
             <button
               className="d-flex btn btn-primary text-white justify-content-center align-items-center gap-2"
               style={{ marginTop: "48px" }}
-              onClick={async () => {
-                if (!memberEmail.length) {
-                  errorToastify("이메일 주소를 입력해주세요.");
-                  return;
-                }
-
-                setIsLoading(true);
-
-                try {
-                  const res = await axios.patch(
-                    `http://localhost:8080/api/member/updatePw`,
-                    { memberEmail }
-                  );
-
-                  if (res.status === 200) setIsLoading(false);
-                } catch (e) {
-                  setBlurMessage("임시 비밀번호 전송에 실패했습니다.");
-                }
-              }}
+              onClick={(e) => checkFindPassword(e)}
               disabled={!isValid}
             >
               {isLoading ? (

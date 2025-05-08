@@ -113,11 +113,11 @@ export default function CrewCreate() {
     }
 
     if (field === "crewName") {
-      const regex = /^[a-zA-Z가-힣0-9 ]{4,20}$/;
+      const regex = /^.{4,20}$/;
       if (!regex.test(value)) {
         setErrorMessage((prev) => ({
           ...prev,
-          crewName: "4~20자 / 한글, 영문, 숫자만 입력해주세요.",
+          crewName: "4~20자만 입력해주세요.",
         }));
         setIsValid((prev) => ({ 
           ...prev, 

@@ -18,6 +18,8 @@ const schoolOptions = schoolData;
 const categoryOptions = categoryData.slice(1);
 const mbtiOptions = mbtiData;
 
+const maxDate = new Date().setFullYear(new Date().getFullYear() - 20);
+
 export default function Signup() {
   const [location, setLocation] = useRecoilState(locationState);
   const [city, setCity] = useState("서울특별시");
@@ -28,9 +30,7 @@ export default function Signup() {
     memberNickname: "",
     memberPw: "",
     memberEmail: "",
-    memberBirth: new Date(new Date().setFullYear(new Date().getFullYear() - 20))
-      .toISOString()
-      .slice(0, 10),
+    memberBirth: new Date(maxDate).toISOString().slice(0, 10),
     memberGender: "m",
     memberLocation: "",
     memberSchool: schoolData[0],
@@ -656,13 +656,16 @@ export default function Signup() {
                 }}
                 placeholder="2000-01-01"
                 value={member.memberBirth}
-                max={new Date().setFullYear(new Date().getFullYear() - 20)}
-                onChange={(e) =>
+                max={maxDate}
+                onChange={(e) => {
                   setMember({
                     ...member,
-                    memberBirth: e.target.value,
-                  })
-                }
+                    memberBirth:
+                      e.target.value === ""
+                        ? new Date(maxDate).toISOString().slice(0, 10)
+                        : e.target.value,
+                  });
+                }}
                 onBlur={() => {
                   if (!member.memberBirth.length) {
                     setBlurMessage({

@@ -98,12 +98,16 @@
 }
 
 .heart-btn.liked {
-  background-color: #DC3545;
-  color: #FFF;
+  /* background-color: #DC3545;
+  color: #FFF; */
+  background-color: #FFF;
+  color: #DC3545;
+  cursor: not-allowed;
   border: none;
 }
 
 .heart-btn .fa-heart {
+  color: #FFF;
   border: 1px solid #111111;
   border-radius: 50%;
 }
@@ -111,3 +115,14 @@
 .heart-btn:hover {
   background-color: #e2e2e2;
 }
+
+.heart-btn.liked:hover {
+  background-color: #b02a37; /* 눌린 상태에서 호버 시 */
+}
+
+.crew-intro {
+  white-space: pre-wrap; /* 공백과 개행을 유지하면서 줄바꿈 */
+  word-wrap: break-word;  /* 긴 단어를 자동으로 줄바꿈 */
+  line-height: 1.6;       /* 줄 간격 조정 */
+}
+

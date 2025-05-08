@@ -1,31 +1,51 @@
+import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import Unauthorized from "../components/Unauthorized";
 
 export default function MypageExitFinish() {
-  return (
-    <>
-      {/* 헤더 */}
-      <Header/>
+  const location = useLocation();
+  const { isFinish } = location?.state || {};
+  const navigate = useNavigate();
 
-      <div className="d-flex flex-column align-items-center" style={{ marginTop:"80px" }}>
-        {/* 회원 탈퇴 제목 */}
-        <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "24px", color:"#111111" }}>
-          회원 탈퇴가 완료되었습니다
-        </h1>
-        {/* 회원 탈퇴 메세지 */}
-        <h2 style={{ fontSize: "16px", marginBottom: "48px" }}>
-          <span style={{ color:"#666666" }}>DE:MO를 이용해주셔서 진심으로 감사드립니다.</span>
-        </h2>
-        {/* 회원 탈퇴 이미지 */}
-        <div style={{ width: "240px", height:"280px", marginBottom: "48px"}}>
-          <img src="/images/exit-finish.svg"/>
+  return (
+    <div className="vh-100">
+      <Header input={false} />
+
+      {isFinish ? (
+        <div className="d-flex justify-content-center">
+          <div
+            className="d-flex flex-column align-items-center"
+            style={{ paddingTop: "70px", width: "360px" }}
+          >
+            <span
+              className="fs-4 fw-bold"
+              style={{
+                marginTop: "80px",
+                marginBottom: "24px",
+                color: "#111111",
+              }}
+            >
+              회원 탈퇴가 완료되었습니다
+            </span>
+            <p className="mt-0 fs-6" style={{ marginBottom: "48px" }}>
+              <span style={{ color: "#666666" }}>
+                DE:MO를 이용해주셔서 진심으로 감사드립니다.
+              </span>
+            </p>
+            <div style={{ marginBottom: "48px" }}>
+              <img src="/images/exit-finish.svg" />
+            </div>
+            <button
+              className="light-gray-btn w-100"
+              onClick={() => navigate("/")}
+            >
+              홈으로 이동
+            </button>
+          </div>
         </div>
-        {/* 홈이동 버튼 */}
-        <div style={{ width: "360px"}}>
-          <button className="light-gray-btn">
-            홈으로 이동
-          </button>
-        </div>
-      </div>
-    </>
+      ) : (
+        <Unauthorized />
+      )}
+    </div>
   );
 }

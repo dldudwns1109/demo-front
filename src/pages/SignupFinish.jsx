@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Header from "../components/Header";
+import Unauthorized from "../components/Unauthorized";
 
 export default function SignupFinish() {
   const location = useLocation();
@@ -81,7 +82,7 @@ export default function SignupFinish() {
           </div>
         </div>
       ) : (
-        <div style={{ paddingTop: "70px" }}>잘못된 접근입니다.</div>
+        <Unauthorized />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
+import axios from "axios";
 import Header from "../components/Header";
 import GroupItem from "../components/GroupItem";
 import JoinBoardItem from "../components/JoinBoardItem";
@@ -13,7 +14,6 @@ import {
 } from "../utils/storage";
 
 import { IoLocationSharp } from "react-icons/io5";
-import axios from "axios";
 
 const joinBoardItem = [
   {
@@ -49,12 +49,16 @@ export default function Home() {
   const [keyword, setKeyword] = useState("");
   const [isAroundMore, setIsAroundMore] = useState(false);
   const [aroundRenderItem, setAroundRenderItem] = useState(6);
+  const [aroundGroupData, setAroundGroupData] = useState([]);
   const [isLikedMore, setIsLikedMore] = useState(false);
   const [likedRenderItem, setLikedRenderItem] = useState(6);
-  const [aroundGroupData, setAroundGroupData] = useState([]);
   const [likedGroupData, setLikedGroupData] = useState([]);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (keyword !== "") navigate(`/crew/list?keyword=${keyword}`);
+  }, [keyword]);
 
   useEffect(() => {
     setIsAroundMore(aroundGroupData.length > aroundRenderItem);
@@ -63,22 +67,6 @@ export default function Home() {
   useEffect(() => {
     setIsLikedMore(likedGroupData.length > likedRenderItem);
   }, [location, likedRenderItem]);
-
-  useEffect(() => {
-    console.log(aroundGroupData);
-  }, [aroundGroupData]);
-
-  useEffect(() => {
-    if (userNo) {
-      const fetchData = async () => {
-        const res = await axios.get(
-          `http://localhost:8080/api/crew/findLikedGroup/${userNo}`
-        );
-        setLikedGroupData([...res.data]);
-      };
-      fetchData();
-    }
-  }, [userNo]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,6 +79,18 @@ export default function Home() {
     };
     fetchData();
   }, [userNo, category, location]);
+
+  useEffect(() => {
+    if (userNo) {
+      const fetchData = async () => {
+        const res = await axios.get(
+          `http://localhost:8080/api/crew/findLikedGroup/${userNo}`
+        );
+        setLikedGroupData([...res.data]);
+      };
+      fetchData();
+    }
+  }, [userNo]);
 
   return (
     <>

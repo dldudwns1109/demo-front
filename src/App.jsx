@@ -72,11 +72,6 @@ function App() {
       }
     };
 
-    
-    
-    
-    
-
     window.addEventListener("resize", handleResize);
     refreshLogin();
 
@@ -99,6 +94,7 @@ function App() {
         <Route path="/mypage/edit/password" element={<MypageEditPassword />} />
         <Route path="/mypage/exit" element={<MyPageExit />} />
         <Route path="/mypage/exit-finish" element={<MyPageExitFinish />} />
+        <Route path="/crew/list" element={<CrewList />} />
         <Route path="/crew/create" element={<CrewCreate />} />
         <Route path="/crew/create-finish" element={<CrewCreateFinish />} />
         <Route path="/chat" element={<Chat />} />

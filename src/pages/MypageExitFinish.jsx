@@ -1,15 +1,18 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
 import Header from "../components/Header";
 import Unauthorized from "../components/Unauthorized";
+import { loginState } from "../utils/storage";
 
 export default function MypageExitFinish() {
+  const login = useRecoilValue(loginState);
   const location = useLocation();
   const { isFinish } = location?.state || {};
   const navigate = useNavigate();
 
   return (
     <div className="vh-100">
-      <Header input={false} />
+      <Header input={false} loginState={`${login ? "loggined" : "login"}`} />
 
       {isFinish ? (
         <div className="d-flex justify-content-center">

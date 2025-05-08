@@ -3,10 +3,11 @@ import { useRecoilValue } from "recoil";
 import axios from "axios";
 import Header from "../components/Header";
 import ProfileCard from "../components/ProfileCard";
+import GroupItem from "../components/GroupItem";
+import Unauthorized from "../components/Unauthorized";
 import { userNoState, loginState, windowWidthState } from "../utils/storage";
 
 import "../css/Mypage.css";
-import GroupItem from "../components/GroupItem";
 
 export default function Mypage() {
   const windowWidth = useRecoilValue(windowWidthState);
@@ -89,160 +90,164 @@ export default function Mypage() {
     <div className="vh-100">
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
 
-      <div style={{ paddingTop: "70px" }}>
-        <div>
-          <ProfileCard member={member} />
+      {login ? (
+        <div style={{ paddingTop: "70px" }}>
+          <div>
+            <ProfileCard member={member} />
+          </div>
+
+          <div
+            className="w-100 d-flex justify-content-center align-items-center"
+            style={{
+              paddingLeft: windowWidth > 768 ? "120px" : "0",
+              paddingRight: windowWidth > 768 ? "120px" : "0",
+              marginTop: "48px",
+              marginBottom: "32px",
+            }}
+          >
+            <button
+              className={`group-tab-button ${
+                activeTab === "create" ? " active" : ""
+              }`}
+              style={{ width: "25%" }}
+              onClick={() => handleTabClick("create")}
+            >
+              만든 모임
+            </button>
+            <button
+              className={`group-tab-button${
+                activeTab === "join" ? " active" : ""
+              }`}
+              style={{ width: "25%" }}
+              onClick={() => handleTabClick("join")}
+            >
+              가입한 모임
+            </button>
+            <button
+              className={`group-tab-button${
+                activeTab === "like" ? " active" : ""
+              }`}
+              style={{ width: "25%" }}
+              onClick={() => handleTabClick("like")}
+            >
+              찜한 모임
+            </button>
+            <button
+              className={`group-tab-button${
+                activeTab === "meeting" ? " active" : ""
+              }`}
+              style={{ width: "25%" }}
+              onClick={() => handleTabClick("meeting")}
+            >
+              정모 일정
+            </button>
+          </div>
+
+          <div className="group-tab-content" style={{ paddingBottom: "60px" }}>
+            {activeTab === "create" &&
+              (createList.length > 0 ? (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: `${
+                      windowWidth > 1024
+                        ? "repeat(3, 1fr)"
+                        : windowWidth > 768
+                        ? "repeat(2, 1fr)"
+                        : "repeat(1, 1fr)"
+                    }`,
+                    gap: "60px",
+                    paddingLeft: windowWidth > 768 ? "120px" : "0",
+                    paddingRight: windowWidth > 768 ? "120px" : "0",
+                  }}
+                >
+                  {createList.map((crew, idx) => (
+                    <GroupItem key={idx} data={crew} />
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-message">만든 모임이 없습니다.</div>
+              ))}
+
+            {activeTab === "join" &&
+              (joinList.length > 0 ? (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: `${
+                      windowWidth > 1024
+                        ? "repeat(3, 1fr)"
+                        : windowWidth > 768
+                        ? "repeat(2, 1fr)"
+                        : "repeat(1, 1fr)"
+                    }`,
+                    gap: "60px",
+                    paddingLeft: windowWidth > 768 ? "120px" : "0",
+                    paddingRight: windowWidth > 768 ? "120px" : "0",
+                  }}
+                >
+                  {joinList.map((crew, idx) => (
+                    <GroupItem key={idx} data={crew} />
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-message">가입한 모임이 없습니다.</div>
+              ))}
+
+            {activeTab === "like" &&
+              (likeList.length > 0 ? (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: `${
+                      windowWidth > 1024
+                        ? "repeat(3, 1fr)"
+                        : windowWidth > 768
+                        ? "repeat(2, 1fr)"
+                        : "repeat(1, 1fr)"
+                    }`,
+                    gap: "60px",
+                    paddingLeft: windowWidth > 768 ? "120px" : "0",
+                    paddingRight: windowWidth > 768 ? "120px" : "0",
+                  }}
+                >
+                  {likeList.map((crew, idx) => (
+                    <GroupItem key={idx} data={crew} />
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-message">찜한 모임이 없습니다.</div>
+              ))}
+
+            {activeTab === "meeting" &&
+              (meetingList.length > 0 ? (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: `${
+                      windowWidth > 1024
+                        ? "repeat(3, 1fr)"
+                        : windowWidth > 768
+                        ? "repeat(2, 1fr)"
+                        : "repeat(1, 1fr)"
+                    }`,
+                    gap: "60px",
+                    paddingLeft: windowWidth > 768 ? "120px" : "0",
+                    paddingRight: windowWidth > 768 ? "120px" : "0",
+                  }}
+                >
+                  {meetingList.map((meeting, idx) => (
+                    <GroupItem key={idx} data={meeting} />
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-message">정모 일정이 없습니다.</div>
+              ))}
+          </div>
         </div>
-
-        <div
-          className="w-100 d-flex justify-content-center align-items-center"
-          style={{
-            paddingLeft: windowWidth > 768 ? "120px" : "0",
-            paddingRight: windowWidth > 768 ? "120px" : "0",
-            marginTop: "48px",
-            marginBottom: "32px",
-          }}
-        >
-          <button
-            className={`group-tab-button ${
-              activeTab === "create" ? " active" : ""
-            }`}
-            style={{ width: "25%" }}
-            onClick={() => handleTabClick("create")}
-          >
-            만든 모임
-          </button>
-          <button
-            className={`group-tab-button${
-              activeTab === "join" ? " active" : ""
-            }`}
-            style={{ width: "25%" }}
-            onClick={() => handleTabClick("join")}
-          >
-            가입한 모임
-          </button>
-          <button
-            className={`group-tab-button${
-              activeTab === "like" ? " active" : ""
-            }`}
-            style={{ width: "25%" }}
-            onClick={() => handleTabClick("like")}
-          >
-            찜한 모임
-          </button>
-          <button
-            className={`group-tab-button${
-              activeTab === "meeting" ? " active" : ""
-            }`}
-            style={{ width: "25%" }}
-            onClick={() => handleTabClick("meeting")}
-          >
-            정모 일정
-          </button>
-        </div>
-
-        <div className="group-tab-content" style={{ paddingBottom: "60px" }}>
-          {activeTab === "create" &&
-            (createList.length > 0 ? (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: `${
-                    windowWidth > 1024
-                      ? "repeat(3, 1fr)"
-                      : windowWidth > 768
-                      ? "repeat(2, 1fr)"
-                      : "repeat(1, 1fr)"
-                  }`,
-                  gap: "60px",
-                  paddingLeft: windowWidth > 768 ? "120px" : "0",
-                  paddingRight: windowWidth > 768 ? "120px" : "0",
-                }}
-              >
-                {createList.map((crew, idx) => (
-                  <GroupItem key={idx} data={crew} />
-                ))}
-              </div>
-            ) : (
-              <div className="empty-message">만든 모임이 없습니다.</div>
-            ))}
-
-          {activeTab === "join" &&
-            (joinList.length > 0 ? (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: `${
-                    windowWidth > 1024
-                      ? "repeat(3, 1fr)"
-                      : windowWidth > 768
-                      ? "repeat(2, 1fr)"
-                      : "repeat(1, 1fr)"
-                  }`,
-                  gap: "60px",
-                  paddingLeft: windowWidth > 768 ? "120px" : "0",
-                  paddingRight: windowWidth > 768 ? "120px" : "0",
-                }}
-              >
-                {joinList.map((crew, idx) => (
-                  <GroupItem key={idx} data={crew} />
-                ))}
-              </div>
-            ) : (
-              <div className="empty-message">가입한 모임이 없습니다.</div>
-            ))}
-
-          {activeTab === "like" &&
-            (likeList.length > 0 ? (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: `${
-                    windowWidth > 1024
-                      ? "repeat(3, 1fr)"
-                      : windowWidth > 768
-                      ? "repeat(2, 1fr)"
-                      : "repeat(1, 1fr)"
-                  }`,
-                  gap: "60px",
-                  paddingLeft: windowWidth > 768 ? "120px" : "0",
-                  paddingRight: windowWidth > 768 ? "120px" : "0",
-                }}
-              >
-                {likeList.map((crew, idx) => (
-                  <GroupItem key={idx} data={crew} />
-                ))}
-              </div>
-            ) : (
-              <div className="empty-message">찜한 모임이 없습니다.</div>
-            ))}
-
-          {activeTab === "meeting" &&
-            (meetingList.length > 0 ? (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: `${
-                    windowWidth > 1024
-                      ? "repeat(3, 1fr)"
-                      : windowWidth > 768
-                      ? "repeat(2, 1fr)"
-                      : "repeat(1, 1fr)"
-                  }`,
-                  gap: "60px",
-                  paddingLeft: windowWidth > 768 ? "120px" : "0",
-                  paddingRight: windowWidth > 768 ? "120px" : "0",
-                }}
-              >
-                {meetingList.map((meeting, idx) => (
-                  <GroupItem key={idx} data={meeting} />
-                ))}
-              </div>
-            ) : (
-              <div className="empty-message">정모 일정이 없습니다.</div>
-            ))}
-        </div>
-      </div>
+      ) : (
+        <Unauthorized />
+      )}
     </div>
   );
 }

@@ -805,6 +805,7 @@ export default function Signup() {
                               city,
                               area: v,
                             });
+                            setIsOpenLocationRef(false);
                           }}
                         >
                           {v}
@@ -866,6 +867,7 @@ export default function Signup() {
                               ...member,
                               memberSchool: v,
                             });
+                            setIsOpenSchoolRef(false);
                           }}
                         >
                           {v}

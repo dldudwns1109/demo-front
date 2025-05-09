@@ -8,13 +8,14 @@ import Header from "../components/Header";
 import CrewTopNav from "../components/CrewTopNav";
 import { FaRegCommentDots } from "react-icons/fa";
 
-export default function CrewBoard({ isCrewMember }) {
+export default function CrewBoard() {
   const { crewNo } = useParams();
   const [crewName, setCrewName] = useState("");
   const categories = ["전체", "공지", "후기", "자유"];
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [boardList, setBoardList] = useState([]);
   const [visibleCount, setVisibleCount] = useState(4);
+  const [isMember, setIsMember] = useState(false);
 
   const replyCounts = useRecoilValue(replyCountState);
 
@@ -24,6 +25,32 @@ export default function CrewBoard({ isCrewMember }) {
 
   const [showPopoverId, setShowPopoverId] = useState(null);
   const popoverRef = useRef();
+
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("refreshToken");
+    return token ? { Authorization: `Bearer ${token.trim()}` } : {};
+  };
+
+  // 모임원 여부 확인
+useEffect(() => {
+  const checkMemberStatus = async () => {
+    if (!login) return;
+
+    try {
+      const headers = getAuthHeaders();
+      const res = await axios.get(
+        `http://localhost:8080/api/crewmember/${crewNo}/member`,
+        { headers }
+      );
+      setIsMember(res.data);
+    } catch (err) {
+      console.error("모임원 여부 확인 실패:", err.message);
+      setIsMember(false);
+    }
+  };
+
+  checkMemberStatus();
+}, [login, crewNo]);
 
   useEffect(() => {
     const fetchCrewName = async () => {
@@ -108,7 +135,7 @@ export default function CrewBoard({ isCrewMember }) {
           ))}
         </div>
 
-        {isCrewMember && (
+        {isMember && (
           <Link
             to={`/crew/${crewNo}/board/write`}
             className="btn btn-outline-primary btn-sm"

@@ -4,7 +4,7 @@ import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useRecoilValue } from "recoil";
-import { crewNoState, userNoState } from "../utils/storage";
+// import { crewNoState, userNoState } from "../utils/storage";
 
 const meetingLimitList = [3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15];
 export default function MeetingCreate() {
@@ -41,20 +41,20 @@ export default function MeetingCreate() {
   //callback
   const changeMeeting = useCallback((e) => {
     const { name, value } = e.target;
-  
+
     if (name === "meetingPrice") {
       const numeric = value.replace(/[^0-9]/g, "");
       const withComma = numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      setMeeting(prev => ({ 
-        ...prev, 
-        [name]: withComma 
+      setMeeting((prev) => ({
+        ...prev,
+        [name]: withComma,
       }));
       return;
     }
-  
-    setMeeting(prev => ({ 
-      ...prev, 
-      [name]: value 
+
+    setMeeting((prev) => ({
+      ...prev,
+      [name]: value,
     }));
   }, []);
 
@@ -84,32 +84,37 @@ export default function MeetingCreate() {
       alert("대표 이미지를 선택해주세요.");
       return;
     }
-  
+
     const formData = new FormData();
-  
+
     Object.entries(meeting).forEach(([key, value]) => {
-      const cleanValue = key === "meetingPrice" ? value.replaceAll(",", "") : value;
+      const cleanValue =
+        key === "meetingPrice" ? value.replaceAll(",", "") : value;
       formData.append(key, cleanValue);
     });
-  
+
     // 반드시 crewNo 추가!
     formData.append("crewNo", crewNo);
     formData.append("attach", attach);
-  
+
     // 디버깅 로그
     for (let [key, value] of formData.entries()) {
       console.log(key, value);
     }
-  
+
     try {
-      const response = await axios.post("http://localhost:8080/api/meeting/", formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          "Refresh-Token": localStorage.getItem("refreshToken"),
-          "Frontend-URL": "http://localhost:5173",
-        },
-      });
-  
+      const response = await axios.post(
+        "http://localhost:8080/api/meeting/",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Refresh-Token": localStorage.getItem("refreshToken"),
+            "Frontend-URL": "http://localhost:5173",
+          },
+        }
+      );
+
       const meetingNo = response.data.meetingNo;
       navigate(`/meeting/${meetingNo}/detail`);
     } catch (err) {
@@ -177,7 +182,8 @@ export default function MeetingCreate() {
           <div
             className="member-input"
             style={{ cursor: "pointer" }}
-            onClick={() => setIsPostcodeOpen(true)}> 
+            onClick={() => setIsPostcodeOpen(true)}
+          >
             {meeting.meetingLocation || "정모 위치를 검색해주세요!"}
           </div>
           <button
@@ -215,7 +221,7 @@ export default function MeetingCreate() {
             value={meeting.meetingLimit}
             onChange={changeMeeting}
           >
-          {meetingLimitList.map((count) => (
+            {meetingLimitList.map((count) => (
               <option key={count} value={count}>
                 {count}명
               </option>
@@ -223,13 +229,13 @@ export default function MeetingCreate() {
           </select>
         </div>
         <div style={{ width: "360px", margin: "0 auto" }}>
-        <button
-          className={isTotalValid ? "blue-btn" : "light-gray-btn"}
-          onClick={meetingAdd}
-          disabled={!isTotalValid}
-        >
-          정모 추가하기
-        </button>
+          <button
+            className={isTotalValid ? "blue-btn" : "light-gray-btn"}
+            onClick={meetingAdd}
+            disabled={!isTotalValid}
+          >
+            정모 추가하기
+          </button>
         </div>
       </div>
     </>

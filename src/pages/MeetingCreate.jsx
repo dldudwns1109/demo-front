@@ -4,12 +4,13 @@ import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useRecoilValue } from "recoil";
-import { crewNoState, userNoState } from "../utils/storage";
+import { userNoState } from "../utils/storage";
+import { useLocation } from "react-router-dom";
 
 const meetingLimitList = [3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15];
 export default function MeetingCreate() {
-  const userNo = useRecoilValue(userNoState);
-  const crewNo = useRecoilValue(crewNoState);
+  const location = useLocation();
+  const crewNo = location.state?.crewNo;
 
   const navigate = useNavigate();
 
@@ -88,7 +89,15 @@ export default function MeetingCreate() {
     const formData = new FormData();
   
     Object.entries(meeting).forEach(([key, value]) => {
-      const cleanValue = key === "meetingPrice" ? value.replaceAll(",", "") : value;
+      let cleanValue = value;
+      if (key === "meetingPrice") {
+        cleanValue = value.replaceAll(",", "");
+      }
+      if (key === "meetingDate") {
+        cleanValue = value.replace("T", ""); // ← 이거는 틀림
+        // 정확히는 아래와 같이 변환해야 해:
+        cleanValue = value.replace("T", " ") + ":00";
+      }
       formData.append(key, cleanValue);
     });
   
@@ -111,7 +120,7 @@ export default function MeetingCreate() {
       });
   
       const meetingNo = response.data.meetingNo;
-      navigate(`/meeting/${meetingNo}/detail`);
+      navigate(`/meeting/detail/${meetingNo}`);
     } catch (err) {
       console.error("정모 등록 오류", err);
       alert("정모 등록 중 오류가 발생했습니다.");

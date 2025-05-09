@@ -1,14 +1,21 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom"; // Link 추가
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import Header from "../components/Header";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { userNoState, loginState, locationState } from "../utils/storage";
 
 export default function JoinBoardWrite() {
+  const [location, setLocation] = useRecoilState(locationState);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [boardTitle, setBoardTitle] = useState("");
   const [boardContent, setBoardContent] = useState("");
   const [profile, setProfile] = useState(null);
   const navigate = useNavigate();
+
+  // 로그인 및 회원번호
+  const login = useRecoilValue(loginState);
+  const userNo = useRecoilValue(userNoState);
 
   const categories = [
     "스포츠",
@@ -23,42 +30,48 @@ export default function JoinBoardWrite() {
   ];
 
   // effect: 컴포넌트 마운트 시 프로필 정보 요청
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:8080/api/member/mypage/${userNo}`
+        );
+        setProfile(res.data);
+      } catch (err) {
+        console.error(err);
+
+        const shouldLogin = window.confirm(
+          "로그인 후 이용 가능합니다. 로그인 페이지로 이동할까요?"
+        );
+        if (shouldLogin) {
+          navigate("/signin");
+        } else {
+          navigate(-1);
+        }
+      }
+    };
+
+    fetchProfile();
+  }, [navigate]);
+
   // useEffect(() => {
   //   const fetchProfile = async () => {
   //     try {
   //       const res = await axios.get("http://localhost:8080/api/profile");
-  //       setProfile(res.data); // 프로필 가져오기 성공 시 저장
+  //       setProfile(res.data);
   //     } catch (err) {
   //       console.error(err);
-  //       // 로그인 안 된 경우 경고창 띄우기
-  //       const shouldLogin = window.confirm("로그인 후 이용 가능합니다. 로그인 페이지로 이동할까요?");
-  //       if (shouldLogin) {
-  //         navigate("/login"); // 로그인 페이지로 이동
-  //       } else {
-  //         navigate(-1); // 이전 페이지로 돌아가기
-  //       }
+  //       setProfile({
+  //         boardWriterProfileUrl: "http://localhost:8080/api/profile",
+  //         boardWriterNickname: "테스트유저",
+  //         boardWriterGender: "M",
+  //         boardWriterBirth: "1995-08-15",
+  //         boardWriterMbti: "ENTP",
+  //       });
   //     }
   //   };
   //   fetchProfile();
   // }, [navigate]);
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await axios.get("http://localhost:8080/api/profile");
-        setProfile(res.data);
-      } catch (err) {
-        console.error(err);
-        setProfile({
-          boardWriterProfileUrl: "/images/default-profile.png",
-          boardWriterNickname: "테스트유저",
-          boardWriterGender: "M",
-          boardWriterBirth: "1995-08-15",
-          boardWriterMbti: "ENTP",
-        });
-      }
-    };
-    fetchProfile();
-  }, [navigate]);
 
   const handleSubmit = async () => {
     if (!selectedCategory || !boardTitle.trim() || !boardContent.trim()) {
@@ -70,6 +83,7 @@ export default function JoinBoardWrite() {
         boardCategory: selectedCategory,
         boardTitle,
         boardContent,
+        boardWriter: userNo,
       });
       alert("게시글이 작성되었습니다.");
       navigate("/join/board");
@@ -81,11 +95,21 @@ export default function JoinBoardWrite() {
 
   return (
     <>
-      {/* <Header loginState="login" /> */}
-      <div className="container py-4">
-        {/* --- 목록으로 버튼 추가 --- */}
+      <Header
+        loginState={`${login ? "loggined" : "login"}`}
+        location={location}
+        setLocation={setLocation}
+      />
+      <div
+        className="container"
+        style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
+      >
         <div className="mb-5">
-          <Link to="/join/board" className="btn btn-outline-secondary btn-sm">
+          <Link
+            to="/join/board"
+            className="btn btn-outline-secondary btn-sm"
+            style={{ marginTop: "3rem" }}
+          >
             목록으로
           </Link>
         </div>
@@ -94,9 +118,7 @@ export default function JoinBoardWrite() {
         {profile && (
           <div className="d-flex align-items-center mb-4">
             <img
-              src={
-                profile.boardWriterProfileUrl || "/images/default-profile.png"
-              }
+              src={`http://localhost:8080/api/member/image/${userNo}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{
@@ -105,11 +127,18 @@ export default function JoinBoardWrite() {
                 objectFit: "cover",
               }}
             />
-            <div>
+            {/* <div>
               <strong>{profile.boardWriterNickname}</strong>
               <div className="text-muted" style={{ fontSize: "0.85rem" }}>
                 {profile.boardWriterGender === "M" ? "남성" : "여성"} ·{" "}
                 {profile.boardWriterBirth} · {profile.boardWriterMbti}
+              </div>
+            </div> */}
+            <div>
+              <strong>{profile.memberNickname}</strong>{" "}
+              <div className="text-muted" style={{ fontSize: "0.85rem" }}>
+                {profile.memberGender === "M" ? "남성" : "여성"} ·{" "}
+                {profile.memberBirth} · {profile.memberMbti}
               </div>
             </div>
           </div>

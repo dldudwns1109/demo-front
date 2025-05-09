@@ -280,8 +280,25 @@ export default function JoinBoardDetail() {
 
         {/* 게시글 내용 */}
         <div className="mb-5">
-          <div style={{ whiteSpace: "pre-wrap", fontSize: "1rem" }}>
-            {board.boardContent}
+          <div
+            style={{
+              whiteSpace: "pre-wrap",
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
+              lineHeight: "1.6",
+              fontSize: "1rem",
+              marginBottom: "1rem",
+              padding: "1rem",
+              maxWidth: "50ch",
+            }}
+          >
+            {board.boardContent
+              .split(/(?<=[.!?])\s+/) // 문장 단위로 분리 (마침표, 느낌표, 물음표 이후)
+              .map((sentence, index) => (
+                <p key={index} style={{ marginBottom: "0.5rem" }}>
+                  {sentence.trim()}
+                </p>
+              ))}
           </div>
         </div>
 

@@ -30,7 +30,10 @@ export default function MypageExit() {
   };
 
   useEffect(() => {
-    setIsValid(checkPassword() && checkAgree);
+    const checkDisabled = async () => {
+      setIsValid((await checkPassword()) && checkAgree);
+    };
+    checkDisabled();
   }, [userNo, checkAgree, password]);
 
   return (
@@ -152,6 +155,7 @@ export default function MypageExit() {
                   navigate("/mypage/exit-finish", {
                     state: { isFinish: true },
                   });
+                  window.location.reload();
                 }
               }}
               disabled={!isValid}

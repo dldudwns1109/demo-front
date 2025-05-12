@@ -29,7 +29,7 @@ export default function CrewDetail() {
   // const [isCrewMember, setIsCrewMember] = useState(false);
   const [isLeader, setIsLeader] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [crewImage, setCrewImage] = useState("");
+  const [crewImage, setCrewImage] = useState("/images/dummy-crew.jpg");
   const [showJoinInput, setShowJoinInput] = useState(false);
   const [showReportInput, setShowReportInput] = useState(false);
   const [joinMessage, setJoinMessage] = useState("");
@@ -181,7 +181,7 @@ export default function CrewDetail() {
             }}
           >
             <img
-              src={crewImage || "/images/dummy-crew.jpg"}
+              src={crewImage}
               alt="Crew"
               className="crew-image"
             />
@@ -219,18 +219,6 @@ export default function CrewDetail() {
               {/* 모임장 전용: 수정하기 / 해체하기 */}
               {login && isLeader && (
                 <>
-                  {/* <button
-                    className="action-btn edit-btn"
-                    style={{ padding: "0.2rem 0.4rem" }}
-                  >
-                    모임 수정
-                  </button>
-                  <button
-                    className="action-btn delete-btn"
-                    style={{ padding: "0.2rem 0.4rem" }}
-                  >
-                    모임 해체
-                  </button> */}
                   <Link
                     to={`/crew/${crewNo}/edit`}
                     className="action-btn edit-btn"

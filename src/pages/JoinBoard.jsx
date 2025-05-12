@@ -1,11 +1,13 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import Header from "../components/Header";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { replyCountState } from "../store/replyCountState";
-import { loginState, locationState } from "../utils/storage";
+import { loginState, locationState, userNoState } from "../utils/storage";
+import GroupItem from "../components/GroupItem";
 import { FaRegCommentDots } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 export default function JoinBoard() {
   const categories = [
@@ -23,32 +25,69 @@ export default function JoinBoard() {
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [boardList, setBoardList] = useState([]);
   const [visibleCount, setVisibleCount] = useState(4);
+  const [profile, setProfile] = useState(null);
+  const navigate = useNavigate();
 
   const replyCounts = useRecoilValue(replyCountState);
-
   //로그인 관련
   const login = useRecoilValue(loginState);
+  const userNo = useRecoilValue(userNoState);
   const [location, setLocation] = useRecoilState(locationState);
 
   // 팝오버 관련 상태 추가
   const [showPopoverId, setShowPopoverId] = useState(null);
   const popoverRef = useRef();
 
+  //팝오버 관리
+  const [activeTab, setActiveTab] = useState("join");
+  const [joinList, setJoinList] = useState([]);
+
+  // 프로필 정보 가져오기
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/api/board", {
-          params:
-            selectedCategory !== "전체" ? { category: selectedCategory } : {},
-        });
-        setBoardList(res.data);
-        setVisibleCount(4);
+        const res = await axios.get(
+          `http://localhost:8080/api/member/profile/${board.boardWriter}`
+        );
+        setProfile(res.data);
       } catch (err) {
-        console.error(err);
+        console.error("프로필 불러오기 에러:", err);
       }
     };
-    fetchData();
+
+    fetchProfile();
+  }, [userNo]);
+
+  // 게시글 목록 불러오기
+  useEffect(() => {
+    const fetchBoardList = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:8080/api/board/joinboard",
+          {
+            params:
+              selectedCategory !== "전체" ? { category: selectedCategory } : {},
+          }
+        );
+        setBoardList(res.data);
+      } catch (err) {
+        console.error("게시글 불러오기 에러:", err);
+      }
+    };
+
+    fetchBoardList();
   }, [selectedCategory]);
+
+  // 팝오버 외부 클릭 감지해서 닫기
+  // useEffect(() => {
+  //   const handleClickOutside = (e) => {
+  //     if (popoverRef.current && !popoverRef.current.contains(e.target)) {
+  //       setShowPopoverId(null);
+  //     }
+  //   };
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => document.removeEventListener("mousedown", handleClickOutside);
+  // }, []);
 
   // 팝오버 외부 클릭 감지해서 닫기
   useEffect(() => {
@@ -61,12 +100,41 @@ export default function JoinBoard() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleCategoryClick = (cat) => {
-    setSelectedCategory(cat);
-  };
+  useEffect(() => {
+    const fetchJoinAndCreateList = async () => {
+      try {
+        if (userNo) {
+          const joinRes = await axios.get(
+            `http://localhost:8080/api/crew/findJoinedGroup/${userNo}`
+          );
+          const createRes = await axios.get(
+            `http://localhost:8080/api/crew/findCreatedGroup/${userNo}`
+          );
+          const joinData = Array.isArray(joinRes.data) ? joinRes.data : [];
+          const createData = Array.isArray(createRes.data)
+            ? createRes.data
+            : [];
+
+          const mergedList = [...joinData, ...createData];
+          setJoinList(mergedList);
+        } else {
+          // 비회원일 경우, 전체 모임 목록만 가져오기
+          const res = await axios.get(`http://localhost:8080/api/crew/all`);
+          setJoinList(Array.isArray(res.data) ? res.data : []);
+        }
+      } catch (err) {
+        console.error("모임 목록 불러오기 에러:", err);
+      }
+    };
+
+    fetchJoinAndCreateList();
+  }, [userNo]);
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 4);
+  };
+  const handleCategoryClick = (cat) => {
+    setSelectedCategory(cat);
   };
 
   return (
@@ -76,9 +144,15 @@ export default function JoinBoard() {
         location={location}
         setLocation={setLocation}
       />
-      <div className="container" style={{ paddingTop: "5rem", paddingBottom: "2rem" }}>
+      <div
+        className="container"
+        style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
+      >
         <div className="mb-5">
-          <h2 className="fw-bold" style={{ fontSize: "2rem", marginTop: "3rem" }}>
+          <h2
+            className="fw-bold"
+            style={{ fontSize: "2rem", marginTop: "3rem" }}
+          >
             모임 가입 게시판
           </h2>
         </div>
@@ -142,9 +216,18 @@ export default function JoinBoard() {
                   <div className="card-body" style={{ padding: "1.5rem" }}>
                     <div className="d-flex align-items-center mb-3">
                       <img
+                        // src={
+                        //   profile
+                        //     ? `http://localhost:8080/api/member/image/${userNo}`
+                        //     : "/images/default-profile.png"
+                        // }
                         src={
-                          board.boardWriterProfileUrl ||
-                          "/images/default-profile.png"
+                          // board.boardWriterProfileUrl !== 0
+                          //   ? `http://localhost:8080/api/member/image/${board.boardWriterProfileUrl}`
+                          //   : "/images/default-profile.png"
+                          board.boardWriterProfileUrl !== 0
+                            ? `http://localhost:8080/api/board/image/${board.boardWriterProfileUrl}`
+                            : "/images/default-profile.png"
                         }
                         alt="프로필"
                         className="rounded-circle me-3"
@@ -164,13 +247,15 @@ export default function JoinBoard() {
                         }}
                       />
                       <div>
-                        <strong>{board.boardWriterNickname}</strong>
+                        <strong>
+                          {board.boardWriterNickname || "알 수 없음"}
+                        </strong>
                         <div
                           className="text-muted"
                           style={{ fontSize: "0.85rem" }}
                         >
-                          {board.boardWriterGender === "M" ? "남성" : "여성"} ·{" "}
-                          {board.boardWriterBirth} · {board.boardWriterMbti}
+                          {board.boardWriterGender} · {board.boardWriterBirth} ·{" "}
+                          {board.boardWriterMbti}
                         </div>
                       </div>
                     </div>
@@ -212,8 +297,8 @@ export default function JoinBoard() {
                             }
                           )
                         : "시간 정보 없음"}
-                        / <FaRegCommentDots style={{ marginBottom: "2px" }} />
-                        댓글 {replyCounts[board.boardNo] ?? board.boardReply}
+                      / <FaRegCommentDots style={{ marginBottom: "2px" }} />
+                      댓글 {replyCounts[board.boardNo] ?? board.boardReply}
                     </small>
                   </div>
                 </div>
@@ -222,22 +307,34 @@ export default function JoinBoard() {
               {/* 팝오버 */}
               {showPopoverId === board.boardNo && (
                 <div
+                  // ref={popoverRef}
+                  // className="shadow position-absolute bg-white rounded p-3"
+                  // style={{
+                  //   top: "5rem",
+                  //   left: "1rem",
+                  //   zIndex: 10,
+                  //   width: "300px",
+                  //   fontSize: "0.9rem",
+                  //   border: "1px solid #ddd",
+                  // }}
                   ref={popoverRef}
-                  className="shadow position-absolute bg-white rounded p-3"
+                  className="shadow bg-white rounded p-3"
                   style={{
-                    top: "5rem",
-                    left: "1rem",
-                    zIndex: 10,
+                    position: "absolute",
+                    top: "4.5rem",
+                    left: "0",
+                    zIndex: 1000,
                     width: "300px",
-                    fontSize: "0.9rem",
-                    border: "1px solid #ddd",
+                    borderRadius: "8px",
+                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
                   }}
                 >
                   <div className="d-flex align-items-center mb-3">
                     <img
                       src={
-                        board.boardWriterProfileUrl ||
-                        "/images/default-profile.png"
+                        profile
+                          ? `http://localhost:8080/api/member/image/${userNo}`
+                          : "/images/default-profile.png"
                       }
                       alt="프로필"
                       className="rounded-circle me-3"
@@ -254,12 +351,15 @@ export default function JoinBoard() {
                       </div>
                     </div>
                   </div>
-                  <div className="text-muted mb-2">
+                  <div
+                    className="text-muted mb-2"
+                    style={{ fontSize: "0.75rem" }}
+                  >
                     {board.boardWriterLocation} · {board.boardWriterSchool} ·{" "}
                     {board.boardWriterBirth}
                   </div>
                   <hr />
-                  <div className="fw-bold">가입한 모임 예시</div>
+                  {/* <div className="fw-bold">가입한 모임 예시</div>
                   <div className="d-flex align-items-center mt-2">
                     <img
                       src="/images/sample-group.jpg"
@@ -269,6 +369,66 @@ export default function JoinBoard() {
                     <div className="text-muted" style={{ fontSize: "0.8rem" }}>
                       모임 이름
                     </div>
+                  </div> */}
+
+                  <div className="fw-bold mb-3 text-center">가입한 모임</div>
+                  <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+                    {joinList.length > 0 ? (
+                      joinList.map((crew, idx) => (
+                        <div
+                          key={idx}
+                          className="d-flex align-items-center mb-3 cursor-pointer"
+                          onClick={() =>
+                            navigate(`/crew/${crew.crewNo}/detail`)
+                          }
+                          style={{
+                            cursor: "pointer",
+                            padding: "0.5rem",
+                            borderRadius: "8px",
+                            transition: "background-color 0.2s",
+                          }}
+                        >
+                          {/* 모임 이미지 */}
+                          <img
+                            src={
+                              crew.crewImageUrl || "/images/default-group.jpg"
+                            }
+                            alt="모임"
+                            className="rounded-circle"
+                            style={{
+                              width: "3rem",
+                              height: "3rem",
+                              objectFit: "cover",
+                              marginRight: "1rem",
+                            }}
+                          />
+
+                          {/* 모임 정보 */}
+                          <div>
+                            <div
+                              className="fw-bold"
+                              style={{ fontSize: "0.75rem" }}
+                            >
+                              {crew.crewName}
+                            </div>
+                            <div
+                              className="text-muted"
+                              style={{ fontSize: "0.75rem" }}
+                            >
+                              {crew.crewCategory} · {crew.crewLocation} · 회원{" "}
+                              {Array.isArray(crew.members)
+                                ? crew.members.length
+                                : 0}
+                              명
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-muted text-center">
+                        가입한 모임이 없습니다.
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

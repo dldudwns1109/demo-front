@@ -222,8 +222,11 @@ export default function JoinBoard() {
                         //     : "/images/default-profile.png"
                         // }
                         src={
-                          board.boardWriterProfileUrl
-                            ? `http://localhost:8080/api/member/image/${board.boardWriterProfileUrl}`
+                          // board.boardWriterProfileUrl !== 0
+                          //   ? `http://localhost:8080/api/member/image/${board.boardWriterProfileUrl}`
+                          //   : "/images/default-profile.png"
+                          board.boardWriterProfileUrl !== 0
+                            ? `http://localhost:8080/api/board/image/${board.boardWriterProfileUrl}`
                             : "/images/default-profile.png"
                         }
                         alt="프로필"
@@ -245,19 +248,14 @@ export default function JoinBoard() {
                       />
                       <div>
                         <strong>
-                          {profile ? profile.memberNickname : "알 수 없음"}
+                          {board.boardWriterNickname || "알 수 없음"}
                         </strong>
                         <div
                           className="text-muted"
                           style={{ fontSize: "0.85rem" }}
                         >
-                          {profile
-                            ? `${
-                                profile.memberGender === "M" ? "남성" : "여성"
-                              } · ${profile.memberBirth} · ${
-                                profile.memberMbti
-                              }`
-                            : "정보 없음"}
+                          {board.boardWriterGender} · {board.boardWriterBirth} ·{" "}
+                          {board.boardWriterMbti}
                         </div>
                       </div>
                     </div>

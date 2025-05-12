@@ -3,7 +3,7 @@ import { useRecoilValue, useRecoilState } from "recoil";
 import { loginState, locationState } from "../utils/storage";
 import Header from "../components/Header";
 import CrewTopNav from "../components/CrewTopNav";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import {
   FaHeart,
@@ -17,6 +17,7 @@ import {
 import "../css/CrewDetail.css";
 
 export default function CrewDetail() {
+  const navigate = useNavigate();
   const login = useRecoilValue(loginState);
   const [location, setLocation] = useRecoilState(locationState);
   const { crewNo } = useParams();
@@ -315,6 +316,16 @@ export default function CrewDetail() {
               <FaCalendarAlt style={{ marginRight: "0.5rem" }} />
               정모 일정 {meetingCount}
             </h3>
+            <button
+              className="btn btn-primary"
+              style={{ fontSize: "0.85rem", padding: "6px 12px" }}
+              onClick={() =>
+                navigate("/meeting/create", {
+                  state: { crewNo: Number(crewNo) }
+                })
+              }>
+                정모 추가하기
+              </button>
           </div>
 
           <div className="member-section" style={{ marginBottom: "1.5rem" }}>

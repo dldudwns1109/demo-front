@@ -4,10 +4,13 @@ import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
+import { loginState } from "../utils/storage";
+import { useRecoilValue } from "recoil";
 
 const meetingLimitList = [3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15];
 export default function MeetingCreate() {
   const location = useLocation();
+  const login = useRecoilValue(loginState);
   const crewNo = location.state?.crewNo;
 
   const navigate = useNavigate();
@@ -132,7 +135,7 @@ export default function MeetingCreate() {
   return (
     <>
       {/* 헤더 */}
-      <Header input={false} />
+      <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
       <div
         className="d-flex flex-column align-items-center"
         style={{ paddingTop: "70px", paddingBottom: "80px" }}

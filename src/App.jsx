@@ -125,7 +125,7 @@ function App() {
         />
         <Route path="/crew/:crewNo/chat" element={<CrewChat />} />
         <Route path="/meeting/create" element={<MeetingCreate />} />
-        <Route path="/meeting/detail" element={<MeetingDetail />} />
+        <Route path="/meeting/detail/:meetingNo" element={<MeetingDetail />} />
         <Route path="/meeting/edit" element={<MeetingEdit />} />
       </Routes>
     </>

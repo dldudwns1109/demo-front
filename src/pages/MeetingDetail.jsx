@@ -1,20 +1,28 @@
-import { useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import axios from "axios";
 import Header from "../components/Header";
 import { loginState, userNoState } from "../utils/storage";
+import { toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 
 export default function MeetingDetail() {
   const { meetingNo } = useParams();
   const userNo = useRecoilValue(userNoState);
   const login = useRecoilValue(loginState);
 
+  const navigate = useNavigate();
   const [meeting, setMeeting] = useState(null);
   const [memberList, setMemberList] = useState([]);
   const [isJoined, setIsJoined] = useState(false);
 
-  // ✅ 정모 정보 조회
+  //인원 제한 체크
+  const isFull = useMemo(() => {
+    return meeting && memberList.length >= meeting.meetingLimit;
+  }, [meeting, memberList]);
+
+  // 정모 정보 조회
   const fetchMeetingDetail = useCallback(() => {
     axios
       .get(`http://localhost:8080/api/meeting/${meetingNo}`)
@@ -22,7 +30,7 @@ export default function MeetingDetail() {
       .catch((err) => console.error("정모 정보 조회 실패", err));
   }, [meetingNo]);
 
-  // ✅ 참여자 목록 조회
+  // 정모 참여자 목록 조회
   const fetchMeetingMemberList = useCallback(() => {
     if (!userNo) return;
     axios
@@ -31,7 +39,7 @@ export default function MeetingDetail() {
       .catch((err) => console.error("참여자 목록 조회 실패", err));
   }, [meetingNo, userNo]);
 
-  // ✅ 참여 여부 확인
+  // 정모 참여 여부 확인
   const checkMeetingJoin = useCallback(() => {
     if (!userNo) return;
     axios
@@ -44,7 +52,7 @@ export default function MeetingDetail() {
       .catch((err) => console.error("참여 여부 확인 실패", err));
   }, [meetingNo, userNo]);
 
-  // ✅ 참여하기
+  // 정모 참여하기
   const meetingJoin = useCallback(() => {
     axios
       .post(
@@ -63,7 +71,7 @@ export default function MeetingDetail() {
       .catch((err) => console.error("정모 참여 실패", err));
   }, [meetingNo, fetchMeetingMemberList]);
 
-  // ✅ 나가기
+  // 정모 나가기
   const meetingExit = useCallback(() => {
     axios
       .delete(`http://localhost:8080/api/meetingMember/${meetingNo}`, {
@@ -77,6 +85,27 @@ export default function MeetingDetail() {
       })
       .catch((err) => console.error("정모 나가기 실패", err));
   }, [meetingNo, fetchMeetingMemberList]);
+
+  // 정모 삭제
+  const meetingDelete = useCallback(() => {
+    const confirmed = window.confirm("정말로 이 정모를 삭제하시겠습니까?");
+    if (!confirmed) return;
+
+    axios
+      .delete(`http://localhost:8080/api/meeting/${meetingNo}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
+      .then(() => {
+        alert("정모가 삭제되었습니다.");
+        navigate(`/crew/${meeting.meetingCrewNo}/detail`);
+      })
+      .catch((err) => {
+        console.error("정모 삭제 실패", err);
+        alert("정모 삭제 중 오류가 발생했습니다.");
+      });
+  }, [meetingNo, navigate]);
 
   // ✅ 초기 데이터 로딩
   useEffect(() => {
@@ -92,6 +121,7 @@ export default function MeetingDetail() {
   return (
     <>
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
+      <ToastContainer position="top-center" autoClose={2000} />
       {/* 로딩 처리 */}
       {meeting === null ? (
         <p style={{ textAlign: "center", padding: "48px", fontSize: "18px" }}>
@@ -148,6 +178,7 @@ export default function MeetingDetail() {
                       borderRadius: "8px",
                       cursor: "pointer",
                     }}
+                    onClick={() => navigate(`/meeting/edit/${meetingNo}`)}
                   >
                     수정
                   </button>
@@ -162,6 +193,7 @@ export default function MeetingDetail() {
                       borderRadius: "8px",
                       cursor: "pointer",
                     }}
+                    onClick={meetingDelete}
                   >
                     삭제
                   </button>
@@ -301,7 +333,13 @@ export default function MeetingDetail() {
                 </button>
               ) : (
                 <button
-                  onClick={meetingJoin}
+                  onClick={() => {
+                    if (isFull) {
+                      toast.warning("정원이 다 찼습니다.");
+                      return;
+                    }
+                    meetingJoin();
+                  }}
                   style={{
                     width: "100%",
                     padding: "12px",
@@ -328,7 +366,7 @@ export default function MeetingDetail() {
                   fontSize: "20px",
                 }}
               >
-                참여 멤버 {memberList.length}
+                참여 멤버 {memberList.length} / {meeting.meetingLimit}
               </h3>
               {memberList.map((member) => (
                 <div
@@ -373,7 +411,7 @@ export default function MeetingDetail() {
                           fontWeight: "bold",
                         }}
                       >
-                        정모 모임장
+                        모임장
                       </span>
                     )}
                   </div>

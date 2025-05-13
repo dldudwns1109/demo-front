@@ -77,6 +77,15 @@ export default function Chat() {
           setSubscription(null);
         }
 
+        const fetchData = async () => {
+          const res = await axios.get(
+            `http://localhost:8080/api/chat/messages/${currRoom}`
+          );
+
+          setMessages(res.data);
+        };
+        fetchData();
+
         const newSubscription = client.subscribe(
           `/private/member/chat/${currRoom}`,
           (message) => {

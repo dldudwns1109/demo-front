@@ -109,11 +109,11 @@ export default function CrewDetail() {
         setIsMember(memberRes.data);
 
         // 찜 여부 확인
-        const likeRes = await axios.get(
-          `http://localhost:8080/api/crewmember/${crewNo}/like`,
-          { headers }
-        );
-        setIsLiked(likeRes.data);
+        // const likeRes = await axios.get(
+        //   `http://localhost:8080/api/crewmember/${crewNo}/like`,
+        //   { headers }
+        // );
+        // setIsLiked(likeRes.data);
       } catch (err) {
         console.error("Error fetching member status:", err.message);
       }
@@ -121,6 +121,52 @@ export default function CrewDetail() {
 
     fetchMemberStatus();
   }, [login, crewNo]);
+
+  /** 모임 탈퇴 처리 */
+  const handleLeave = async () => {
+    if (!isMember) {
+      window.confirm("모임원이 아닙니다.");
+      return;
+    }
+
+    if (isLeader) {
+      window.confirm("모임장은 탈퇴할 수 없습니다. 모임 해체를 해주세요.");
+      return;
+    }
+
+    try {
+      const headers = getAuthHeaders();
+      await axios.delete(
+        `http://localhost:8080/api/crewmember/${crewNo}/leave`,
+        { headers }
+      );
+      window.confirm("모임에서 탈퇴되었습니다.");
+      navigate("/crew");
+    } catch (err) {
+      console.error("Error leaving crew:", err.message);
+      window.confirm("모임 탈퇴에 실패했습니다.");
+    }
+  };
+
+  /** 모임 해체 처리 */
+  const handleDeleteCrew = async () => {
+    if (!isLeader) {
+      window.confirm("모임장만 해체할 수 있습니다.");
+      return;
+    }
+
+    try {
+      const headers = getAuthHeaders();
+      await axios.delete(`http://localhost:8080/api/crew/${crewNo}`, {
+        headers,
+      });
+      window.confirm("모임이 해체되었습니다.");
+      navigate("/crew");
+    } catch (err) {
+      console.error("Error deleting crew:", err.message);
+      window.confirm("모임 해체에 실패했습니다.");
+    }
+  };
 
   // 가입처리
   const handleJoin = () => {
@@ -181,7 +227,7 @@ export default function CrewDetail() {
             }}
           >
             <img
-              src={crewImage}
+              src={`http://localhost:8080/api/crew/image/${crewNo}`}
               alt="Crew"
               className="crew-image"
             />
@@ -287,7 +333,7 @@ export default function CrewDetail() {
                 회원 {members.length || 0}명
               </span>
             </div>
-            <p style={{ marginBottom: "0.5rem" }}>모임 소개</p>
+            <p style={{ fontWeight: "bold", marginBottom: "0.5rem" }}>모임 소개</p>
             <p style={{ marginBottom: "1.5rem" }}>{crewData?.crewIntro}</p>
           </div>
 
@@ -309,11 +355,12 @@ export default function CrewDetail() {
               style={{ fontSize: "0.85rem", padding: "6px 12px" }}
               onClick={() =>
                 navigate("/meeting/create", {
-                  state: { crewNo: Number(crewNo) }
+                  state: { crewNo: Number(crewNo) },
                 })
-              }>
-                정모 추가하기
-              </button>
+              }
+            >
+              정모 추가하기
+            </button>
           </div>
 
           <div className="member-section" style={{ marginBottom: "1.5rem" }}>
@@ -352,9 +399,9 @@ export default function CrewDetail() {
                       cursor: "pointer",
                     }}
                   >
-                    {/* 더미 이미지 */}
+                    {/* 이미지 */}
                     <img
-                      src="/images/default-profile.png"
+                      src={`http://localhost:8080/api/member/image/${member.memberNo}`}
                       alt="프로필"
                       style={{
                         width: "50px",

@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom"; // Link 추가
 import axios from "axios";
+import Header from "../components/Header";
+import { loginState, userNoState } from "../utils/storage";
+import { useRecoilValue } from "recoil";
 
 export default function JoinBoardEdit() {
   const { boardNo } = useParams();
@@ -12,6 +15,9 @@ export default function JoinBoardEdit() {
     boardCategory: "",
   });
   const [profile, setProfile] = useState(null);
+  //로그인 관련
+  const login = useRecoilValue(loginState);
+  const userNo = useRecoilValue(userNoState);
 
   const categories = [
     "스포츠",
@@ -36,7 +42,13 @@ export default function JoinBoardEdit() {
           boardTitle: res.data.boardTitle,
           boardContent: res.data.boardContent,
           boardCategory: res.data.boardCategory,
+          boardWriter: res.data.boardWriter,
         });
+        // 작성자와 로그인한 사용자가 다를 경우 접근 차단
+        if (res.data.boardWriter !== userNo) {
+          alert("수정 권한이 없습니다.");
+          navigate(`/join/board/detail/${boardNo}`);
+        }
       } catch (err) {
         console.error(err);
         alert("게시글 정보를 불러오는데 실패했습니다.");
@@ -44,30 +56,45 @@ export default function JoinBoardEdit() {
       }
     };
     fetchBoard();
-  }, [boardNo, navigate]);
+  }, [boardNo, navigate, userNo]);
 
   // 프로필 불러오기
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     try {
+  //       // 실제 프로필 불러오기 코드 (주석 해제 시 사용)
+  //       // const res = await axios.get("http://localhost:8080/api/profile");
+  //       // setProfile(res.data);
+
+  //       // 더미 프로필 데이터
+  //       setProfile({
+  //         boardWriterProfileUrl: "/images/default-profile.png",
+  //         boardWriterNickname: "테스트유저",
+  //         boardWriterGender: "M",
+  //         boardWriterBirth: "1995-08-15",
+  //         boardWriterMbti: "ENTP",
+  //       });
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   };
+  //   fetchProfile();
+  // }, []);
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // 실제 프로필 불러오기 코드 (주석 해제 시 사용)
-        // const res = await axios.get("http://localhost:8080/api/profile");
-        // setProfile(res.data);
-
-        // 더미 프로필 데이터
-        setProfile({
-          boardWriterProfileUrl: "/images/default-profile.png",
-          boardWriterNickname: "테스트유저",
-          boardWriterGender: "M",
-          boardWriterBirth: "1995-08-15",
-          boardWriterMbti: "ENTP",
-        });
+        const res = await axios.get(
+          `http://localhost:8080/api/member/mypage/${userNo}`
+        );
+        setProfile(res.data);
       } catch (err) {
         console.error(err);
       }
     };
+
     fetchProfile();
-  }, []);
+  }, [navigate]);
 
   const handleEdit = async () => {
     if (
@@ -93,102 +120,119 @@ export default function JoinBoardEdit() {
   };
 
   return (
-    <div className="container py-4">
-      {/* 목록으로 버튼 */}
-      <div className="mb-5">
-        <Link to="/join/board" className="btn btn-outline-secondary btn-sm">
-          목록으로
-        </Link>
-      </div>
+    <>
+      <Header
+        loginState={`${login ? "loggined" : "login"}`}
+        // location={location}
+        // setLocation={setLocation}
+        input={false}
+      />
+      <div className="container py-4">
+        {/* 목록으로 버튼 */}
+        <div className="mb-5">
+          <Link to="/join/board" className="btn btn-outline-secondary btn-sm">
+            목록으로
+          </Link>
+        </div>
 
-      {/* 프로필 정보 */}
-      {profile && (
-        <div className="d-flex align-items-center mb-4">
-          <img
-            src={profile.boardWriterProfileUrl || "/images/default-profile.png"}
-            alt="프로필"
-            className="rounded-circle me-3"
-            style={{ width: "3rem", height: "3rem", objectFit: "cover" }}
-          />
-          <div>
-            <strong>{profile.boardWriterNickname}</strong>
-            <div className="text-muted" style={{ fontSize: "0.85rem" }}>
-              {profile.boardWriterGender === "M" ? "남성" : "여성"} ·{" "}
-              {profile.boardWriterBirth} · {profile.boardWriterMbti}
+        {/* 프로필 정보 */}
+        {profile && (
+          <div className="d-flex align-items-center mb-4">
+            <img
+              src={`http://localhost:8080/api/member/image/${userNo}`}
+              alt="프로필"
+              className="rounded-circle me-3"
+              style={{ width: "3rem", height: "3rem", objectFit: "cover" }}
+            />
+            <div>
+              <strong>{profile.memberNickname}</strong>
+              <div className="text-muted" style={{ fontSize: "0.85rem" }}>
+                {profile.memberGender === "m" ? "남성" : "여성"} ·{" "}
+                {profile.memberBirth} · {profile.memberMbti}
+              </div>
             </div>
           </div>
+        )}
+
+        {/* 카테고리 선택 */}
+        <div className="d-flex flex-wrap gap-2 mb-4">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              className="btn btn-sm rounded-pill"
+              style={{
+                backgroundColor:
+                  board.boardCategory === cat ? "#F9B4ED" : "#ffffff",
+                color: board.boardCategory === cat ? "#ffffff" : "#F9B4ED",
+                border:
+                  board.boardCategory === cat ? "none" : "1px solid #F9B4ED",
+                padding: "0.5rem 1.2rem",
+                fontSize: "0.95rem",
+              }}
+              onClick={() => setBoard({ ...board, boardCategory: cat })}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
-      )}
 
-      {/* 카테고리 선택 */}
-      <div className="d-flex flex-wrap gap-2 mb-4">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            type="button"
-            className="btn btn-sm rounded-pill"
+        {/* 제목 입력 */}
+        <div className="mb-4">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="제목을 입력하세요"
+            value={board.boardTitle}
+            onChange={(e) => setBoard({ ...board, boardTitle: e.target.value })}
+            style={{ fontSize: "1rem", padding: "0.75rem" }}
+          />
+        </div>
+
+        {/* 내용 입력 */}
+        <div className="mb-4">
+          <textarea
+            className="form-control"
+            rows="15"
+            placeholder="내용을 입력하세요"
+            value={board.boardContent}
+            onChange={(e) =>
+              setBoard({ ...board, boardContent: e.target.value })
+            }
             style={{
-              backgroundColor:
-                board.boardCategory === cat ? "#F9B4ED" : "#ffffff",
-              color: board.boardCategory === cat ? "#ffffff" : "#F9B4ED",
-              border:
-                board.boardCategory === cat ? "none" : "1px solid #F9B4ED",
-              padding: "0.5rem 1.2rem",
-              fontSize: "0.95rem",
+              fontSize: "1rem",
+              padding: "1.2rem",
+              minHeight: "400px", // 추가
+              resize: "vertical", // 사용자가 크기 조정 가능하게
             }}
-            onClick={() => setBoard({ ...board, boardCategory: cat })}
+          ></textarea>
+        </div>
+
+        {/* 수정 버튼 */}
+        <div
+          className="text-center d-flex justify-content-center"
+          style={{ gap: "2rem" }}
+        >
+          <button
+            // className="btn btn-primary px-5 py-2"
+            // style={{ fontSize: "1rem" }}
+            // onClick={handleEdit}
+            className="btn btn-primary px-5 py-2"
+            style={{ fontSize: "1rem" }}
+            onClick={handleEdit}
+            disabled={board.boardWriter !== userNo} // 권한이 없으면 비활성화
           >
-            {cat}
+            수정하기
           </button>
-        ))}
+          <button
+            className="btn btn-secondary px-5 py-2"
+            style={{ fontSize: "1rem" }}
+            onClick={() => navigate(`/join/board/detail/${boardNo}`)}
+          >
+            뒤로가기
+          </button>
+        </div>
       </div>
-
-      {/* 제목 입력 */}
-      <div className="mb-4">
-        <input
-          type="text"
-          className="form-control"
-          placeholder="제목을 입력하세요"
-          value={board.boardTitle}
-          onChange={(e) => setBoard({ ...board, boardTitle: e.target.value })}
-          style={{ fontSize: "1rem", padding: "0.75rem" }}
-        />
-      </div>
-
-      {/* 내용 입력 */}
-      <div className="mb-4">
-        <textarea
-          className="form-control"
-          rows="15"
-          placeholder="내용을 입력하세요"
-          value={board.boardContent}
-          onChange={(e) => setBoard({ ...board, boardContent: e.target.value })}
-          style={{
-            fontSize: "1rem",
-            padding: "1.2rem",
-            minHeight: "400px", // 추가
-            resize: "vertical", // 사용자가 크기 조정 가능하게
-          }}
-        ></textarea>
-      </div>
-
-      {/* 수정 버튼 */}
-      <div className="text-center d-flex justify-content-center" style={{ gap: "2rem" }}>
-        <button
-          className="btn btn-primary px-5 py-2"
-          style={{ fontSize: "1rem" }}
-          onClick={handleEdit}
-        >
-          수정하기
-        </button>
-        <button
-          className="btn btn-secondary px-5 py-2"
-          style={{ fontSize: "1rem" }}
-          onClick={() => navigate(`/join/board/detail/${boardNo}`)}
-        >
-          뒤로가기
-        </button>
-      </div>
-    </div>
+    </>
   );
 }

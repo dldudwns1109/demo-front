@@ -5,7 +5,7 @@ import { FiMoreVertical } from "react-icons/fi";
 import { FaPaperPlane } from "react-icons/fa";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { replyCountState } from "../store/replyCountState";
-import { loginState, locationState } from "../utils/storage";
+import { loginState, userNoState, locationState } from "../utils/storage";
 import Header from "../components/Header";
 
 export default function JoinBoardDetail() {
@@ -21,6 +21,12 @@ export default function JoinBoardDetail() {
   const boardPopoverRef = useRef();
   const replyPopoverRefs = useRef([]);
   const navigate = useNavigate();
+  const [profile, setProfile] = useState(null);
+
+  //로그인 관련
+  const login = useRecoilValue(loginState);
+  const [location, setLocation] = useRecoilState(locationState);
+  const userNo = useRecoilValue(userNoState);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,10 +41,6 @@ export default function JoinBoardDetail() {
     };
     fetchData();
   }, [boardNo]);
-
-  //로그인 관련
-  const login = useRecoilValue(loginState);
-  const [location, setLocation] = useRecoilState(locationState);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -127,24 +129,117 @@ export default function JoinBoardDetail() {
   };
 
   const handleBoardDelete = async () => {
-    if (window.confirm("이 게시글을 삭제하시겠습니까?")) {
-      try {
-        await axios.delete(`http://localhost:8080/api/board/${boardNo}`);
-        navigate("/join/board");
-      } catch (err) {
-        console.error(err);
-      }
+    if (board.boardWriter !== userNo) {
+      window.confirm("삭제 권한이 없습니다.");
+      return;
+    }
+
+    const confirmDelete = window.confirm("정말로 삭제하시겠습니까?");
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`http://localhost:8080/api/board/${board.boardNo}`);
+      alert("게시글이 삭제되었습니다.");
+      navigate("/join/board");
+    } catch (err) {
+      console.error(err);
+      alert("게시글 삭제에 실패했습니다.");
     }
   };
 
   if (!board) return <div>로딩 중...</div>;
 
+  // 게시글 및 댓글 데이터 불러오기
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const [boardRes, repliesRes] = await Promise.all([
+  //         axios.get(`http://localhost:8080/api/board/${boardNo}`),
+  //         axios.get(`http://localhost:8080/api/reply/${boardNo}`),
+  //       ]);
+
+  //       setBoard(boardRes.data);
+  //       setReplies(repliesRes.data);
+  //     } catch (err) {
+  //       console.error("데이터 로드 에러:", err);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [boardNo]);
+
+  // // 로그인된 사용자 프로필 정보 가져오기
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     if (!login) return;
+  //     try {
+  //       const res = await axios.get(
+  //         `http://localhost:8080/api/member/mypage/${userNo}`
+  //       );
+  //       setProfile(res.data);
+  //     } catch (err) {
+  //       console.error("프로필 정보 로드 에러:", err);
+  //     }
+  //   };
+
+  //   fetchProfile();
+  // }, [login, userNo]);
+
+  // // 댓글 작성 시 로그인 여부 확인
+  // const shouldLogin = () => {
+  //   if (!login) {
+  //     window.confirm("로그인 후 이용 가능합니다");
+  //     return false;
+  //   }
+  //   return true;
+  // };
+
+  // // 댓글 작성 핸들러
+  // const handleReplySubmit = async () => {
+  //   if (!shouldLogin() || !profile) return;
+
+  //   const trimmedReply = newReply.trim();
+  //   if (!trimmedReply) return;
+
+  //   try {
+  //     const replyData = {
+  //       replyWriter: userNo,
+  //       replyOrigin: boardNo,
+  //       replyContent: trimmedReply,
+  //     };
+
+  //     const res = await axios.post(
+  //       `http://localhost:8080/api/reply`,
+  //       replyData
+  //     );
+  //     const newReplyData = res.data;
+
+  //     setReplies([newReplyData, ...replies]);
+  //     setNewReply("");
+  //     setReplyCounts((prev) => ({
+  //       ...prev,
+  //       [boardNo]: (prev[boardNo] ?? 0) + 1,
+  //     }));
+  //   } catch (err) {
+  //     console.error("댓글 작성 에러:", err);
+  //     alert("댓글 작성에 실패했습니다.");
+  //   }
+  // };
+
+  // // 엔터키로 댓글 작성
+  // const handleKeyPress = (e) => {
+  //   if (e.key === "Enter") handleReplySubmit();
+  // };
+
+  // if (!board) return <div>로딩 중...</div>;
+
   return (
     <>
       <Header
         loginState={`${login ? "loggined" : "login"}`}
-        location={location}
-        setLocation={setLocation}
+        // location={location}
+        // setLocation={setLocation}
+        input={false}
       />
       <div
         className="container"
@@ -164,7 +259,7 @@ export default function JoinBoardDetail() {
         <div className="d-flex justify-content-between align-items-start mb-4 position-relative">
           <div className="d-flex align-items-center">
             <img
-              src={board.boardWriterProfileUrl || "/images/default-profile.png"}
+              src={`http://localhost:8080/api/member/image/${board.boardWriter}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{
@@ -189,7 +284,7 @@ export default function JoinBoardDetail() {
                 </small>
               </div>
               <div className="text-muted" style={{ fontSize: "0.85rem" }}>
-                {board.boardWriterGender === "M" ? "남성" : "여성"} ·{" "}
+                {board.boardWriterGender === "m" ? "남성" : "여성"} ·{" "}
                 {board.boardWriterBirth} · {board.boardWriterMbti}
               </div>
             </div>

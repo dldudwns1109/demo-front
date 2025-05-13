@@ -106,7 +106,7 @@ export default function ProfileCard({ member }) {
               </div>
               <div
                 className={`d-flex flex-wrap ${windowWidth < 768 && "mt-4"}`}
-                style={{ gap: "12px" }}
+                style={{ gap: "12px", width: "360px" }}
               >
                 {member.memberLike.map((like, idx) => (
                   <span key={idx} className="mbti-badge">

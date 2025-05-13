@@ -105,6 +105,7 @@ function App() {
         />
         <Route path="/join/board/write" element={<JoinBoardWrite />} />
         <Route path="/join/board/edit/:boardNo" element={<JoinBoardEdit />} />
+        
         <Route path="/crew/:crewNo/detail" element={<CrewDetail />} />
         <Route path="/crew/:crewNo/edit" element={<CrewEdit />} />
         <Route path="/crew/:crewNo/delete" element={<CrewDelete />} />

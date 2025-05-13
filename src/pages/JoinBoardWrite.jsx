@@ -137,7 +137,7 @@ export default function JoinBoardWrite() {
             <div>
               <strong>{profile.memberNickname}</strong>{" "}
               <div className="text-muted" style={{ fontSize: "0.85rem" }}>
-                {profile.memberGender === "M" ? "남성" : "여성"} ·{" "}
+                {profile.memberGender === "m" ? "남성" : "여성"} ·{" "}
                 {profile.memberBirth} · {profile.memberMbti}
               </div>
             </div>

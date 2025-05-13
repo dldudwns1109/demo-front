@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { replyCountState } from "../store/replyCountState";
-import { loginState, locationState } from "../utils/storage";
+import { loginState, locationState, userNoState } from "../utils/storage";
 import Header from "../components/Header";
 import CrewTopNav from "../components/CrewTopNav";
 import { FaRegCommentDots } from "react-icons/fa";
@@ -22,6 +22,7 @@ export default function CrewBoard() {
    // 로그인 및 위치 상태
    const login = useRecoilValue(loginState);
    const [location, setLocation] = useRecoilState(locationState);
+   const userNo = useRecoilValue(userNoState);
 
   const [showPopoverId, setShowPopoverId] = useState(null);
   const popoverRef = useRef();
@@ -166,10 +167,13 @@ useEffect(() => {
                 <div className="card-body" style={{ padding: "1.5rem" }}>
                   <div className="d-flex align-items-center mb-3">
                     <img
-                      src={
-                        board.boardWriterProfileUrl ||
-                        "/images/default-profile.png"
-                      }
+                      // src={
+                      //   board.boardWriterProfileUrl ||
+                      //   "/images/default-profile.png"
+                      // }
+                      // src={`http://localhost:8080/api/member/image/${userNo}`}
+                      // src={`http://localhost:8080/api/member/image/${member.memberNo}`}
+                      src={`http://localhost:8080/api/member/image/${board.boardWriter}`}
                       alt="프로필"
                       className="rounded-circle me-3"
                       style={{
@@ -187,6 +191,7 @@ useEffect(() => {
                     />
                     <div>
                       <strong>{board.boardWriterNickname}</strong>
+                      
                       <div className="text-muted" style={{ fontSize: "0.85rem" }}>
                         {board.boardCategory} ·{" "}
                         {new Date(board.boardWriteTime).toLocaleString("ko-KR", {
@@ -235,10 +240,7 @@ useEffect(() => {
               >
                 <div className="d-flex align-items-center mb-3">
                   <img
-                    src={
-                      board.boardWriterProfileUrl ||
-                      "/images/default-profile.png"
-                    }
+                    src={`http://localhost:8080/api/member/image/${userNo}`}
                     alt="프로필"
                     className="rounded-circle me-3"
                     style={{ width: "3.5rem", height: "3.5rem", objectFit: "cover" }}

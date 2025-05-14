@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import axios from "axios";
 
@@ -12,17 +13,27 @@ export default function GroupItem({ data }) {
   const userNo = useRecoilValue(userNoState);
   const [toggle, setToggle] = useState(data.crewIsLiked);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     setToggle(data.crewIsLiked);
   }, [data.crewIsLiked]);
 
   return (
-    <div className="d-flex flex-column" style={{ cursor: "pointer" }}>
+    <div
+      className="d-flex flex-column"
+      style={{ cursor: "pointer" }}
+      onClick={() => navigate(`/crew/${data.crewNo}/detail`)}
+    >
       <div className="position-relative" style={{ marginBottom: "12px" }}>
         <img
           src={`http://localhost:8080/api/attachment/${data.crewAttachmentNo}`}
           className="w-100"
-          style={{ borderRadius: "8px", objectFit: "cover" }}
+          style={{
+            borderRadius: "8px",
+            objectFit: "cover",
+            height: "270px",
+          }}
         />
         <button
           className="d-flex justify-content-center align-items-center position-absolute border-0 p-2 bg-white"

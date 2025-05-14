@@ -62,11 +62,11 @@ export default function Home() {
 
   useEffect(() => {
     setIsAroundMore(aroundGroupData.length > aroundRenderItem);
-  }, [location, aroundRenderItem]);
+  }, [location, aroundRenderItem, aroundGroupData]);
 
   useEffect(() => {
     setIsLikedMore(likedGroupData.length > likedRenderItem);
-  }, [location, likedRenderItem]);
+  }, [location, likedRenderItem, likedGroupData]);
 
   useEffect(() => {
     const fetchData = async () => {

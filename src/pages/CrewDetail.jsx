@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useRecoilValue, useRecoilState } from "recoil";
-import { loginState, locationState } from "../utils/storage";
+import { loginState, locationState, categoryState } from "../utils/storage";
 import Header from "../components/Header";
 import CrewTopNav from "../components/CrewTopNav";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -21,6 +21,7 @@ export default function CrewDetail() {
   const navigate = useNavigate();
   const login = useRecoilValue(loginState);
   const [location, setLocation] = useRecoilState(locationState);
+  const [category, setCategory] = useRecoilState(categoryState);
   const { crewNo } = useParams();
 
   const [crewData, setCrewData] = useState(null);
@@ -37,7 +38,6 @@ export default function CrewDetail() {
   const joinSheetRef = useRef(null);
   const [joinMessage, setJoinMessage] = useState("");
   // const [reportMessage, setReportMessage] = useState("");
-
   const [showPopoverId, setShowPopoverId] = useState(null);
   const popoverRef = useRef();
 
@@ -293,6 +293,8 @@ export default function CrewDetail() {
     <>
       <Header
         loginState={login ? "loggined" : "login"}
+        category={category}
+        setCategory={setCategory}
         location={location}
         setLocation={setLocation}
       />

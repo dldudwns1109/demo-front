@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { replyCountState } from "../store/replyCountState";
-import { loginState, locationState, userNoState } from "../utils/storage";
+import { loginState, locationState, userNoState, categoryState } from "../utils/storage";
 import Header from "../components/Header";
 import CrewTopNav from "../components/CrewTopNav";
 import { FaRegCommentDots } from "react-icons/fa";
@@ -22,6 +22,7 @@ export default function CrewBoard() {
   // 로그인 및 위치 상태
   const login = useRecoilValue(loginState);
   const [location, setLocation] = useRecoilState(locationState);
+  const [category, setCategory] = useRecoilState(categoryState);
   const userNo = useRecoilValue(userNoState);
 
   const [showPopoverId, setShowPopoverId] = useState(null);
@@ -113,6 +114,8 @@ export default function CrewBoard() {
       {/* 헤더 */}
       <Header
         loginState={`${login ? "loggined" : "login"}`}
+        category={category}
+        setCategory={setCategory}
         location={location}
         setLocation={setLocation}
       />

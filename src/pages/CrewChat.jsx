@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useRecoilValue, useRecoilState } from "recoil";
-import { loginState, locationState } from "../utils/storage";
+import { loginState, locationState, categoryState } from "../utils/storage";
 import Header from "../components/Header";
 import CrewTopNav from "../components/CrewTopNav";
 
@@ -12,6 +12,7 @@ export default function CrewChat() {
 
   const login = useRecoilValue(loginState);
   const [location, setLocation] = useRecoilState(locationState);
+  const [category, setCategory] = useRecoilState(categoryState);
 
   useEffect(() => {
     const fetchCrewName = async () => {
@@ -29,6 +30,8 @@ export default function CrewChat() {
     <>
       <Header
         loginState={`${login ? "loggined" : "login"}`}
+        category={category}
+        setCategory={setCategory}
         location={location}
         setLocation={setLocation}
       />

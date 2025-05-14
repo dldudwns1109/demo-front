@@ -15,6 +15,7 @@ import {
   FaUserAlt,
 } from "react-icons/fa";
 import "../css/CrewDetail.css";
+import MeetingCard from "../components/MeetingCard";
 
 export default function CrewDetail() {
   const navigate = useNavigate();
@@ -39,6 +40,7 @@ export default function CrewDetail() {
   const popoverRef = useRef();
 
   const [meetingCount, setMeetingCount] = useState(0);
+  const [meetingList, setMeetingList] = useState([]);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("refreshToken");
@@ -72,18 +74,21 @@ export default function CrewDetail() {
       }
     };
 
-    const fetchMeetingCount = async () => {
+    const fetchMeetingList = async () => {
       try {
-        // 더미 데이터로 0으로 설정 (구현 예정이므로)
-        setMeetingCount(0);
+        const response = await axios.get(
+          `http://localhost:8080/api/meeting/list/${crewNo}`
+        );
+        setMeetingList(response.data);
+        setMeetingCount(response.data.length); // ✅ 여기서 count 설정
       } catch (err) {
-        console.error("Error fetching meeting count:", err.message);
+        console.error("정모 목록 불러오기 실패:", err);
       }
     };
 
     fetchCrewData();
     fetchMembers();
-    fetchMeetingCount();
+    fetchMeetingList();
   }, [crewNo]);
 
   /* 로그인 시 추가적으로 체크할 정보들 */
@@ -324,43 +329,74 @@ export default function CrewDetail() {
             >
               <span>{crewData?.crewCategory}</span> ·
               <span style={{ display: "flex", alignItems: "center" }}>
-                <FaMapMarkerAlt style={{ marginRight: "0.3rem" }} />
+                <FaMapMarkerAlt style={{ marginRight: "0.3rem", color: "#6C757D" }} />
                 {crewData?.crewLocation}
               </span>{" "}
               ·
               <span style={{ display: "flex", alignItems: "center" }}>
-                <FaUsers style={{ marginRight: "0.3rem" }} />
+                <FaUsers style={{ marginRight: "0.3rem", color: "#6C757D" }} />
                 회원 {members.length || 0}명
               </span>
             </div>
-            <p style={{ fontWeight: "bold", marginBottom: "0.5rem" }}>모임 소개</p>
+            <p style={{ fontWeight: "bold", marginBottom: "0.5rem" }}>
+              모임 소개
+            </p>
             <p style={{ marginBottom: "1.5rem" }}>{crewData?.crewIntro}</p>
           </div>
 
-          {/* 정모 일정 */}
-          <div className="meeting-schedule" style={{ marginBottom: "1.5rem" }}>
+          {/* 정모 일정 제목 + 버튼 */}
+          <div
+            className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center"
+            style={{ gap: "8px" }}
+          >
             <h3
               style={{
                 fontSize: "1rem",
                 fontWeight: "bold",
                 display: "flex",
                 alignItems: "center",
+                margin: 0,
               }}
             >
-              <FaCalendarAlt style={{ marginRight: "0.5rem" }} />
               정모 일정 {meetingCount}
             </h3>
+
             <button
               className="btn btn-primary"
-              style={{ fontSize: "0.85rem", padding: "6px 12px" }}
+              style={{
+                padding: "12px",
+                backgroundColor: "#007BFF",
+                color: "#ffffff",
+                fontSize: "16px",
+                fontWeight: "bold",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: "0.85rem",
+                padding: "6px 12px",
+              }}
               onClick={() =>
                 navigate("/meeting/create", {
                   state: { crewNo: Number(crewNo) },
                 })
               }
             >
-              정모 추가하기
+              정모 추가
             </button>
+          </div>
+
+          {/* 정모 카드 목록 */}
+          <div
+            className="d-flex flex-wrap"
+            style={{ justifyContent: "flex-start", gap: "60px" }}
+          >
+            {meetingList.map((meeting) => (
+              <MeetingCard
+                key={meeting.meetingNo}
+                meeting={meeting}
+                crewNo={crewNo}
+              />
+            ))}
           </div>
 
           <div className="member-section" style={{ marginBottom: "1.5rem" }}>
@@ -372,7 +408,6 @@ export default function CrewDetail() {
                 alignItems: "center",
               }}
             >
-              <FaUserAlt style={{ marginRight: "0.5rem" }} />
               모임 멤버 {members.length || 0}
             </h3>
             <div
@@ -388,7 +423,7 @@ export default function CrewDetail() {
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "0.5rem",
+                      gap: "0.8rem",
                       padding: "0.5rem",
                       justifyContent: "space-between",
                       backgroundColor: "#f9f9f9",
@@ -408,7 +443,6 @@ export default function CrewDetail() {
                         height: "50px",
                         borderRadius: "50%",
                         objectFit: "cover",
-                        marginRight: "1rem",
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -432,6 +466,7 @@ export default function CrewDetail() {
                     <div
                       style={{
                         color: member.leader === "Y" ? "#F9B4ED" : "#888",
+                        fontWeight: "bold"
                       }}
                     >
                       {member.leader === "Y" ? "회장" : "일반 회원"}

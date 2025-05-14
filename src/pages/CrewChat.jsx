@@ -33,7 +33,7 @@ export default function CrewChat() {
         setLocation={setLocation}
       />
 
-      <div className="container" style={{ paddingTop: "5rem", paddingBottom: "2rem" }}>
+      <div style={{ paddingTop: "5rem", paddingBottom: "2rem" }}>
         <CrewTopNav />
 
         <div className="text-center text-muted mt-5">

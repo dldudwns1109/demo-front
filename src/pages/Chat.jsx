@@ -6,6 +6,7 @@ import { loginState, userNoState, windowWidthState } from "../utils/storage";
 import axios from "axios";
 import moment from "moment";
 import "moment/dist/locale/ko";
+import { toast, ToastContainer } from "react-toastify";
 import Header from "../components/Header";
 import Unauthorized from "../components/Unauthorized";
 
@@ -20,44 +21,52 @@ export default function Chat() {
   const [client, setClient] = useState(null);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
+  const [receivedMessage, setReceivedMessage] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
   const [chatRoom, setChatRoom] = useState([]);
   const [currRoom, setCurrRoom] = useState(null);
-  const [subscription, setSubscription] = useState(null); // 구독 상태 추가
 
   const scrollContainerRef = useRef(null);
 
   const accessToken = axios.defaults.headers.common["Authorization"];
 
-  useEffect(() => {
-    if (!userNo) return;
+  const errorToastify = (message) => toast.error(message);
 
+  useEffect(() => {
     const fetchData = async () => {
       const res = await axios.get(
-        `http://localhost:8080/api/chat/list/${userNo}`
+        `http://localhost:8080/api/chat/messages/${currRoom}`
       );
-      setChatRoom(res.data);
+      setMessages(res.data);
     };
-
-    fetchData();
-  }, [userNo]);
+    if (currRoom) fetchData();
+  }, [currRoom]);
 
   useEffect(() => {
-    if (chatRoom.length) setCurrRoom(chatRoom[0].roomNo);
-  }, [chatRoom]);
+    if (!login) return;
+    setCurrRoom(chatRoom[0]?.roomNo);
+  }, [login, chatRoom.length]);
 
   useEffect(() => {
     if (!login) return;
 
-    if (currRoom) {
-      const client = connectToServer();
-      setClient(client);
-    }
+    const client = connectToServer();
+    setClient(client);
 
     return () => {
       disconnectFromServer(client);
       setClient(null);
     };
-  }, [login, currRoom]);
+  }, [login, chatRoom.length, currRoom]);
+
+  useEffect(() => {
+    if (!isConnected || !client?.active) return;
+
+    client.publish({
+      destination: "/app/member/room",
+      headers: { accessToken },
+    });
+  }, [isConnected, receivedMessage]);
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -71,54 +80,49 @@ export default function Chat() {
 
     const client = new Client({
       webSocketFactory: () => socket,
-      connectHeaders: {
-        accessToken,
+      onConnect: async () => {
+        client.subscribe(`/private/member/rooms/${userNo}`, (message) => {
+          setChatRoom(JSON.parse(message.body));
+        });
+
+        chatRoom?.forEach((room) => {
+          client.subscribe(`/private/member/chat/${room.roomNo}`, (message) => {
+            setReceivedMessage({
+              ...JSON.parse(message.body),
+              type: "CHAT",
+            });
+            if (room.roomNo === currRoom) {
+              setMessages((messages) => [
+                ...messages,
+                {
+                  ...JSON.parse(message.body),
+                  type: "CHAT",
+                },
+              ]);
+            }
+          });
+        });
+
+        setIsConnected(true);
       },
-      onConnect: () => {
-        if (subscription) {
-          subscription.unsubscribe();
-          setSubscription(null);
-        }
-
-        const fetchData = async () => {
-          const res = await axios.get(
-            `http://localhost:8080/api/chat/messages/${currRoom}`
-          );
-
-          setMessages(res.data);
-        };
-        fetchData();
-
-        const newSubscription = client.subscribe(
-          `/private/member/chat/${currRoom}`,
-          (message) => {
-            const json = JSON.parse(message.body);
-            json.type = "CHAT";
-            setMessages((prev) => [...prev, json]);
-          }
-        );
-
-        setSubscription(newSubscription);
+      onDisconnect: () => {
+        setIsConnected(false);
       },
-      onDisconnect: () => {},
       // debug: (str) => console.log(str),
     });
+
+    if (login) client.connectHeaders = { accessToken };
 
     client.activate();
 
     return client;
-  }, [currRoom, subscription]);
+  }, [login, userNo, chatRoom, currRoom]);
 
-  const disconnectFromServer = useCallback(
-    (client) => {
-      if (subscription) {
-        subscription.unsubscribe();
-        setSubscription(null);
-      }
-      if (client) client.deactivate();
-    },
-    [subscription]
-  );
+  const disconnectFromServer = useCallback((client) => {
+    if (client) client.deactivate();
+    setClient(false);
+    setIsConnected(false);
+  }, []);
 
   const sendMessageToServer = useCallback(() => {
     if (
@@ -130,13 +134,11 @@ export default function Chat() {
     )
       return;
 
-    const stompMessage = {
+    client.publish({
       destination: "/app/member/chat",
       headers: { accessToken },
       body: JSON.stringify({ target: currRoom, content: input }),
-    };
-
-    client.publish(stompMessage);
+    });
     setInput("");
   }, [client, input, login, currRoom]);
 
@@ -224,12 +226,22 @@ export default function Chat() {
                       <span style={{ color: "#111111" }}>
                         {room.accountNickname}
                       </span>
-                      <span style={{ fontSize: "14px", color: "#333333" }}>
-                        {room.content}
+                      <span
+                        style={{
+                          fontSize: "14px",
+                          color: "#333333",
+                          textAlign: "left",
+                        }}
+                      >
+                        {room.content.length > 16
+                          ? room.content.slice(0, 16) + "..."
+                          : room.content}
                       </span>
                     </div>
                   </div>
-                  {moment(room.time).format("a h:mm")}
+                  <div style={{ minWidth: "80px" }}>
+                    {moment(room.time).format("a h:mm")}
+                  </div>
                 </button>
               ))}
             </div>
@@ -282,8 +294,18 @@ export default function Chat() {
               {messages.map((message, idx) => (
                 <div key={idx} className="d-flex flex-column gap-3">
                   {isDayFirstMessage(message, idx) && (
-                    <div className="text-center mt-3">
-                      {moment(message.time).format("YYYY년 MM월 DD일 dddd")}
+                    <div className="d-inline-flex justify-content-center mt-3">
+                      <span
+                        className="px-3 py-2"
+                        style={{
+                          backgroundColor: "#F1F3F5",
+                          borderRadius: "999px",
+                          fontSize: "14px",
+                          color: "#666666",
+                        }}
+                      >
+                        {moment(message.time).format("YYYY년 MM월 DD일 dddd")}
+                      </span>
                     </div>
                   )}
                   <div
@@ -301,9 +323,8 @@ export default function Chat() {
                         )}
                         <div>
                           <div
-                            className="py-2"
+                            className="bg-primary text-white py-2"
                             style={{
-                              backgroundColor: "#F1F3F5",
                               borderRadius: "8px",
                               paddingLeft: "12px",
                               paddingRight: "12px",
@@ -312,58 +333,59 @@ export default function Chat() {
                               whiteSpace: "normal",
                             }}
                           >
-                            <span style={{ color: "#333333" }}>
-                              {message.content}
-                            </span>
+                            <span>{message.content}</span>
                           </div>
                         </div>
                       </>
                     ) : (
                       <>
-                        {isSenderVisible(message, idx) && (
-                          <img
-                            className="shadow-sm"
-                            style={{
-                              objectFit: "cover",
-                              borderRadius: "999px",
-                              marginBottom: windowWidth > 1024 ? "0px" : "12px",
-                            }}
-                            src={`http://localhost:8080/api/member/image/${message.accountNo}`}
-                            width={windowWidth > 1024 ? 64 : 48}
-                            height={windowWidth > 1024 ? 64 : 48}
-                          />
-                        )}
-                        <div
-                          style={{
-                            paddingLeft: !isSenderVisible(message, idx)
-                              ? windowWidth > 1024
-                                ? "72px"
-                                : "60px"
-                              : "0px",
-                          }}
-                        >
+                        <div className="d-flex" style={{ gap: "12px" }}>
                           {isSenderVisible(message, idx) && (
-                            <span
-                              style={{ fontSize: "14px", color: "#111111" }}
-                            >
-                              {message.accountNickname}
-                            </span>
+                            <img
+                              className="shadow-sm"
+                              style={{
+                                objectFit: "cover",
+                                borderRadius: "999px",
+                                marginBottom:
+                                  windowWidth > 1024 ? "0px" : "12px",
+                              }}
+                              src={`http://localhost:8080/api/member/image/${message.accountNo}`}
+                              width={windowWidth > 1024 ? 64 : 48}
+                              height={windowWidth > 1024 ? 64 : 48}
+                            />
                           )}
                           <div
-                            className="py-2"
                             style={{
-                              backgroundColor: "#F1F3F5",
-                              borderRadius: "8px",
-                              paddingLeft: "12px",
-                              paddingRight: "12px",
-                              maxWidth: "200px",
-                              wordBreak: "break-word",
-                              whiteSpace: "normal",
+                              paddingLeft: !isSenderVisible(message, idx)
+                                ? windowWidth > 1024
+                                  ? "76px"
+                                  : "60px"
+                                : "0px",
                             }}
                           >
-                            <span style={{ color: "#333333" }}>
-                              {message.content}
-                            </span>
+                            {isSenderVisible(message, idx) && (
+                              <span
+                                style={{ fontSize: "14px", color: "#111111" }}
+                              >
+                                {message.accountNickname}
+                              </span>
+                            )}
+                            <div
+                              className="py-2"
+                              style={{
+                                backgroundColor: "#F1F3F5",
+                                borderRadius: "8px",
+                                paddingLeft: "12px",
+                                paddingRight: "12px",
+                                maxWidth: "200px",
+                                wordBreak: "break-word",
+                                whiteSpace: "normal",
+                              }}
+                            >
+                              <span style={{ color: "#333333" }}>
+                                {message.content}
+                              </span>
+                            </div>
                           </div>
                         </div>
                         {isLastMessage(message, idx) && (
@@ -401,7 +423,11 @@ export default function Chat() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyUp={(e) => {
-                  if (e.key === "Enter") sendMessageToServer();
+                  if (e.key === "Enter") {
+                    e.target.value.length > 200
+                      ? errorToastify("200글자 이상 입력할 수 없습니다!")
+                      : sendMessageToServer();
+                  }
                 }}
               />
               <button
@@ -413,6 +439,13 @@ export default function Chat() {
               </button>
             </div>
           </div>
+          <ToastContainer
+            position="bottom-right"
+            autoClose={2000}
+            pauseOnHover={false}
+            theme="light"
+            limit={1}
+          />
         </div>
       ) : (
         <Unauthorized />

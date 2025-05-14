@@ -3,8 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import PostcodeModal from "../components/PostcodeModal";
 import axios from "axios";
-import { loginState } from "../utils/storage";
+import { loginState, userNoState } from "../utils/storage";
 import { useRecoilValue } from "recoil";
+import Unauthorized from "../components/Unauthorized";
 
 const meetingLimitList = [3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15];
 
@@ -12,6 +13,8 @@ export default function MeetingEdit() {
   const { meetingNo } = useParams();
   const login = useRecoilValue(loginState);
   const navigate = useNavigate();
+  const userNo = useRecoilValue(userNoState);
+  const [isLeader, setIsLeader] = useState(null);
 
   const [meeting, setMeeting] = useState({
     meetingName: "",
@@ -25,15 +28,21 @@ export default function MeetingEdit() {
   const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
   const fileInputRef = useRef();
 
+  const [errors, setErrors] = useState({
+    meetingName: "",
+    meetingDate: "",
+  });
+
   const isTotalValid = useMemo(() => {
     return (
       !!meeting.meetingName &&
       !!meeting.meetingDate &&
       !!meeting.meetingLocation &&
       !!meeting.meetingPrice &&
-      !!meeting.meetingLimit
+      !!meeting.meetingLimit &&
+      !Object.values(errors).some((msg) => !!msg) // 에러 메시지 하나라도 있으면 false
     );
-  }, [meeting]);
+  }, [meeting, errors]);
 
   const changeMeeting = useCallback((e) => {
     const { name, value } = e.target;
@@ -62,28 +71,55 @@ export default function MeetingEdit() {
     setMeeting((prev) => ({ ...prev, meetingLocation: address }));
   }, []);
 
-  const loadMeetingData = useCallback(() => {
-    axios
-      .get(`http://localhost:8080/api/meeting/${meetingNo}`)
-      .then((res) => {
-        const data = res.data;
-        setMeeting({
-          meetingName: data.meetingName,
-          meetingDate: data.meetingDate.replace(" ", "T").slice(0, 16),
-          meetingLocation: data.meetingLocation,
-          meetingPrice: data.meetingPrice.toLocaleString(),
-          meetingLimit: data.meetingLimit,
-        });
-        setPreviewUrl(`http://localhost:8080/api/meeting/image/${meetingNo}`);
-      })
-      .catch((err) => console.error("정모 정보 로딩 실패", err));
-  }, [meetingNo]);
+  const loadMeetingData = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/meeting/${meetingNo}`
+      );
+      const data = res.data;
+
+      setMeeting({
+        meetingName: data.meetingName,
+        meetingDate: data.meetingDate.replace(" ", "T").slice(0, 16),
+        meetingLocation: data.meetingLocation,
+        meetingPrice: data.meetingPrice.toLocaleString(),
+        meetingLimit: data.meetingLimit,
+      });
+      setPreviewUrl(`http://localhost:8080/api/meeting/image/${meetingNo}`);
+
+      // ✅ 모임장 여부 판단
+      setIsLeader(data.meetingOwnerNo === userNo);
+    } catch (err) {
+      console.error("정모 정보 로딩 실패", err);
+      setIsLeader(false); // 오류 시 접근 차단
+    }
+  }, [meetingNo, userNo]);
 
   useEffect(() => {
     loadMeetingData();
-  }, [loadMeetingData]);
+  }, []);
+
+  const checkError = useCallback(() => {
+    const value = meeting.meetingDate;
+    let message = "";
+
+    if (!value) {
+      message = "정모 날짜를 입력해주세요.";
+    } else if (new Date(value) < new Date()) {
+      message = "정모 날짜는 현재 이후여야 해요.";
+    }
+
+    setErrors((prev) => ({ ...prev, meetingDate: message }));
+    return !message; // 에러 없으면 true, 있으면 false
+  }, [meeting]);
 
   const meetingEdit = useCallback(async () => {
+    const isValid = checkError();
+    if (!isValid) {
+      alert("입력한 정보를 다시 확인해주세요.");
+      return;
+    }
+
     const formData = new FormData();
     Object.entries(meeting).forEach(([key, value]) => {
       let cleanValue = value;
@@ -110,7 +146,17 @@ export default function MeetingEdit() {
       console.error("정모 수정 오류", err);
       alert("정모 수정 중 오류가 발생했습니다.");
     }
-  }, [meeting, attach, meetingNo, navigate]);
+  }, [meeting, attach, meetingNo, navigate, checkError]);
+
+  // meetingNo 없거나, 모임장이 아닌 경우
+  if (!meetingNo || isLeader === false) {
+    return (
+      <div className="vh-100">
+        <Header input={false} loginState={`${login ? "loggined" : "login"}`} />
+        <Unauthorized />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -159,7 +205,13 @@ export default function MeetingEdit() {
             name="meetingDate"
             value={meeting.meetingDate}
             onChange={changeMeeting}
+            onBlur={(e) => checkError(e.target.name, e.target.value)}
           />
+          {errors.meetingDate && (
+            <div style={{ color: "red", fontSize: "14px", marginTop: "4px" }}>
+              {errors.meetingDate}
+            </div>
+          )}
         </div>
         <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
           <label className="label-text">정모 위치</label>

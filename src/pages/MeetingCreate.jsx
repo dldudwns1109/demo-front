@@ -1,16 +1,18 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PostcodeModal from "../components/PostcodeModal";
 import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
-import { loginState } from "../utils/storage";
+import { loginState, userNoState } from "../utils/storage";
 import { useRecoilValue } from "recoil";
+import Unauthorized from "../components/Unauthorized";
 
 const meetingLimitList = [3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15];
 export default function MeetingCreate() {
   const location = useLocation();
   const login = useRecoilValue(loginState);
+  const userNo = useRecoilValue(userNoState);
   const crewNo = location.state?.crewNo;
 
   const navigate = useNavigate();
@@ -28,6 +30,10 @@ export default function MeetingCreate() {
   const [isPostcodeOpen, setIsPostcodeOpen] = useState(false); //지도모달
   const fileInputRef = useRef();
 
+  const [errors, setErrors] = useState({
+    meetingDate: "",
+  });
+
   //memo
   const isTotalValid = useMemo(() => {
     return (
@@ -36,11 +42,38 @@ export default function MeetingCreate() {
       !!meeting.meetingLocation &&
       !!meeting.meetingPrice &&
       !!meeting.meetingLimit &&
-      !!attach
+      !!attach &&
+      !Object.values(errors).some((msg) => !!msg)
     );
-  }, [meeting, attach]);
+  }, [meeting, attach, errors]);
+
+  useEffect(() => {
+    checkCrewMember();
+  }, []);
 
   //callback
+  const checkCrewMember = useCallback(async () => {
+    if (!login || !crewNo) return;
+
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/crewmember/${crewNo}/member`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+      if (!res.data) {
+        alert("정모를 생성하려면 해당 모임의 회원이어야 합니다.");
+        navigate(`/crew/${crewNo}/detail`);
+      }
+    } catch (err) {
+      console.error("모임 멤버 여부 확인 실패", err);
+      alert("모임 멤버 확인 중 오류가 발생했습니다.");
+    }
+  }, [login, crewNo, navigate]);
+
   const changeMeeting = useCallback((e) => {
     const { name, value } = e.target;
 
@@ -81,35 +114,58 @@ export default function MeetingCreate() {
     setMeeting((prev) => ({ ...prev, meetingLocation: address }));
   }, []);
 
+  const checkError = useCallback((name, value) => {
+    let message = "";
+
+    if (name === "meetingDate") {
+      if (!value) {
+        message = "정모 날짜를 입력해주세요.";
+      } else if (new Date(value) < new Date()) {
+        message = "정모 날짜는 현재 이후여야 해요.";
+      }
+    }
+
+    setErrors((prev) => ({ ...prev, [name]: message }));
+    return !message;
+  }, []);
+
   const meetingAdd = useCallback(async () => {
+    // 1️⃣ 대표 이미지 체크
     if (!attach) {
       alert("대표 이미지를 선택해주세요.");
       return;
     }
 
+    // 2️⃣ 날짜 유효성 체크
+    const isValid = checkError();
+    if (!isValid) {
+      alert("정모 날짜를 다시 확인해주세요.");
+      return;
+    }
+
+    // 3️⃣ FormData 구성
     const formData = new FormData();
 
     Object.entries(meeting).forEach(([key, value]) => {
       let cleanValue = value;
+
       if (key === "meetingPrice") {
-        cleanValue = value.replaceAll(",", "");
+        cleanValue = Number(value.replaceAll(",", "")); // ← 여기
       }
+
+      if (key === "meetingLimit") {
+        cleanValue = Number(value); // ← 여기도
+      }
+
       if (key === "meetingDate") {
-        cleanValue = value.replace("T", ""); // ← 이거는 틀림
-        // 정확히는 아래와 같이 변환해야 해:
         cleanValue = value.replace("T", " ") + ":00";
       }
+
       formData.append(key, cleanValue);
     });
 
-    // 반드시 crewNo 추가!
     formData.append("crewNo", crewNo);
     formData.append("attach", attach);
-
-    // 디버깅 로그
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
 
     try {
       const response = await axios.post(
@@ -124,14 +180,23 @@ export default function MeetingCreate() {
         }
       );
 
-      const meetingNo = response.data.meetingNo;
-      navigate(`/meeting/detail/${meetingNo}`);
+      navigate(`/crew/${crewNo}/detail`);
     } catch (err) {
       console.error("정모 등록 오류", err);
       alert("정모 등록 중 오류가 발생했습니다.");
     }
-  }, [meeting, attach, crewNo, navigate]);
+  }, [meeting, attach, crewNo, navigate, checkError]);
 
+  // 모임 번호가 없으면 잘못된 접근으로 간주
+  if (!crewNo) {
+    return (
+      <div className="vh-100">
+        <Header input={false} loginState={`${login ? "loggined" : "login"}`} />
+        <Unauthorized />
+      </div>
+    );
+  }
+  
   return (
     <>
       {/* 헤더 */}
@@ -184,7 +249,13 @@ export default function MeetingCreate() {
             name="meetingDate"
             value={meeting.meetingDate}
             onChange={changeMeeting}
+            onBlur={(e) => checkError(e.target.name, e.target.value)}
           />
+          {errors.meetingDate && (
+            <div style={{ color: "red", fontSize: "14px", marginTop: "4px" }}>
+              {errors.meetingDate}
+            </div>
+          )}
         </div>
         <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
           <label className="label-text">정모 위치</label>

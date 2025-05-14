@@ -8,7 +8,7 @@ import axios from "axios";
 export default function CrewBoardWrite() {
   const { crewNo } = useParams();
   const [location, setLocation] = useRecoilState(locationState);
-  const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [boardTitle, setBoardTitle] = useState("");
   const [boardContent, setBoardContent] = useState("");
   const [profile, setProfile] = useState(null);
@@ -20,7 +20,7 @@ export default function CrewBoardWrite() {
   const login = useRecoilValue(loginState);
   const userNo = useRecoilValue(userNoState);
 
-  const categories = ["전체", "공지", "후기", "자유"];
+  const categories = ["공지", "후기", "자유"];
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("refreshToken");
@@ -73,9 +73,14 @@ export default function CrewBoardWrite() {
     if (isMember) fetchProfile();
   }, [userNo, isMember]);
 
-  const handleSubmit = async () => {
-    if (!boardContent.trim() || !boardTitle.trim() || !selectedCategory) {
-      alert("카테고리, 제목, 내용을 모두 입력해주세요.");
+   const handleSubmit = async () => {
+    if (!selectedCategory) {
+      alert("카테고리를 선택해주세요.");
+      return;
+    }
+
+    if (!boardTitle.trim() || !boardContent.trim()) {
+      alert("제목과 내용을 모두 입력해주세요.");
       return;
     }
 

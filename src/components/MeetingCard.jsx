@@ -26,6 +26,7 @@ export default function MeetingCard({ meeting, crewNo }) {
           state: { crewNo },
         })
       }
+      className="w-100"
       style={{
         width: "360px",
         cursor: "pointer",
@@ -45,17 +46,17 @@ export default function MeetingCard({ meeting, crewNo }) {
           width: "100%",
           height: "270px",
           objectFit: "cover",
-          borderRadius: "16px",
+          borderRadius: "8px",
         }}
       />
 
-      <div 
-        style={{ 
-            fontWeight: "bold", 
-            fontSize: "20px", 
-            color: "#111111",
-
-        }}>
+      <div
+        style={{
+          fontWeight: "bold",
+          fontSize: "20px",
+          color: "#111111",
+        }}
+      >
         {meeting.meetingName}
       </div>
 

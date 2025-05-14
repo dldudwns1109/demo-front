@@ -4,6 +4,7 @@ import axios from "axios";
 import Header from "../components/Header";
 import ProfileCard from "../components/ProfileCard";
 import GroupItem from "../components/GroupItem";
+import MeetingCard from "../components/MeetingCard";
 import Unauthorized from "../components/Unauthorized";
 import { userNoState, loginState, windowWidthState } from "../utils/storage";
 
@@ -61,8 +62,11 @@ export default function Mypage() {
   }, [userNo]);
 
   const loadMeetingList = useCallback(async () => {
-    const resp = await axios.get(`/meeting/member/${userNo}`);
-    const list = Array.isArray(resp.data) ? resp.data : [];
+    const res = await axios.get(
+      `http://localhost:8080/api/meeting/member/${userNo}`
+    );
+    console.log(res.data);
+    const list = Array.isArray(res.data) ? res.data : [];
     setMeetingList(list);
   }, [userNo]);
 
@@ -157,8 +161,8 @@ export default function Mypage() {
                         : "repeat(1, 1fr)"
                     }`,
                     gap: "60px",
-                    paddingLeft: windowWidth > 768 ? "120px" : "0",
-                    paddingRight: windowWidth > 768 ? "120px" : "0",
+                    paddingLeft: windowWidth > 768 ? "120px" : "8.33%",
+                    paddingRight: windowWidth > 768 ? "120px" : "8.33%",
                   }}
                 >
                   {createList.map((crew, idx) => (
@@ -182,8 +186,8 @@ export default function Mypage() {
                         : "repeat(1, 1fr)"
                     }`,
                     gap: "60px",
-                    paddingLeft: windowWidth > 768 ? "120px" : "0",
-                    paddingRight: windowWidth > 768 ? "120px" : "0",
+                    paddingLeft: windowWidth > 768 ? "120px" : "8.33%",
+                    paddingRight: windowWidth > 768 ? "120px" : "8.33%",
                   }}
                 >
                   {joinList.map((crew, idx) => (
@@ -207,8 +211,8 @@ export default function Mypage() {
                         : "repeat(1, 1fr)"
                     }`,
                     gap: "60px",
-                    paddingLeft: windowWidth > 768 ? "120px" : "0",
-                    paddingRight: windowWidth > 768 ? "120px" : "0",
+                    paddingLeft: windowWidth > 768 ? "120px" : "8.33%",
+                    paddingRight: windowWidth > 768 ? "120px" : "8.33%",
                   }}
                 >
                   {likeList.map((crew, idx) => (
@@ -232,12 +236,16 @@ export default function Mypage() {
                         : "repeat(1, 1fr)"
                     }`,
                     gap: "60px",
-                    paddingLeft: windowWidth > 768 ? "120px" : "0",
-                    paddingRight: windowWidth > 768 ? "120px" : "0",
+                    paddingLeft: windowWidth > 768 ? "120px" : "8.33%",
+                    paddingRight: windowWidth > 768 ? "120px" : "8.33%",
                   }}
                 >
                   {meetingList.map((meeting, idx) => (
-                    <GroupItem key={idx} data={meeting} />
+                    <MeetingCard
+                      key={idx}
+                      meeting={meeting}
+                      crewNo={meeting.meetingCrewNo}
+                    />
                   ))}
                 </div>
               ) : (

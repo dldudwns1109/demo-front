@@ -84,7 +84,7 @@ export default function GroupItem({ data }) {
           : data.crewIntro}
       </p>
       <div
-        className="d-flex align-items-center gap-1"
+        className="d-flex flex-wrap align-items-center gap-1"
         style={{ color: "#666666" }}
       >
         <IoPeople size={18} color="#6C757D" />

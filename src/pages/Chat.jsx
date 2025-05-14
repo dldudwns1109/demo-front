@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import { useRecoilValue } from "recoil";
-import { loginState, userNoState } from "../utils/storage";
+import { loginState, userNoState, windowWidthState } from "../utils/storage";
 import axios from "axios";
 import moment from "moment";
 import "moment/dist/locale/ko";
@@ -14,6 +14,7 @@ import { FaRegPaperPlane } from "react-icons/fa6";
 moment.locale("ko");
 
 export default function Chat() {
+  const windowWidth = useRecoilValue(windowWidthState);
   const userNo = useRecoilValue(userNoState);
   const login = useRecoilValue(loginState);
   const [client, setClient] = useState(null);
@@ -185,54 +186,98 @@ export default function Chat() {
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
 
       {login ? (
-        <div className="d-flex" style={{ paddingTop: "70px" }}>
-          <div
-            style={{
-              padding: "32px",
-              backgroundColor: "#FAFAFA",
-              width: "460px",
-              height: "calc(100vh - 70px)",
-            }}
-          >
-            {chatRoom.map((room, idx) => (
-              <button
-                key={idx}
-                className="w-100 btn d-flex justify-content-between align-items-center p-3"
-                style={{
-                  backgroundColor:
-                    room.roomNo === currRoom ? "#EBEBEB" : "transparent",
-                }}
-                onClick={() => setCurrRoom(room.roomNo)}
-              >
-                <div className="d-flex gap-3">
+        <div
+          className={`d-flex ${windowWidth <= 1024 && "flex-column"}`}
+          style={{ paddingTop: "70px" }}
+        >
+          {windowWidth > 1024 ? (
+            <div
+              style={{
+                padding: "32px",
+                backgroundColor: "#FAFAFA",
+                width: "380px",
+                height: "calc(100vh - 70px)",
+              }}
+            >
+              {chatRoom.map((room, idx) => (
+                <button
+                  key={idx}
+                  className="w-100 btn d-flex justify-content-between align-items-center p-3"
+                  style={{
+                    backgroundColor:
+                      room.roomNo === currRoom ? "#EBEBEB" : "transparent",
+                  }}
+                  onClick={() => setCurrRoom(room.roomNo)}
+                >
+                  <div className="d-flex gap-3">
+                    <img
+                      className="shadow-sm"
+                      style={{ borderRadius: "999px", objectFit: "cover" }}
+                      src={`http://localhost:8080/api/member/image/${room.accountNo}`}
+                      width={64}
+                      height={64}
+                    />
+                    <div
+                      className="d-flex flex-column align-items-start"
+                      style={{ gap: "12px" }}
+                    >
+                      <span style={{ color: "#111111" }}>
+                        {room.accountNickname}
+                      </span>
+                      <span style={{ fontSize: "14px", color: "#333333" }}>
+                        {room.content}
+                      </span>
+                    </div>
+                  </div>
+                  {moment(room.time).format("a h:mm")}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div
+              className="d-flex"
+              style={{
+                padding: "16px",
+                backgroundColor: "#FAFAFA",
+              }}
+            >
+              {chatRoom.map((room, idx) => (
+                <button
+                  key={idx}
+                  className="btn d-flex flex-column justify-content-between align-items-center p-2 gap-2"
+                  style={{
+                    width: "98px",
+                    backgroundColor:
+                      room.roomNo === currRoom ? "#EBEBEB" : "transparent",
+                  }}
+                  onClick={() => setCurrRoom(room.roomNo)}
+                >
                   <img
                     className="shadow-sm"
-                    style={{ borderRadius: "999px" }}
+                    style={{ borderRadius: "999px", objectFit: "cover" }}
                     src={`http://localhost:8080/api/member/image/${room.accountNo}`}
-                    width={64}
-                    height={64}
+                    width={48}
+                    height={48}
                   />
-                  <div
-                    className="d-flex flex-column align-items-start"
-                    style={{ gap: "12px" }}
-                  >
-                    <span style={{ color: "#111111" }}>
-                      {room.accountNickname}
-                    </span>
-                    <span style={{ fontSize: "14px", color: "#333333" }}>
-                      {room.content}
-                    </span>
-                  </div>
-                </div>
-                {moment(room.time).format("a h:mm")}
-              </button>
-            ))}
-          </div>
-          <div className="mx-auto" style={{ width: "53%" }}>
+                  <span style={{ color: "#111111" }}>
+                    {room.accountNickname.length > 4
+                      ? room.accountNickname.slice(0, 4) + "..."
+                      : room.accountNickname}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+          <div
+            className="mx-auto"
+            style={{ width: windowWidth > 1024 ? "53%" : "80%" }}
+          >
             <div
               ref={scrollContainerRef}
-              className="d-flex flex-column gap-2 overflow-auto p-4"
-              style={{ height: "80vh" }}
+              className={`d-flex flex-column gap-2 overflow-auto ${
+                windowWidth > 1024 ? "p-4" : "my-4"
+              }`}
+              style={{ height: windowWidth > 1024 ? "80vh" : "63vh" }}
             >
               {messages.map((message, idx) => (
                 <div key={idx} className="d-flex flex-column gap-3">
@@ -281,16 +326,19 @@ export default function Chat() {
                             style={{
                               objectFit: "cover",
                               borderRadius: "999px",
+                              marginBottom: windowWidth > 1024 ? "0px" : "12px",
                             }}
                             src={`http://localhost:8080/api/member/image/${message.accountNo}`}
-                            width={60}
-                            height={60}
+                            width={windowWidth > 1024 ? 64 : 48}
+                            height={windowWidth > 1024 ? 64 : 48}
                           />
                         )}
                         <div
                           style={{
                             paddingLeft: !isSenderVisible(message, idx)
-                              ? "72px"
+                              ? windowWidth > 1024
+                                ? "72px"
+                                : "60px"
                               : "0px",
                           }}
                         >
@@ -332,7 +380,7 @@ export default function Chat() {
             <div
               className="d-flex justify-content-between position-absolute"
               style={{
-                width: "53%",
+                width: windowWidth > 1024 ? "53%" : "80%",
                 backgroundColor: "#F1F3F5",
                 borderRadius: "8px",
                 bottom: "80px",

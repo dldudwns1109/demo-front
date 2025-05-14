@@ -44,9 +44,10 @@ export default function GroupItem({ data }) {
             width: "36px",
             height: "36px",
           }}
-          onClick={async () => {
+          onClick={async (e) => {
+            e.stopPropagation();
+
             if (toggle) {
-              console.log(toggle);
               await axios.delete("http://localhost:8080/api/crew/deleteLike", {
                 data: {
                   memberNo: userNo,
@@ -79,8 +80,8 @@ export default function GroupItem({ data }) {
           marginBottom: "12px",
         }}
       >
-        {data.crewIntro.length > 50
-          ? data.crewIntro.slice(0, 50)
+        {data.crewIntro.length > 45
+          ? data.crewIntro.slice(0, 45) + "..."
           : data.crewIntro}
       </p>
       <div

@@ -1,13 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import axios from "axios";
 import Header from "../components/Header";
 import { loginState, userNoState } from "../utils/storage";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
+import MeetingDelegateModal from "../components/DelegateModal";
+import { FaLocationDot, FaRegCalendar } from "react-icons/fa6";
+import { FaClock, FaWonSign } from "react-icons/fa";
+import Unauthorized from "../components/Unauthorized";
 
 export default function MeetingDetail() {
+  const location = useLocation();
+  const crewNo = location.state?.crewNo;
   const { meetingNo } = useParams();
   const userNo = useRecoilValue(userNoState);
   const login = useRecoilValue(loginState);
@@ -17,20 +23,31 @@ export default function MeetingDetail() {
   const [memberList, setMemberList] = useState([]);
   const [isJoined, setIsJoined] = useState(false);
 
-  //인원 제한 체크
+  const [isDelegating, setIsDelegating] = useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
+
   const isFull = useMemo(() => {
     return meeting && memberList.length >= meeting.meetingLimit;
   }, [meeting, memberList]);
 
-  // 정모 정보 조회
   const fetchMeetingDetail = useCallback(() => {
     axios
       .get(`http://localhost:8080/api/meeting/${meetingNo}`)
-      .then((res) => setMeeting(res.data))
-      .catch((err) => console.error("정모 정보 조회 실패", err));
-  }, [meetingNo]);
+      .then((res) => {
+        if (res.data === null) {
+          alert("삭제된 정모입니다.");
+          navigate("/");
+        } else {
+          setMeeting(res.data);
+        }
+      })
+      .catch((err) => {
+        console.error("정모 정보 조회 실패", err);
+        alert("정모 정보를 불러오지 못했습니다.");
+        navigate("/");
+      });
+  }, [meetingNo, navigate]);
 
-  // 정모 참여자 목록 조회
   const fetchMeetingMemberList = useCallback(() => {
     if (!userNo) return;
     axios
@@ -39,7 +56,6 @@ export default function MeetingDetail() {
       .catch((err) => console.error("참여자 목록 조회 실패", err));
   }, [meetingNo, userNo]);
 
-  // 정모 참여 여부 확인
   const checkMeetingJoin = useCallback(() => {
     if (!userNo) return;
     axios
@@ -52,7 +68,6 @@ export default function MeetingDetail() {
       .catch((err) => console.error("참여 여부 확인 실패", err));
   }, [meetingNo, userNo]);
 
-  // 정모 참여하기
   const meetingJoin = useCallback(() => {
     axios
       .post(
@@ -71,7 +86,6 @@ export default function MeetingDetail() {
       .catch((err) => console.error("정모 참여 실패", err));
   }, [meetingNo, fetchMeetingMemberList]);
 
-  // 정모 나가기
   const meetingExit = useCallback(() => {
     axios
       .delete(`http://localhost:8080/api/meetingMember/${meetingNo}`, {
@@ -86,7 +100,6 @@ export default function MeetingDetail() {
       .catch((err) => console.error("정모 나가기 실패", err));
   }, [meetingNo, fetchMeetingMemberList]);
 
-  // 정모 삭제
   const meetingDelete = useCallback(() => {
     const confirmed = window.confirm("정말로 이 정모를 삭제하시겠습니까?");
     if (!confirmed) return;
@@ -99,29 +112,87 @@ export default function MeetingDetail() {
       })
       .then(() => {
         alert("정모가 삭제되었습니다.");
-        navigate(`/crew/${meeting.meetingCrewNo}/detail`);
+        navigate(`/crew/${crewNo}/detail`);
       })
       .catch((err) => {
         console.error("정모 삭제 실패", err);
         alert("정모 삭제 중 오류가 발생했습니다.");
       });
-  }, [meetingNo, navigate]);
+  }, [meetingNo, meeting, navigate]);
 
-  // ✅ 초기 데이터 로딩
   useEffect(() => {
     fetchMeetingDetail();
     fetchMeetingMemberList();
     checkMeetingJoin();
   }, [fetchMeetingDetail, fetchMeetingMemberList, checkMeetingJoin]);
 
-  // ✅ 날짜 & 시간 포맷
-  const dateStr = meeting?.meetingDate?.split("T")[0] || "";
-  const timeStr = meeting?.meetingDate?.split("T")[1]?.slice(0, 5) || "";
+  if (!meeting) return null;
+  const dateObj = new Date(meeting.meetingDate);
+  const dateStr = dateObj.toLocaleDateString("ko-KR", {
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+  });
+  const timeStr = dateObj.toLocaleTimeString("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  // 모임 번호가 없으면 잘못된 접근으로 간주
+  if (!crewNo) {
+    return (
+      <div className="vh-100">
+        <Header input={false} loginState={`${login ? "loggined" : "login"}`} />
+        <Unauthorized />
+      </div>
+    );
+  }
 
   return (
     <>
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
       <ToastContainer position="top-center" autoClose={2000} />
+
+      {/* ✅ 위임 모달 */}
+      {isDelegating && (
+        <MeetingDelegateModal
+          memberList={memberList}
+          userNo={userNo}
+          selectedMember={selectedMember}
+          setSelectedMember={setSelectedMember}
+          onClose={() => {
+            setIsDelegating(false);
+            setSelectedMember(null);
+          }}
+          onDelegate={() => {
+            if (!selectedMember) return;
+            axios
+              .put(
+                `http://localhost:8080/api/meeting/${meetingNo}/owner`,
+                null,
+                {
+                  params: { newOwnerNo: selectedMember.memberNo }, // 👈 필수
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem(
+                      "accessToken"
+                    )}`,
+                  },
+                }
+              )
+              .then(() => {
+                toast.success("모임장 위임이 완료되었습니다.");
+                setIsDelegating(false);
+                fetchMeetingDetail();
+                fetchMeetingMemberList();
+              })
+              .catch((err) => {
+                console.error("모임장 위임 실패", err);
+                toast.error("모임장 위임 중 오류 발생");
+              });
+          }}
+        />
+      )}
+
       {/* 로딩 처리 */}
       {meeting === null ? (
         <p style={{ textAlign: "center", padding: "48px", fontSize: "18px" }}>
@@ -202,7 +273,7 @@ export default function MeetingDetail() {
             </div>
 
             {/* 날짜 */}
-            <div style={{ marginTop: "24px" }}>
+            <div style={{ marginTop: "40px" }}>
               <div
                 style={{
                   display: "flex",
@@ -211,18 +282,29 @@ export default function MeetingDetail() {
                   marginBottom: "4px",
                 }}
               >
-                <span role="img" aria-label="calendar">
-                  📅
-                </span>
-                <span
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                    color: "#343a40",
-                  }}
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
                 >
-                  정모 날짜
-                </span>
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      color: "#6C757D",
+                    }}
+                  >
+                    <FaRegCalendar size={20} />
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      color: "#333333",
+                      lineHeight: "1", // 추가로 균형 잡기
+                    }}
+                  >
+                    정모 날짜
+                  </span>
+                </div>
               </div>
               <p style={{ margin: 0, fontSize: "14px", color: "#333" }}>
                 {dateStr}
@@ -230,7 +312,7 @@ export default function MeetingDetail() {
             </div>
 
             {/* 시간 */}
-            <div style={{ marginTop: "20px" }}>
+            <div style={{ marginTop: "36px" }}>
               <div
                 style={{
                   display: "flex",
@@ -239,18 +321,29 @@ export default function MeetingDetail() {
                   marginBottom: "4px",
                 }}
               >
-                <span role="img" aria-label="clock">
-                  🕒
-                </span>
-                <span
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                    color: "#343a40",
-                  }}
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
                 >
-                  정모 시간
-                </span>
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      color: "#6C757D",
+                    }}
+                  >
+                    <FaClock size={20} />
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      color: "#333333",
+                      lineHeight: "1", // 추가로 균형 잡기
+                    }}
+                  >
+                    정모 시간
+                  </span>
+                </div>
               </div>
               <p style={{ margin: 0, fontSize: "14px", color: "#333" }}>
                 {timeStr}
@@ -258,7 +351,7 @@ export default function MeetingDetail() {
             </div>
 
             {/* 장소 */}
-            <div style={{ marginTop: "20px" }}>
+            <div style={{ marginTop: "36px" }}>
               <div
                 style={{
                   display: "flex",
@@ -267,18 +360,29 @@ export default function MeetingDetail() {
                   marginBottom: "4px",
                 }}
               >
-                <span role="img" aria-label="location">
-                  📍
-                </span>
-                <span
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                    color: "#343a40",
-                  }}
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
                 >
-                  정모 위치
-                </span>
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      color: "#6C757D",
+                    }}
+                  >
+                    <FaLocationDot size={20} />
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      color: "#333333",
+                      lineHeight: "1", // 추가로 균형 잡기
+                    }}
+                  >
+                    정모 위치
+                  </span>
+                </div>
               </div>
               <p style={{ margin: 0, fontSize: "14px", color: "#333" }}>
                 {meeting.meetingLocation}
@@ -286,7 +390,7 @@ export default function MeetingDetail() {
             </div>
 
             {/* 비용 */}
-            <div style={{ marginTop: "20px" }}>
+            <div style={{ marginTop: "36px" }}>
               <div
                 style={{
                   display: "flex",
@@ -295,18 +399,29 @@ export default function MeetingDetail() {
                   marginBottom: "4px",
                 }}
               >
-                <span role="img" aria-label="money">
-                  💰
-                </span>
-                <span
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                    color: "#343a40",
-                  }}
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
                 >
-                  비용
-                </span>
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      color: "#6C757D",
+                    }}
+                  >
+                    <FaWonSign size={20} />
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      color: "#333333",
+                      lineHeight: "1", // 추가로 균형 잡기
+                    }}
+                  >
+                    인당 비용
+                  </span>
+                </div>
               </div>
               <p style={{ margin: 0, fontSize: "14px", color: "#333" }}>
                 {Number(meeting.meetingPrice).toLocaleString()}원
@@ -314,7 +429,33 @@ export default function MeetingDetail() {
             </div>
 
             <div style={{ marginTop: "64px" }}>
-              {isJoined ? (
+              {userNo === meeting.meetingOwnerNo ? (
+                <button
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    backgroundColor: "#F9B4ED",
+                    color: "#ffffff",
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    const delegateTargetList = memberList.filter(
+                      (m) => m.isLeader !== "Y"
+                    );
+                    if (delegateTargetList.length === 0) {
+                      toast.warn("위임할 대상이 없습니다.");
+                      return;
+                    }
+                    setIsDelegating(true);
+                  }}
+                >
+                  모임장 위임하기
+                </button>
+              ) : isJoined ? (
                 <button
                   onClick={meetingExit}
                   style={{
@@ -381,7 +522,7 @@ export default function MeetingDetail() {
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "16px",
+                      gap: "0.8rem",
                     }}
                   >
                     <img

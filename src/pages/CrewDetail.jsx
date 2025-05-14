@@ -30,11 +30,13 @@ export default function CrewDetail() {
   // const [isCrewMember, setIsCrewMember] = useState(false);
   const [isLeader, setIsLeader] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [crewImage, setCrewImage] = useState("/images/dummy-crew.jpg");
-  const [showJoinInput, setShowJoinInput] = useState(false);
-  const [showReportInput, setShowReportInput] = useState(false);
+  // const [crewImage, setCrewImage] = useState("/images/dummy-crew.jpg");
+  // const [showJoinInput, setShowJoinInput] = useState(false);
+  const setShowReportInput = useState(false)[1];
+  const [showJoinSheet, setShowJoinSheet] = useState(false);
+  const joinSheetRef = useRef(null);
   const [joinMessage, setJoinMessage] = useState("");
-  const [reportMessage, setReportMessage] = useState("");
+  // const [reportMessage, setReportMessage] = useState("");
 
   const [showPopoverId, setShowPopoverId] = useState(null);
   const popoverRef = useRef();
@@ -46,6 +48,85 @@ export default function CrewDetail() {
     const token = localStorage.getItem("refreshToken");
     return { Authorization: `Bearer ${token.trim()}` };
   };
+
+  //모임 멤버 목록 불러오기
+  const fetchMembers = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/crewmember/${crewNo}/members`
+      );
+
+      const fetchedMembers = Array.isArray(response.data) ? response.data : [];
+
+      const sortedMembers = [
+        ...fetchedMembers.filter((member) => member.leader === "Y"),
+        ...fetchedMembers.filter((member) => member.leader !== "Y"),
+      ];
+
+      // setMembers(fetchedMembers);
+      setMembers(sortedMembers);
+    } catch (err) {
+      console.error("Error fetching members data:", err.message);
+    }
+  };
+
+  //가입하기 버튼 클릭 시
+  const handleJoinClick = async () => {
+    try {
+      const token = localStorage.getItem("refreshToken");
+
+      if (!token || token.trim() === "") {
+        window.confirm("로그인이 필요합니다.");
+        return;
+      }
+
+      const authHeader = `Bearer ${token.trim()}`;
+
+      if (joinMessage.trim() === "") {
+        window.confirm("가입 인사를 입력해 주세요.");
+        return;
+      }
+
+      console.log("Authorization Header:", authHeader); // 디버깅용
+
+      const response = await axios.post(
+        `http://localhost:8080/api/crewmember/${crewNo}/join`,
+        {},
+        {
+          headers: {
+            Authorization: authHeader,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        window.confirm("모임에 가입되었습니다.");
+        setIsMember(true);
+        setShowJoinSheet(false);
+        setJoinMessage("");
+
+        await fetchMembers();
+      }
+    } catch (err) {
+      console.error("Error joining crew:", err.message);
+      window.confirm("모임 가입에 실패했습니다.");
+    }
+  };
+
+  const handleOutsideClick = (e) => {
+    if (
+      showJoinSheet &&
+      joinSheetRef.current &&
+      !joinSheetRef.current.contains(e.target)
+    ) {
+      setShowJoinSheet(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [showJoinSheet]);
 
   /** 
      모임 정보 및 회원 목록 불러오기 
@@ -63,18 +144,7 @@ export default function CrewDetail() {
       }
     };
 
-    const fetchMembers = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8080/api/crewmember/${crewNo}/members`
-        );
-        setMembers(Array.isArray(response.data) ? response.data : []);
-      } catch (err) {
-        console.error("Error fetching members data:", err.message);
-      }
-    };
-
-    const fetchMeetingList = async () => {
+    const fetchMeetingCount = async () => {
       try {
         const response = await axios.get(
           `http://localhost:8080/api/meeting/list/${crewNo}`
@@ -88,7 +158,7 @@ export default function CrewDetail() {
 
     fetchCrewData();
     fetchMembers();
-    fetchMeetingList();
+    fetchMeetingCount();
   }, [crewNo]);
 
   /* 로그인 시 추가적으로 체크할 정보들 */
@@ -128,7 +198,11 @@ export default function CrewDetail() {
   }, [login, crewNo]);
 
   /** 모임 탈퇴 처리 */
-  const handleLeave = async () => {
+  const handleLeaveClick = async () => {
+    const confirmLeave = window.confirm("정말 모임을 탈퇴하시겠습니까?");
+
+    if (!confirmLeave) return;
+
     if (!isMember) {
       window.confirm("모임원이 아닙니다.");
       return;
@@ -141,12 +215,18 @@ export default function CrewDetail() {
 
     try {
       const headers = getAuthHeaders();
-      await axios.delete(
+      const response = await axios.delete(
         `http://localhost:8080/api/crewmember/${crewNo}/leave`,
         { headers }
       );
-      window.confirm("모임에서 탈퇴되었습니다.");
-      navigate("/crew");
+
+      if (response.data) {
+        window.confirm("모임에서 탈퇴되었습니다.");
+        setIsMember(false);
+        fetchMembers();
+      } else {
+        window.confirm("모임 탈퇴에 실패했습니다.");
+      }
     } catch (err) {
       console.error("Error leaving crew:", err.message);
       window.confirm("모임 탈퇴에 실패했습니다.");
@@ -154,29 +234,29 @@ export default function CrewDetail() {
   };
 
   /** 모임 해체 처리 */
-  const handleDeleteCrew = async () => {
-    if (!isLeader) {
-      window.confirm("모임장만 해체할 수 있습니다.");
-      return;
-    }
+  // const handleDeleteCrew = async () => {
+  //   if (!isLeader) {
+  //     window.confirm("모임장만 해체할 수 있습니다.");
+  //     return;
+  //   }
 
-    try {
-      const headers = getAuthHeaders();
-      await axios.delete(`http://localhost:8080/api/crew/${crewNo}`, {
-        headers,
-      });
-      window.confirm("모임이 해체되었습니다.");
-      navigate("/crew");
-    } catch (err) {
-      console.error("Error deleting crew:", err.message);
-      window.confirm("모임 해체에 실패했습니다.");
-    }
-  };
+  //   try {
+  //     const headers = getAuthHeaders();
+  //     await axios.delete(`http://localhost:8080/api/crew/${crewNo}`, {
+  //       headers,
+  //     });
+  //     window.confirm("모임이 해체되었습니다.");
+  //     navigate("/crew");
+  //   } catch (err) {
+  //     console.error("Error deleting crew:", err.message);
+  //     window.confirm("모임 해체에 실패했습니다.");
+  //   }
+  // };
 
   // 가입처리
-  const handleJoin = () => {
-    setShowJoinInput(true);
-  };
+  // const handleJoin = () => {
+  //   setShowJoinInput(true);
+  // };
 
   // 신고처리
   const handleReport = () => {
@@ -261,7 +341,16 @@ export default function CrewDetail() {
               {login && isMember && !isLeader && (
                 <button
                   className="action-btn leave-btn"
-                  style={{ padding: "0.2rem 0.4rem" }}
+                  onClick={handleLeaveClick}
+                  // style={{ padding: "0.2rem 0.4rem" }}
+                  style={{
+                    backgroundColor: "#FF4D4F",
+                    color: "#FFF",
+                    padding: "0.5rem 1rem",
+                    borderRadius: "8px",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
                 >
                   탈퇴하기
                 </button>
@@ -329,7 +418,9 @@ export default function CrewDetail() {
             >
               <span>{crewData?.crewCategory}</span> ·
               <span style={{ display: "flex", alignItems: "center" }}>
-                <FaMapMarkerAlt style={{ marginRight: "0.3rem", color: "#6C757D" }} />
+                <FaMapMarkerAlt
+                  style={{ marginRight: "0.3rem", color: "#6C757D" }}
+                />
                 {crewData?.crewLocation}
               </span>{" "}
               ·
@@ -367,13 +458,11 @@ export default function CrewDetail() {
                 padding: "12px",
                 backgroundColor: "#007BFF",
                 color: "#ffffff",
-                fontSize: "16px",
                 fontWeight: "bold",
                 border: "none",
                 borderRadius: "8px",
                 cursor: "pointer",
                 fontSize: "0.85rem",
-                padding: "6px 12px",
               }}
               onClick={() =>
                 navigate("/meeting/create", {
@@ -412,124 +501,141 @@ export default function CrewDetail() {
             </h3>
             <div
               className="member-list"
-              style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}
+              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
             >
               {/* {Array.isArray(members) && members.length > 0 ? ( */}
               {members.length > 0 ? (
-                members.slice(0, visibleCount).map((member) => (
-                  <div
-                    key={member.memberNo}
-                    className="member-item"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.8rem",
-                      padding: "0.5rem",
-                      justifyContent: "space-between",
-                      backgroundColor: "#f9f9f9",
-                      borderRadius: "8px",
-                      // width: "100%",
-                      // maxWidth: "250px",
-                      position: "relative",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {/* 이미지 */}
-                    <img
-                      src={`http://localhost:8080/api/member/image/${member.memberNo}`}
-                      alt="프로필"
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowPopoverId(
-                          showPopoverId === member.memberNo
-                            ? null
-                            : member.memberNo
-                        );
-                      }}
-                    />
-
-                    {/* 닉네임 */}
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontWeight: "bold", marginBottom: "0.2rem" }}>
-                        {/* {member.nickname ? member.nickname : "회원"} */}
-                        {member.nickname || "회원"}
-                      </p>
-                    </div>
-
-                    {/* 모임장 여부 */}
+                members
+                  // slice(0, visibleCount).
+                  .map((member) => (
                     <div
+                      key={member.memberNo}
+                      className="member-item"
                       style={{
-                        color: member.leader === "Y" ? "#F9B4ED" : "#888",
-                        fontWeight: "bold"
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        padding: "0.5rem",
+                        justifyContent: "space-between",
+                        backgroundColor: "#f9f9f9",
+                        borderRadius: "8px",
+                        // width: "100%",
+                        // maxWidth: "250px",
+                        position: "relative",
+                        cursor: "pointer",
                       }}
                     >
-                      {member.leader === "Y" ? "회장" : "일반 회원"}
-                    </div>
-                    {/* 팝오버 */}
-                    {showPopoverId === member.memberNo && (
-                      <div
-                        ref={popoverRef}
-                        className="shadow position-absolute bg-white rounded p-3"
+                      {/* 이미지 */}
+                      <img
+                        src={`http://localhost:8080/api/member/image/${member.memberNo}`}
+                        alt="프로필"
                         style={{
-                          top: "3.5rem",
-                          left: "1rem",
-                          zIndex: 10,
-                          width: "300px",
-                          fontSize: "0.9rem",
-                          border: "1px solid #ddd",
+                          width: "50px",
+                          height: "50px",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                          marginRight: "1rem",
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowPopoverId(
+                            showPopoverId === member.memberNo
+                              ? null
+                              : member.memberNo
+                          );
+                        }}
+                      />
+
+                      {/* 닉네임 + 회장/일반회원 */}
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          flex: 1,
                         }}
                       >
-                        <div className="d-flex align-items-center mb-3">
-                          <img
-                            src="/images/default-profile.png"
-                            alt="프로필"
-                            className="rounded-circle me-3"
-                            style={{
-                              width: "3.5rem",
-                              height: "3.5rem",
-                              objectFit: "cover",
-                            }}
-                          />
-                          <div>
-                            <div className="fw-bold">{member.nickname}</div>
-                            <div className="badge bg-info text-white me-1">
-                              {member.mbti || "정보 없음"}
+                        <p
+                          style={{
+                            fontWeight: "bold",
+                            margin: 0,
+                            // marginBottom: "0.2rem",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {member.nickname || "회원"}
+                        </p>
+
+                        <span
+                          style={{
+                            color: member.leader === "Y" ? "#F9B4ED" : "#888",
+                            fontSize: "0.85rem",
+                            fontWeight: "bold",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {member.leader === "Y" ? "회장" : "회원"}
+                        </span>
+                      </div>
+                      {/* 팝오버 */}
+                      {showPopoverId === member.memberNo && (
+                        <div
+                          ref={popoverRef}
+                          className="shadow position-absolute bg-white rounded p-3"
+                          style={{
+                            top: "3.5rem",
+                            left: "1rem",
+                            zIndex: 10,
+                            width: "300px",
+                            fontSize: "0.9rem",
+                            border: "1px solid #ddd",
+                          }}
+                        >
+                          <div className="d-flex align-items-center mb-3">
+                            <img
+                              src="/images/default-profile.png"
+                              alt="프로필"
+                              className="rounded-circle me-3"
+                              style={{
+                                width: "3.5rem",
+                                height: "3.5rem",
+                                objectFit: "cover",
+                              }}
+                            />
+                            <div>
+                              <div className="fw-bold">{member.nickname}</div>
+                              <div className="badge bg-info text-white me-1">
+                                {member.mbti || "정보 없음"}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="text-muted mb-2">
+                            {member.location || "지역 정보 없음"} ·{" "}
+                            {member.birth || "생년월일 없음"}
+                          </div>
+
+                          <hr />
+
+                          <div className="fw-bold">가입한 모임 예시</div>
+                          <div className="d-flex align-items-center mt-2">
+                            <img
+                              src="/images/sample-group.jpg"
+                              className="me-2 rounded"
+                              style={{ width: "2rem", height: "2rem" }}
+                              alt="모임"
+                            />
+                            <div
+                              className="text-muted"
+                              style={{ fontSize: "0.8rem" }}
+                            >
+                              모임 이름
                             </div>
                           </div>
                         </div>
-
-                        <div className="text-muted mb-2">
-                          {member.location || "지역 정보 없음"} ·{" "}
-                          {member.birth || "생년월일 없음"}
-                        </div>
-
-                        <hr />
-
-                        <div className="fw-bold">가입한 모임 예시</div>
-                        <div className="d-flex align-items-center mt-2">
-                          <img
-                            src="/images/sample-group.jpg"
-                            className="me-2 rounded"
-                            style={{ width: "2rem", height: "2rem" }}
-                            alt="모임"
-                          />
-                          <div
-                            className="text-muted"
-                            style={{ fontSize: "0.8rem" }}
-                          >
-                            모임 이름
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))
+                      )}
+                    </div>
+                  ))
               ) : (
                 <p>가입된 멤버가 없습니다.</p>
               )}
@@ -549,29 +655,31 @@ export default function CrewDetail() {
             )}
           </div>
 
-          {showJoinInput && (
-            <div className="input-box">
-              <input
-                type="text"
-                placeholder="모임장님께 가입인사를 작성하세요!"
-                value={joinMessage}
-                onChange={(e) => setJoinMessage(e.target.value)}
-              />
-              <button onClick={() => setShowJoinInput(false)}>가입하기</button>
+          {/* 하단 고정 시트 */}
+          {login && !isMember && (
+            <div
+              className="bottom-sheet"
+              onClick={() => setShowJoinSheet(true)}
+            >
+              모임 가입하기
             </div>
           )}
 
-          {showReportInput && (
-            <div className="input-box">
-              <input
-                type="text"
-                placeholder="허위 신고는 계정 정지가 될 수 있다는 점 유의해주세요"
-                value={reportMessage}
-                onChange={(e) => setReportMessage(e.target.value)}
-              />
-              <button onClick={() => setShowReportInput(false)}>
-                신고하기
-              </button>
+          {/* 바텀 시트 내용 */}
+          {showJoinSheet && (
+            <div className="bottom-sheet-content" ref={joinSheetRef}>
+              <div className="join-sheet-body">
+                <input
+                  type="text"
+                  placeholder="가입 인사를 입력하세요"
+                  value={joinMessage}
+                  onChange={(e) => setJoinMessage(e.target.value)}
+                  maxLength={100}
+                />
+                <button className="join-btn" onClick={handleJoinClick}>
+                  모임 가입하기
+                </button>
+              </div>
             </div>
           )}
         </div>

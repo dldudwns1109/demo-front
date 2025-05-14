@@ -62,7 +62,7 @@ export default function JoinBoard() {
     };
 
     fetchBoardList();
-  }, [selectedCategory]);
+  }, [selectedCategory, userNo]);
 
   // //작성자 가입 모임 목록 불러오기
   // useEffect(() => {

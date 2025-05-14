@@ -8,10 +8,13 @@ import { replyCountState } from "../store/replyCountState";
 import { loginState, locationState } from "../utils/storage";
 import Header from "../components/Header";
 import CrewTopNav from "../components/CrewTopNav";
+import Unauthorized from "../components/Unauthorized";
 
 export default function CrewBoardDetail() {
   const { boardNo, crewNo } = useParams();
   const [board, setBoard] = useState(null);
+  const [isMember, setIsMember] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [replies, setReplies] = useState([]);
   const [newReply, setNewReply] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(null);
@@ -26,18 +29,74 @@ export default function CrewBoardDetail() {
   const login = useRecoilValue(loginState);
   const [location, setLocation] = useRecoilState(locationState);
 
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("refreshToken");
+    return token ? { Authorization: `Bearer ${token.trim()}` } : {};
+  };
+
+  /* 모임원 여부 확인 */
   useEffect(() => {
-    const fetchData = async () => {
+    const checkMemberStatus = async () => {
+      try {
+        const headers = getAuthHeaders();
+        const res = await axios.get(
+          `http://localhost:8080/api/crewmember/${crewNo}/member`,
+          { headers }
+        );
+
+        setIsMember(res.data);
+      } catch (err) {
+        console.error("모임원 여부 확인 실패:", err.message);
+        setIsMember(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (login) {
+      checkMemberStatus();
+    } else {
+      setIsLoading(false);
+    }
+  }, [crewNo, login]);
+
+  /* 게시글 데이터 불러오기 (모임원만 가능) */
+  // useEffect(() => {
+  //   const fetchBoardData = async () => {
+  //     try {
+  //       const res = await axios.get(
+  //         `http://localhost:8080/api/board/${boardNo}`
+  //       );
+  //       setBoard(res.data);
+  //     } catch (err) {
+  //       console.error("게시글 데이터 불러오기 실패:", err.message);
+  //     }
+  //   };
+
+  //   if (isMember) {
+  //     fetchBoardData();
+  //   }
+  // }, [boardNo, isMember]);
+
+  useEffect(() => {
+    const fetchBoardData = async () => {
       try {
         const res = await axios.get(
           `http://localhost:8080/api/board/${boardNo}`
         );
-        setBoard(res.data);
+        if (res.data) {
+          setBoard(res.data);
+        } else {
+          console.warn(`게시글 ${boardNo}이(가) 존재하지 않습니다.`);
+          setBoard(null); // 명확하게 `null`로 처리
+        }
       } catch (err) {
-        console.error(err);
+        console.error("게시글 데이터 불러오기 실패:", err.message);
+        setBoard(null);
       }
     };
-    fetchData();
+
+      fetchBoardData();
   }, [boardNo]);
 
   useEffect(() => {
@@ -137,7 +196,21 @@ export default function CrewBoardDetail() {
     }
   };
 
-  if (!board) return <div>로딩 중...</div>;
+  if (isLoading) {
+    return (
+      <div className="container" style={{ paddingTop: "5rem" }}>
+        <p>로딩 중...</p>
+      </div>
+    );
+  }
+
+  // Unauthorized 페이지로 리다이렉트
+  // if (!isMember) {
+  //   return <Unauthorized />;
+  // }
+  if (!isMember || board === null) {
+    return <Unauthorized />;
+  }
 
   return (
     <>
@@ -164,7 +237,7 @@ export default function CrewBoardDetail() {
         <div className="d-flex justify-content-between align-items-start mb-4 position-relative">
           <div className="d-flex align-items-center">
             <img
-              src={board.boardWriterProfileUrl || "/images/default-profile.png"}
+              src={`http://localhost:8080/api/member/image/${board.boardWriter}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{
@@ -189,7 +262,7 @@ export default function CrewBoardDetail() {
                 </small>
               </div>
               <div className="text-muted" style={{ fontSize: "0.85rem" }}>
-                {board.boardWriterGender === "M" ? "남성" : "여성"} ·{" "}
+                {board.boardWriterGender === "m" ? "남성" : "여성"} ·{" "}
                 {board.boardWriterBirth} · {board.boardWriterMbti}
               </div>
             </div>

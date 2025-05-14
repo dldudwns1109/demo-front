@@ -18,7 +18,6 @@ const mbtiOptions = mbtiData;
 
 export default function MypageEdit() {
   const userNo = useRecoilValue(userNoState);
-  console.log(userNo);
   const [location, setLocation] = useRecoilState(locationState);
   const navigate = useNavigate();
 
@@ -45,6 +44,11 @@ export default function MypageEdit() {
     memberBirth: "",
     memberLike: "",
   });
+  const [isValid, setIsValid] = useState({
+    memberNickname: true,
+    memberLike: true,
+  });
+
 
   const fileInputRef = useRef(null);
   const isFirstRender = useRef(true);
@@ -63,6 +67,10 @@ export default function MypageEdit() {
     }
   }, [city]);
 
+  const isTotalValid = useMemo(() => {
+    return Object.values(isValid).every((val) => val);
+  }, [isValid]);
+
   useEffect(() => {
     setMember((prev) => ({
       ...prev,
@@ -71,24 +79,23 @@ export default function MypageEdit() {
   }, [location, city]);
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
+  if (isFirstRender.current) {
+    isFirstRender.current = false;
+    return;
+  }
 
-    if (!member.memberLike.size) {
-      setBlurMessage({
-        ...blurMessage,
-        memberLike: "최소한 한 개의 관심사를 선택해주세요.",
-      });
-      return;
-    }
+  const hasLike = member.memberLike.size > 0;
 
-    setBlurMessage({
-      ...blurMessage,
-      memberLike: "",
-    });
-  }, [member.memberLike]);
+  setBlurMessage((prev) => ({
+    ...prev,
+    memberLike: hasLike ? "" : "최소한 한 개의 관심사를 선택해주세요.",
+  }));
+
+  setIsValid((prev) => ({
+    ...prev,
+    memberLike: hasLike,
+  }));
+}, [member.memberLike]);
 
   useEffect(() => {
     const clickLocationRefOutside = (e) => {
@@ -258,7 +265,55 @@ export default function MypageEdit() {
               name="memberNickname"
               value={member.memberNickname}
               onChange={changeMember}
+              onBlur={async () => {
+                const nickname = member.memberNickname;
+
+                if (!nickname.length) {
+                  setBlurMessage((prev) => ({
+                    ...prev,
+                    memberNickname: "닉네임을 입력해주세요.",
+                  }));
+                  setIsValid((prev) => ({ ...prev, memberNickname: false }));
+                  return;
+                }
+
+                if (!/^[가-힣0-9]{2,10}$/.test(nickname)) {
+                  setBlurMessage((prev) => ({
+                    ...prev,
+                    memberNickname: "2~10자 / 한글,숫자로만 입력 가능합니다.",
+                  }));
+                  setIsValid((prev) => ({ ...prev, memberNickname: false }));
+                  return;
+                }
+
+                try {
+                  const res = await axios.get(
+                    `http://localhost:8080/api/member/checkNickname/${nickname}`
+                  );
+                  const { isDuplicated, nicknameOwnerUserNo } = res.data;
+
+                  if (isDuplicated && nicknameOwnerUserNo !== userNo) {
+                    setBlurMessage((prev) => ({
+                      ...prev,
+                      memberNickname: "사용중인 닉네임입니다.",
+                    }));
+                    setIsValid((prev) => ({ ...prev, memberNickname: false }));
+                    return;
+                  }
+
+                  setBlurMessage((prev) => ({
+                    ...prev,
+                    memberNickname: "",
+                  }));
+                  setIsValid((prev) => ({ ...prev, memberNickname: true }));
+                } catch (e) {
+                  console.error("닉네임 검사 실패", e);
+                }
+              }}
             />
+            <span className="text-danger" style={{ fontSize: "14px" }}>
+              {blurMessage.memberNickname}
+            </span>
           </div>
           <div
             style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}
@@ -539,6 +594,7 @@ export default function MypageEdit() {
               className="blue-btn"
               style={{ marginTop: "48px" }}
               onClick={(e) => clickEdit(e)}
+              disabled={!isTotalValid}
             >
               수정하기
             </button>

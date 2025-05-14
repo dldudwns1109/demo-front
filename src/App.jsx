@@ -36,6 +36,7 @@ import MeetingDetail from "./pages/MeetingDetail";
 import MeetingEdit from "./pages/MeetingEdit";
 import { loginState, userNoState, windowWidthState } from "./utils/storage";
 import "./App.css";
+import Unauthorized from "./components/Unauthorized";
 
 function App() {
   const setWindowWidth = useSetRecoilState(windowWidthState);
@@ -126,8 +127,10 @@ function App() {
         />
         <Route path="/crew/:crewNo/chat" element={<CrewChat />} />
         <Route path="/meeting/create" element={<MeetingCreate />} />
-        <Route path="/meeting/detail" element={<MeetingDetail />} />
-        <Route path="/meeting/edit" element={<MeetingEdit />} />
+        <Route path="/meeting/detail/:meetingNo" element={<MeetingDetail />} />
+        <Route path="/meeting/detail" element={<Unauthorized />} />
+        <Route path="/meeting/edit/:meetingNo" element={<MeetingEdit />} />
+        <Route path="/meeting/edit" element={<Unauthorized />} />
       </Routes>
     </>
   );

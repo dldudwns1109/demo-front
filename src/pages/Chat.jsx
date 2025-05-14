@@ -5,11 +5,13 @@ import { useRecoilValue } from "recoil";
 import { loginState, userNoState } from "../utils/storage";
 import axios from "axios";
 import moment from "moment";
-import "moment/locale/ko";
+import "moment/dist/locale/ko";
 import Header from "../components/Header";
 import Unauthorized from "../components/Unauthorized";
 
 import { FaRegPaperPlane } from "react-icons/fa6";
+
+moment.locale("ko");
 
 export default function Chat() {
   const userNo = useRecoilValue(userNoState);
@@ -137,12 +139,21 @@ export default function Chat() {
     setInput("");
   }, [client, input, login, currRoom]);
 
+  const isDayFirstMessage = useCallback(
+    (message, idx) => {
+      if (!idx) return true;
+
+      const prevMessage = messages[idx - 1];
+      return moment(message.time).isAfter(moment(prevMessage.time), "day");
+    },
+    [messages]
+  );
+
   const isLastMessage = useCallback(
     (message, idx) => {
       if (idx + 1 === messages.length) return true;
 
       const nextMessage = messages[idx + 1];
-
       if (message.accountNo !== nextMessage.accountNo) return true;
 
       return (
@@ -213,7 +224,7 @@ export default function Chat() {
                     </span>
                   </div>
                 </div>
-                {moment(room.time).format("a H:mm")}
+                {moment(room.time).format("a h:mm")}
               </button>
             ))}
           </div>
@@ -224,86 +235,97 @@ export default function Chat() {
               style={{ height: "80vh" }}
             >
               {messages.map((message, idx) => (
-                <div
-                  key={idx}
-                  className={`d-flex ${
-                    message.accountNo === userNo && "justify-content-end"
-                  } align-items-end`}
-                  style={{ gap: "12px" }}
-                >
-                  {message.accountNo === userNo ? (
-                    <>
-                      {isLastMessage(message, idx) && (
-                        <span style={{ fontSize: "14px", color: "#333333" }}>
-                          {moment(message.time).format("a H:mm")}
-                        </span>
-                      )}
-                      <div>
-                        <div
-                          className="py-2"
-                          style={{
-                            backgroundColor: "#F1F3F5",
-                            borderRadius: "8px",
-                            paddingLeft: "12px",
-                            paddingRight: "12px",
-                            maxWidth: "200px",
-                            wordBreak: "break-word",
-                            whiteSpace: "normal",
-                          }}
-                        >
-                          <span style={{ color: "#333333" }}>
-                            {message.content}
-                          </span>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {isSenderVisible(message, idx) && (
-                        <img
-                          className="shadow-sm"
-                          style={{ objectFit: "cover", borderRadius: "999px" }}
-                          src={`http://localhost:8080/api/member/image/${message.accountNo}`}
-                          width={60}
-                          height={60}
-                        />
-                      )}
-                      <div
-                        style={{
-                          paddingLeft: !isSenderVisible(message, idx)
-                            ? "72px"
-                            : "0px",
-                        }}
-                      >
-                        {isSenderVisible(message, idx) && (
-                          <span style={{ fontSize: "14px", color: "#111111" }}>
-                            {message.accountNickname}
+                <div key={idx} className="d-flex flex-column gap-3">
+                  {isDayFirstMessage(message, idx) && (
+                    <div className="text-center mt-3">
+                      {moment(message.time).format("YYYY년 MM월 DD일 dddd")}
+                    </div>
+                  )}
+                  <div
+                    className={`d-flex ${
+                      message.accountNo === userNo && "justify-content-end"
+                    } align-items-end`}
+                    style={{ gap: "12px" }}
+                  >
+                    {message.accountNo === userNo ? (
+                      <>
+                        {isLastMessage(message, idx) && (
+                          <span style={{ fontSize: "14px", color: "#333333" }}>
+                            {moment(message.time).format("a h:mm")}
                           </span>
                         )}
+                        <div>
+                          <div
+                            className="py-2"
+                            style={{
+                              backgroundColor: "#F1F3F5",
+                              borderRadius: "8px",
+                              paddingLeft: "12px",
+                              paddingRight: "12px",
+                              maxWidth: "200px",
+                              wordBreak: "break-word",
+                              whiteSpace: "normal",
+                            }}
+                          >
+                            <span style={{ color: "#333333" }}>
+                              {message.content}
+                            </span>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {isSenderVisible(message, idx) && (
+                          <img
+                            className="shadow-sm"
+                            style={{
+                              objectFit: "cover",
+                              borderRadius: "999px",
+                            }}
+                            src={`http://localhost:8080/api/member/image/${message.accountNo}`}
+                            width={60}
+                            height={60}
+                          />
+                        )}
                         <div
-                          className="py-2"
                           style={{
-                            backgroundColor: "#F1F3F5",
-                            borderRadius: "8px",
-                            paddingLeft: "12px",
-                            paddingRight: "12px",
-                            maxWidth: "200px",
-                            wordBreak: "break-word",
-                            whiteSpace: "normal",
+                            paddingLeft: !isSenderVisible(message, idx)
+                              ? "72px"
+                              : "0px",
                           }}
                         >
-                          <span style={{ color: "#333333" }}>
-                            {message.content}
-                          </span>
+                          {isSenderVisible(message, idx) && (
+                            <span
+                              style={{ fontSize: "14px", color: "#111111" }}
+                            >
+                              {message.accountNickname}
+                            </span>
+                          )}
+                          <div
+                            className="py-2"
+                            style={{
+                              backgroundColor: "#F1F3F5",
+                              borderRadius: "8px",
+                              paddingLeft: "12px",
+                              paddingRight: "12px",
+                              maxWidth: "200px",
+                              wordBreak: "break-word",
+                              whiteSpace: "normal",
+                            }}
+                          >
+                            <span style={{ color: "#333333" }}>
+                              {message.content}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                      {isLastMessage(message, idx) && (
-                        <span style={{ fontSize: "14px", color: "#333333" }}>
-                          {moment(message.time).format("a H:mm")}
-                        </span>
-                      )}
-                    </>
-                  )}
+                        {isLastMessage(message, idx) && (
+                          <span style={{ fontSize: "14px", color: "#333333" }}>
+                            {moment(message.time).format("a h:mm")}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

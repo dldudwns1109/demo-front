@@ -27,7 +27,7 @@ export default function Header({
   setSearchKeyword = null,
 }) {
   const windowWidth = useRecoilValue(windowWidthState);
-  const [city, setCity] = useState("서울특별시");
+  const [city, setCity] = useState(location?.city);
   const [isOpenCategoryRef, setIsOpenCategoryRef] = useState(false);
   const [isOpenLocationRef, setIsOpenLocationRef] = useState(false);
   const [searchInput, setSearchInput] = useState("");

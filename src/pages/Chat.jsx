@@ -219,223 +219,167 @@ export default function Chat() {
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
 
       {login ? (
-        <div
-          className={`d-flex ${windowWidth <= 1024 && "flex-column"}`}
-          style={{ paddingTop: "70px" }}
-        >
-          {windowWidth > 1024 ? (
-            <div
-              style={{
-                padding: "32px",
-                backgroundColor: "#FAFAFA",
-                width: "380px",
-                height: "calc(100vh - 70px)",
-              }}
-            >
-              {chatRoom.map((room, idx) => (
-                <button
-                  key={idx}
-                  className="w-100 btn d-flex justify-content-between align-items-center p-3 position-relative"
-                  style={{
-                    backgroundColor:
-                      room.roomNo === currRoom ? "#EBEBEB" : "transparent",
-                  }}
-                  onClick={() => setCurrRoom(room.roomNo)}
-                >
-                  <div className="d-flex gap-3">
+        chatRoom.length ? (
+          <div
+            className={`d-flex ${windowWidth <= 1024 && "flex-column"}`}
+            style={{ paddingTop: "70px" }}
+          >
+            {windowWidth > 1024 ? (
+              <div
+                style={{
+                  padding: "32px",
+                  backgroundColor: "#FAFAFA",
+                  width: "380px",
+                  height: "calc(100vh - 70px)",
+                }}
+              >
+                {chatRoom.map((room, idx) => (
+                  <button
+                    key={idx}
+                    className="w-100 btn d-flex justify-content-between align-items-center p-3 position-relative"
+                    style={{
+                      backgroundColor:
+                        room.roomNo === currRoom ? "#EBEBEB" : "transparent",
+                    }}
+                    onClick={() => setCurrRoom(room.roomNo)}
+                  >
+                    <div className="d-flex gap-3">
+                      <img
+                        className="shadow-sm"
+                        style={{ borderRadius: "999px", objectFit: "cover" }}
+                        src={`http://localhost:8080/api/member/image/${room.accountNo}`}
+                        width={64}
+                        height={64}
+                      />
+                      <div
+                        className="d-flex flex-column align-items-start"
+                        style={{ gap: "12px" }}
+                      >
+                        <span style={{ color: "#111111" }}>
+                          {room.accountNickname}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "14px",
+                            color: "#333333",
+                            textAlign: "left",
+                          }}
+                        >
+                          {room.content.length > 16
+                            ? room.content.slice(0, 16) + "..."
+                            : room.content}
+                        </span>
+                      </div>
+                    </div>
+                    <div style={{ minWidth: "80px" }}>
+                      {moment(room.time).format("a h:mm")}
+                    </div>
+                    {room.chatRead !== 0 && (
+                      <span
+                        className="position-absolute px-2 text-white"
+                        style={{
+                          fontSize: "16px",
+                          backgroundColor: "#F9B4ED",
+                          right: "-8px",
+                          top: "-8px",
+                          borderRadius: "999px",
+                        }}
+                      >
+                        {room.chatRead}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div
+                className="d-flex"
+                style={{
+                  padding: "16px",
+                  backgroundColor: "#FAFAFA",
+                }}
+              >
+                {chatRoom.map((room, idx) => (
+                  <button
+                    key={idx}
+                    className="btn d-flex flex-column justify-content-between align-items-center p-2 gap-2"
+                    style={{
+                      width: "98px",
+                      backgroundColor:
+                        room.roomNo === currRoom ? "#EBEBEB" : "transparent",
+                    }}
+                    onClick={() => setCurrRoom(room.roomNo)}
+                  >
                     <img
                       className="shadow-sm"
                       style={{ borderRadius: "999px", objectFit: "cover" }}
                       src={`http://localhost:8080/api/member/image/${room.accountNo}`}
-                      width={64}
-                      height={64}
+                      width={48}
+                      height={48}
                     />
+                    <span style={{ color: "#111111" }}>
+                      {room.accountNickname.length > 4
+                        ? room.accountNickname.slice(0, 4) + "..."
+                        : room.accountNickname}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+            <div
+              className="mx-auto"
+              style={{ width: windowWidth > 1024 ? "53%" : "80%" }}
+            >
+              <div
+                ref={scrollContainerRef}
+                className={`d-flex flex-column gap-2 overflow-auto ${
+                  windowWidth > 1024 ? "p-4" : "my-4"
+                }`}
+                style={{ height: windowWidth > 1024 ? "80vh" : "63vh" }}
+              >
+                {messages.map((message, idx) => (
+                  <div key={idx} className="d-flex flex-column gap-3">
+                    {isDayFirstMessage(message, idx) && (
+                      <div className="d-inline-flex justify-content-center mt-3">
+                        <span
+                          className="px-3 py-2"
+                          style={{
+                            backgroundColor: "#F1F3F5",
+                            borderRadius: "999px",
+                            fontSize: "14px",
+                            color: "#666666",
+                          }}
+                        >
+                          {moment(message.time).format("YYYY년 MM월 DD일 dddd")}
+                        </span>
+                      </div>
+                    )}
                     <div
-                      className="d-flex flex-column align-items-start"
+                      className={`d-flex ${
+                        message.accountNo === userNo && "justify-content-end"
+                      } align-items-end`}
                       style={{ gap: "12px" }}
                     >
-                      <span style={{ color: "#111111" }}>
-                        {room.accountNickname}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: "14px",
-                          color: "#333333",
-                          textAlign: "left",
-                        }}
-                      >
-                        {room.content.length > 16
-                          ? room.content.slice(0, 16) + "..."
-                          : room.content}
-                      </span>
-                    </div>
-                  </div>
-                  <div style={{ minWidth: "80px" }}>
-                    {moment(room.time).format("a h:mm")}
-                  </div>
-                  {room.chatRead !== 0 && (
-                    <span
-                      className="position-absolute px-2 text-white"
-                      style={{
-                        fontSize: "16px",
-                        backgroundColor: "#F9B4ED",
-                        right: "-8px",
-                        top: "-8px",
-                        borderRadius: "999px",
-                      }}
-                    >
-                      {room.chatRead}
-                    </span>
-                  )}
-                  {/* <span
-                    className="position-absolute px-2 text-white"
-                    style={{
-                      fontSize: "16px",
-                      backgroundColor: "#F9B4ED",
-                      right: "-8px",
-                      top: "-8px",
-                      borderRadius: "999px",
-                    }}
-                  >
-                    {room.chatRead}
-                  </span> */}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div
-              className="d-flex"
-              style={{
-                padding: "16px",
-                backgroundColor: "#FAFAFA",
-              }}
-            >
-              {chatRoom.map((room, idx) => (
-                <button
-                  key={idx}
-                  className="btn d-flex flex-column justify-content-between align-items-center p-2 gap-2"
-                  style={{
-                    width: "98px",
-                    backgroundColor:
-                      room.roomNo === currRoom ? "#EBEBEB" : "transparent",
-                  }}
-                  onClick={() => setCurrRoom(room.roomNo)}
-                >
-                  <img
-                    className="shadow-sm"
-                    style={{ borderRadius: "999px", objectFit: "cover" }}
-                    src={`http://localhost:8080/api/member/image/${room.accountNo}`}
-                    width={48}
-                    height={48}
-                  />
-                  <span style={{ color: "#111111" }}>
-                    {room.accountNickname.length > 4
-                      ? room.accountNickname.slice(0, 4) + "..."
-                      : room.accountNickname}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-          <div
-            className="mx-auto"
-            style={{ width: windowWidth > 1024 ? "53%" : "80%" }}
-          >
-            <div
-              ref={scrollContainerRef}
-              className={`d-flex flex-column gap-2 overflow-auto ${
-                windowWidth > 1024 ? "p-4" : "my-4"
-              }`}
-              style={{ height: windowWidth > 1024 ? "80vh" : "63vh" }}
-            >
-              {messages.map((message, idx) => (
-                <div key={idx} className="d-flex flex-column gap-3">
-                  {isDayFirstMessage(message, idx) && (
-                    <div className="d-inline-flex justify-content-center mt-3">
-                      <span
-                        className="px-3 py-2"
-                        style={{
-                          backgroundColor: "#F1F3F5",
-                          borderRadius: "999px",
-                          fontSize: "14px",
-                          color: "#666666",
-                        }}
-                      >
-                        {moment(message.time).format("YYYY년 MM월 DD일 dddd")}
-                      </span>
-                    </div>
-                  )}
-                  <div
-                    className={`d-flex ${
-                      message.accountNo === userNo && "justify-content-end"
-                    } align-items-end`}
-                    style={{ gap: "12px" }}
-                  >
-                    {message.accountNo === userNo ? (
-                      <>
-                        {message.chatRead !== 0 && (
-                          <span style={{ fontSize: "14px", color: "#F9B4ED" }}>
-                            {message.chatRead}
-                          </span>
-                        )}
-                        {isLastMessage(message, idx) && (
-                          <span style={{ fontSize: "14px", color: "#333333" }}>
-                            {moment(message.time).format("a h:mm")}
-                          </span>
-                        )}
-                        <div>
-                          <div
-                            className="bg-primary text-white py-2"
-                            style={{
-                              borderRadius: "8px",
-                              paddingLeft: "12px",
-                              paddingRight: "12px",
-                              maxWidth: "200px",
-                              wordBreak: "break-word",
-                              whiteSpace: "normal",
-                            }}
-                          >
-                            <span>{message.content}</span>
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="d-flex" style={{ gap: "12px" }}>
-                          {isSenderVisible(message, idx) && (
-                            <img
-                              className="shadow-sm"
-                              style={{
-                                objectFit: "cover",
-                                borderRadius: "999px",
-                                marginBottom:
-                                  windowWidth > 1024 ? "0px" : "12px",
-                              }}
-                              src={`http://localhost:8080/api/member/image/${message.accountNo}`}
-                              width={windowWidth > 1024 ? 64 : 48}
-                              height={windowWidth > 1024 ? 64 : 48}
-                            />
+                      {message.accountNo === userNo ? (
+                        <>
+                          {message.chatRead !== 0 && (
+                            <span
+                              style={{ fontSize: "14px", color: "#F9B4ED" }}
+                            >
+                              {message.chatRead}
+                            </span>
                           )}
-                          <div
-                            style={{
-                              paddingLeft: !isSenderVisible(message, idx)
-                                ? windowWidth > 1024
-                                  ? "76px"
-                                  : "60px"
-                                : "0px",
-                            }}
-                          >
-                            {isSenderVisible(message, idx) && (
-                              <span
-                                style={{ fontSize: "14px", color: "#111111" }}
-                              >
-                                {message.accountNickname}
-                              </span>
-                            )}
+                          {isLastMessage(message, idx) && (
+                            <span
+                              style={{ fontSize: "14px", color: "#333333" }}
+                            >
+                              {moment(message.time).format("a h:mm")}
+                            </span>
+                          )}
+                          <div>
                             <div
-                              className="py-2"
+                              className="bg-primary text-white py-2"
                               style={{
-                                backgroundColor: "#F1F3F5",
                                 borderRadius: "8px",
                                 paddingLeft: "12px",
                                 paddingRight: "12px",
@@ -444,74 +388,139 @@ export default function Chat() {
                                 whiteSpace: "normal",
                               }}
                             >
-                              <span style={{ color: "#333333" }}>
-                                {message.content}
-                              </span>
+                              <span>{message.content}</span>
                             </div>
                           </div>
-                        </div>
-                        {/* {message.chatRead !== 0 && (
+                        </>
+                      ) : (
+                        <>
+                          <div className="d-flex" style={{ gap: "12px" }}>
+                            {isSenderVisible(message, idx) && (
+                              <img
+                                className="shadow-sm"
+                                style={{
+                                  objectFit: "cover",
+                                  borderRadius: "999px",
+                                  marginBottom:
+                                    windowWidth > 1024 ? "0px" : "12px",
+                                }}
+                                src={`http://localhost:8080/api/member/image/${message.accountNo}`}
+                                width={windowWidth > 1024 ? 64 : 48}
+                                height={windowWidth > 1024 ? 64 : 48}
+                              />
+                            )}
+                            <div
+                              style={{
+                                paddingLeft: !isSenderVisible(message, idx)
+                                  ? windowWidth > 1024
+                                    ? "76px"
+                                    : "60px"
+                                  : "0px",
+                              }}
+                            >
+                              {isSenderVisible(message, idx) && (
+                                <span
+                                  style={{ fontSize: "14px", color: "#111111" }}
+                                >
+                                  {message.accountNickname}
+                                </span>
+                              )}
+                              <div
+                                className="py-2"
+                                style={{
+                                  backgroundColor: "#F1F3F5",
+                                  borderRadius: "8px",
+                                  paddingLeft: "12px",
+                                  paddingRight: "12px",
+                                  maxWidth: "200px",
+                                  wordBreak: "break-word",
+                                  whiteSpace: "normal",
+                                }}
+                              >
+                                <span style={{ color: "#333333" }}>
+                                  {message.content}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          {/* {message.chatRead !== 0 && (
                           <span>{message.chatRead}</span>
                         )} */}
-                        {isLastMessage(message, idx) && (
-                          <span style={{ fontSize: "14px", color: "#333333" }}>
-                            {moment(message.time).format("a h:mm")}
-                          </span>
-                        )}
-                      </>
-                    )}
+                          {isLastMessage(message, idx) && (
+                            <span
+                              style={{ fontSize: "14px", color: "#333333" }}
+                            >
+                              {moment(message.time).format("a h:mm")}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-            <div
-              className="d-flex justify-content-between position-absolute"
-              style={{
-                width: windowWidth > 1024 ? "53%" : "80%",
-                backgroundColor: "#F1F3F5",
-                borderRadius: "8px",
-                bottom: "80px",
-              }}
-            >
-              <input
-                type="text"
-                className="border-0 w-100"
+                ))}
+              </div>
+              <div
+                className="d-flex justify-content-between position-absolute"
                 style={{
+                  width: windowWidth > 1024 ? "53%" : "80%",
                   backgroundColor: "#F1F3F5",
-                  paddingLeft: "12px",
-                  paddingTop: "8px",
-                  paddingBottom: "8px",
                   borderRadius: "8px",
-                  outline: "none",
+                  bottom: "80px",
                 }}
-                placeholder="메세지 입력..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyUp={(e) => {
-                  if (e.key === "Enter") {
-                    e.target.value.length > 200
-                      ? errorToastify("200글자 이상 입력할 수 없습니다!")
-                      : sendMessageToServer();
-                  }
-                }}
-              />
-              <button
-                className="btn py-0 pb-1"
-                style={{ height: "40px" }}
-                onClick={sendMessageToServer}
               >
-                <FaRegPaperPlane size={18} color="#6C757D" />
-              </button>
+                <input
+                  type="text"
+                  className="border-0 w-100"
+                  style={{
+                    backgroundColor: "#F1F3F5",
+                    paddingLeft: "12px",
+                    paddingTop: "8px",
+                    paddingBottom: "8px",
+                    borderRadius: "8px",
+                    outline: "none",
+                  }}
+                  placeholder="메세지 입력..."
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyUp={(e) => {
+                    if (e.key === "Enter") {
+                      e.target.value.length > 200
+                        ? errorToastify("200글자 이상 입력할 수 없습니다!")
+                        : sendMessageToServer();
+                    }
+                  }}
+                />
+                <button
+                  className="btn py-0 pb-1"
+                  style={{ height: "40px" }}
+                  onClick={sendMessageToServer}
+                >
+                  <FaRegPaperPlane size={18} color="#6C757D" />
+                </button>
+              </div>
             </div>
+            <ToastContainer
+              position="bottom-right"
+              autoClose={2000}
+              pauseOnHover={false}
+              theme="light"
+              limit={1}
+            />
           </div>
-          <ToastContainer
-            position="bottom-right"
-            autoClose={2000}
-            pauseOnHover={false}
-            theme="light"
-            limit={1}
-          />
-        </div>
+        ) : (
+          <div
+            className="d-flex flex-column justify-content-center align-items-center gap-4"
+            style={{ paddingTop: "70px" }}
+          >
+            <img
+              src="/images/no-authorized.svg"
+              style={{ marginTop: "80px" }}
+            />
+            <span className="fs-6 fw-bold" style={{ color: "#333333" }}>
+              채팅 목록이 없습니다.
+            </span>
+          </div>
+        )
       ) : (
         <Unauthorized />
       )}

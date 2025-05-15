@@ -30,8 +30,9 @@ export default function JoinBoard() {
   const { crewNo } = useParams();
 
   const [writerCrews, setWriterCrews] = useState([]);
-  
+
   const replyCounts = useRecoilValue(replyCountState);
+
   //로그인 관련
   const login = useRecoilValue(loginState);
   const userNo = useRecoilValue(userNoState);
@@ -42,6 +43,28 @@ export default function JoinBoard() {
   const popoverRef = useRef();
 
   // 게시글 목록 불러오기
+  // useEffect(() => {
+  //   const fetchBoardList = async () => {
+  //     try {
+  //       const res = await axios.get(
+  //         "http://localhost:8080/api/board/joinboard",
+  //         {
+  //           params:
+  //             selectedCategory !== "전체" ? { category: selectedCategory } : {},
+  //         }
+  //       );
+
+  //       console.log("Board List Data: ", res.data); // 추가된 로그
+
+  //       setBoardList(res.data);
+  //     } catch (err) {
+  //       console.error("게시글 불러오기 에러:", err);
+  //     }
+  //   };
+
+  //   fetchBoardList();
+  // }, [selectedCategory, userNo]);
+
   useEffect(() => {
     const fetchBoardList = async () => {
       try {
@@ -53,38 +76,21 @@ export default function JoinBoard() {
           }
         );
 
-        console.log("Board List Data: ", res.data); // 추가된 로그
+        const updatedBoardList = res.data.map((board) => {
+          return {
+            ...board,
+            boardReply: replyCounts[board.boardNo] ?? board.boardReply,
+          };
+        });
 
-        setBoardList(res.data);
+        setBoardList(updatedBoardList);
       } catch (err) {
         console.error("게시글 불러오기 에러:", err);
       }
     };
 
     fetchBoardList();
-  }, [selectedCategory, userNo]);
-
-  // //작성자 가입 모임 목록 불러오기
-  // useEffect(() => {
-  //   const fetchWriterCrews = async () => {
-  //     try {
-  //       if (boardList.length > 0) {
-  //         const writerId = boardList[0].boardWriter;
-
-  //         if (writerId) {
-  //           const res = await axios.get(
-  //             `http://localhost:8080/api/crew/joined/${writerId}`
-  //           );
-  //           setWriterCrews(res.data || []);
-  //         }
-  //       }
-  //     } catch (err) {
-  //       console.error("작성자 모임 목록 불러오기 에러:", err);
-  //     }
-  //   };
-
-  //   fetchWriterCrews();
-  // }, [boardList]);
+  }, [selectedCategory, userNo, replyCounts]);
 
   // 작성자 가입 모임 목록 불러오기
   useEffect(() => {
@@ -123,8 +129,6 @@ export default function JoinBoard() {
 
     fetchWriterCrews();
   }, [boardList]);
-
-  
 
   // 팝오버 클릭 시 작성자의 가입한 모임 목록을 불러오는 함수
   const handlePopoverClick = async (board) => {
@@ -321,7 +325,8 @@ export default function JoinBoard() {
                           )
                         : "시간 정보 없음"}
                       / <FaRegCommentDots style={{ marginBottom: "2px" }} />
-                      댓글 {replyCounts[board.boardNo] ?? board.boardReply}
+                      {/* 댓글 {replyCounts[board.boardNo] ?? board.boardReply} */}
+                      댓글 {board.boardReply}
                     </small>
                   </div>
                 </div>

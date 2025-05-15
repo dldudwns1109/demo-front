@@ -3,7 +3,12 @@ import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { replyCountState } from "../store/replyCountState";
-import { loginState, locationState, userNoState, categoryState } from "../utils/storage";
+import {
+  loginState,
+  locationState,
+  userNoState,
+  categoryState,
+} from "../utils/storage";
 import Header from "../components/Header";
 import CrewTopNav from "../components/CrewTopNav";
 import { FaRegCommentDots } from "react-icons/fa";
@@ -72,8 +77,26 @@ export default function CrewBoard() {
     fetchCrewName();
   }, [crewNo]);
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const res = await axios.get(
+  //         `http://localhost:8080/api/board/crew/${crewNo}`,
+  //         {
+  //           params:
+  //             selectedCategory !== "전체" ? { category: selectedCategory } : {},
+  //         }
+  //       );
+  //       setBoardList(res.data);
+  //       setVisibleCount(4);
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   };
+  //   fetchData();
+  // }, [crewNo, selectedCategory]);
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchBoardList = async () => {
       try {
         const res = await axios.get(
           `http://localhost:8080/api/board/crew/${crewNo}`,
@@ -82,14 +105,21 @@ export default function CrewBoard() {
               selectedCategory !== "전체" ? { category: selectedCategory } : {},
           }
         );
-        setBoardList(res.data);
+
+        const updatedBoardList = res.data.map((board) => ({
+          ...board,
+          boardReply: replyCounts[board.boardNo] ?? board.boardReply,
+        }));
+
+        setBoardList(updatedBoardList);
         setVisibleCount(4);
       } catch (err) {
-        console.error(err);
+        console.error("게시글 불러오기 에러:", err);
       }
     };
-    fetchData();
-  }, [crewNo, selectedCategory]);
+
+    fetchBoardList();
+  }, [crewNo, selectedCategory, replyCounts]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -108,6 +138,8 @@ export default function CrewBoard() {
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 4);
   };
+
+  
 
   return (
     <>
@@ -264,7 +296,8 @@ export default function CrewBoard() {
                         })
                       : "시간 정보 없음"}
                     / <FaRegCommentDots style={{ marginBottom: "2px" }} />
-                    댓글 {replyCounts[board.boardNo] ?? board.boardReply}
+                    {/* 댓글 {replyCounts[board.boardNo] ?? board.boardReply} */}
+                    댓글 {board.boardReply}
                   </small>
                 </div>
               </div>

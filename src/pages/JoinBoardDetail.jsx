@@ -28,18 +28,45 @@ export default function JoinBoardDetail() {
   const [location, setLocation] = useRecoilState(locationState);
   const userNo = useRecoilValue(userNoState);
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const res = await axios.get(
+  //         `http://localhost:8080/api/board/${boardNo}`
+  //       );
+  //       setBoard(res.data);
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   };
+  //   fetchData();
+  // }, [boardNo]);
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchBoard = async () => {
       try {
         const res = await axios.get(
           `http://localhost:8080/api/board/${boardNo}`
         );
         setBoard(res.data);
       } catch (err) {
-        console.error(err);
+        console.error("게시글 불러오기 에러:", err);
       }
     };
-    fetchData();
+
+    const fetchReplies = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:8080/api/reply/${boardNo}`
+        );
+        setReplies(res.data);
+      } catch (err) {
+        console.error("댓글 불러오기 에러:", err);
+      }
+    };
+
+    fetchBoard();
+    fetchReplies();
   }, [boardNo]);
 
   useEffect(() => {
@@ -60,24 +87,77 @@ export default function JoinBoardDetail() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleReplySubmit = () => {
-    if (newReply.trim()) {
-      const reply = {
-        writer: "댓글작성자", // 더미
-        profileUrl: "/images/default-profile.png",
-        content: newReply,
-        writeTime: new Date(),
-        isEditing: false,
-        memberLocation: "서울",
-        memberSchool: "서울대학교",
-        memberMbti: "ENTP",
+  // const handleReplySubmit = () => {
+  //   if (newReply.trim()) {
+  //     const reply = {
+  //       writer: "댓글작성자", // 더미
+  //       profileUrl: "/images/default-profile.png",
+  //       content: newReply,
+  //       writeTime: new Date(),
+  //       isEditing: false,
+  //       memberLocation: "서울",
+  //       memberSchool: "서울대학교",
+  //       memberMbti: "ENTP",
+  //     };
+  //     setReplies([reply, ...replies]);
+  //     setNewReply("");
+  //     setReplyCounts((prev) => ({
+  //       ...prev,
+  //       [boardNo]: (prev[boardNo] ?? board?.boardReply ?? 0) + 1,
+  //     }));
+  //   }
+  // };
+
+  const handleReplySubmit = async () => {
+    if (!login) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    if (!newReply.trim()) return;
+
+    try {
+      const replyData = {
+        replyWriter: userNo,
+        replyOrigin: parseInt(boardNo),
+        replyContent: newReply.trim(),
       };
-      setReplies([reply, ...replies]);
-      setNewReply("");
+
+      const res = await axios.post(
+        "http://localhost:8080/api/reply",
+        replyData
+      );
+      setReplies([res.data, ...replies]);
+      
       setReplyCounts((prev) => ({
         ...prev,
-        [boardNo]: (prev[boardNo] ?? board?.boardReply ?? 0) + 1,
+        [boardNo]: (prev[boardNo] ?? 0) + 1,
       }));
+      setNewReply("");
+    } catch (err) {
+      console.error("댓글 작성 에러:", err);
+    }
+  };
+
+  const handleDeleteReply = async (replyNo) => {
+    if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
+
+    try {
+      await axios.delete(`http://localhost:8080/api/reply/${replyNo}`, {
+        params: { replyOrigin: boardNo },
+      });
+
+      setReplies(replies.filter((reply) => reply.replyNo !== replyNo));
+
+      setReplies(updatedReplies);
+      setDropdownOpen(null);
+
+      setReplyCounts((prev) => ({
+        ...prev,
+        [boardNo]: (prev[boardNo] ?? 1) - 1,
+      }));
+    } catch (err) {
+      console.error("댓글 삭제 에러:", err);
     }
   };
 
@@ -96,33 +176,73 @@ export default function JoinBoardDetail() {
   const handleEditReply = (idx) => {
     const updatedReplies = [...replies];
     updatedReplies[idx].isEditing = true;
+    updatedReplies[idx].backupContent = updatedReplies[idx].replyContent;
     setReplies(updatedReplies);
     setDropdownOpen(null);
   };
 
-  const handleUpdateReply = (idx, newContent) => {
+  const handleCancelEdit = (idx) => {
     const updatedReplies = [...replies];
-    updatedReplies[idx].content = newContent;
     updatedReplies[idx].isEditing = false;
-    updatedReplies[idx].writeTime = new Date();
-    setReplies(
-      updatedReplies.sort(
-        (a, b) => new Date(b.writeTime) - new Date(a.writeTime)
-      )
-    );
+    updatedReplies[idx].replyContent = updatedReplies[idx].backupContent; // 백업된 내용으로 복구
+    delete updatedReplies[idx].backupContent; // 백업 제거
+    setReplies(updatedReplies);
   };
 
-  const handleDeleteReply = (idx) => {
-    if (window.confirm("이 댓글을 삭제하시겠습니까?")) {
-      const updatedReplies = replies.filter((_, i) => i !== idx);
-      setReplies(updatedReplies);
-      setDropdownOpen(null);
-      setReplyCounts((prev) => ({
-        ...prev,
-        [boardNo]: (prev[boardNo] ?? board?.boardReply ?? 1) - 1,
-      }));
+  // const handleUpdateReply = (idx, newContent) => {
+  //   const updatedReplies = [...replies];
+  //   updatedReplies[idx].content = newContent;
+  //   updatedReplies[idx].isEditing = false;
+  //   updatedReplies[idx].writeTime = new Date();
+  //   setReplies(
+  //     updatedReplies.sort(
+  //       (a, b) => new Date(b.writeTime) - new Date(a.writeTime)
+  //     )
+  //   );
+  // };
+  const handleUpdateReply = async (replyNo, idx, newContent) => {
+    if (!newContent.trim()) return;
+
+    try {
+      const response = await axios.put(
+        `http://localhost:8080/api/reply/${replyNo}`,
+        { replyContent: newContent }
+      );
+
+      if (response.data) {
+        const updatedReplies = replies.map((reply) =>
+          reply.replyNo === replyNo
+            ? {
+                ...reply,
+                replyContent: newContent,
+                replyWtime: new Date().toISOString(),
+                isEditing: false,
+              }
+            : reply
+        );
+
+        updatedReplies.sort(
+          (a, b) => new Date(b.replyWtime) - new Date(a.replyWtime)
+        );
+
+        setReplies(updatedReplies);
+      }
+    } catch (err) {
+      console.error("댓글 수정 에러:", err);
     }
   };
+
+  // const handleDeleteReply = (idx) => {
+  //   if (window.confirm("이 댓글을 삭제하시겠습니까?")) {
+  //     const updatedReplies = replies.filter((_, i) => i !== idx);
+  //     setReplies(updatedReplies);
+  //     setDropdownOpen(null);
+  //     setReplyCounts((prev) => ({
+  //       ...prev,
+  //       [boardNo]: (prev[boardNo] ?? board?.boardReply ?? 1) - 1,
+  //     }));
+  //   }
+  // };
 
   const handleBoardEdit = () => {
     navigate(`/join/board/edit/${boardNo}`);
@@ -148,90 +268,6 @@ export default function JoinBoardDetail() {
   };
 
   if (!board) return <div>로딩 중...</div>;
-
-  // 게시글 및 댓글 데이터 불러오기
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const [boardRes, repliesRes] = await Promise.all([
-  //         axios.get(`http://localhost:8080/api/board/${boardNo}`),
-  //         axios.get(`http://localhost:8080/api/reply/${boardNo}`),
-  //       ]);
-
-  //       setBoard(boardRes.data);
-  //       setReplies(repliesRes.data);
-  //     } catch (err) {
-  //       console.error("데이터 로드 에러:", err);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, [boardNo]);
-
-  // // 로그인된 사용자 프로필 정보 가져오기
-  // useEffect(() => {
-  //   const fetchProfile = async () => {
-  //     if (!login) return;
-  //     try {
-  //       const res = await axios.get(
-  //         `http://localhost:8080/api/member/mypage/${userNo}`
-  //       );
-  //       setProfile(res.data);
-  //     } catch (err) {
-  //       console.error("프로필 정보 로드 에러:", err);
-  //     }
-  //   };
-
-  //   fetchProfile();
-  // }, [login, userNo]);
-
-  // // 댓글 작성 시 로그인 여부 확인
-  // const shouldLogin = () => {
-  //   if (!login) {
-  //     window.confirm("로그인 후 이용 가능합니다");
-  //     return false;
-  //   }
-  //   return true;
-  // };
-
-  // // 댓글 작성 핸들러
-  // const handleReplySubmit = async () => {
-  //   if (!shouldLogin() || !profile) return;
-
-  //   const trimmedReply = newReply.trim();
-  //   if (!trimmedReply) return;
-
-  //   try {
-  //     const replyData = {
-  //       replyWriter: userNo,
-  //       replyOrigin: boardNo,
-  //       replyContent: trimmedReply,
-  //     };
-
-  //     const res = await axios.post(
-  //       `http://localhost:8080/api/reply`,
-  //       replyData
-  //     );
-  //     const newReplyData = res.data;
-
-  //     setReplies([newReplyData, ...replies]);
-  //     setNewReply("");
-  //     setReplyCounts((prev) => ({
-  //       ...prev,
-  //       [boardNo]: (prev[boardNo] ?? 0) + 1,
-  //     }));
-  //   } catch (err) {
-  //     console.error("댓글 작성 에러:", err);
-  //     alert("댓글 작성에 실패했습니다.");
-  //   }
-  // };
-
-  // // 엔터키로 댓글 작성
-  // const handleKeyPress = (e) => {
-  //   if (e.key === "Enter") handleReplySubmit();
-  // };
-
-  // if (!board) return <div>로딩 중...</div>;
 
   return (
     <>
@@ -408,12 +444,12 @@ export default function JoinBoardDetail() {
           ) : (
             replies.map((reply, idx) => (
               <div
-                key={idx}
+                key={reply.replyNo}
                 className="d-flex align-items-start border-bottom py-3 position-relative"
                 style={{ fontSize: "0.95rem" }}
               >
                 <img
-                  src={reply.profileUrl}
+                  src={`http://localhost:8080/api/attachment/${reply.profileUrl}`}
                   alt="프로필"
                   className="rounded-circle me-2"
                   style={{
@@ -427,28 +463,34 @@ export default function JoinBoardDetail() {
                   }
                 />
                 <div className="flex-grow-1">
-                  <div className="fw-bold">{reply.writer}</div>
+                  <div className="fw-bold">{reply.memberNickname}</div>
                   <div className="d-flex align-items-center">
                     {reply.isEditing ? (
                       <input
                         type="text"
                         className="form-control form-control-sm border"
-                        defaultValue={reply.content}
-                        onBlur={(e) => handleUpdateReply(idx, e.target.value)}
-                        onKeyDown={(e) =>
-                          e.key === "Enter" &&
-                          handleUpdateReply(idx, e.target.value)
+                        defaultValue={reply.replyContent}
+                        onBlur={(e) =>
+                          handleUpdateReply(reply.replyNo, idx, e.target.value)
                         }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleUpdateReply(reply.replyNo, idx, e.target.value);
+                          } else if (e.key === "Escape") {
+                            handleCancelEdit(idx);
+                          }
+                        }}
                         autoFocus
                       />
                     ) : (
-                      <div>{reply.content}</div>
+                      <div>{reply.replyContent}</div>
                     )}
+
                     <small
                       className="text-muted ms-3"
                       style={{ fontSize: "0.8rem" }}
                     >
-                      {new Date(reply.writeTime).toLocaleString("ko-KR", {
+                      {new Date(reply.replyWtime).toLocaleString("ko-KR", {
                         year: "numeric",
                         month: "2-digit",
                         day: "2-digit",
@@ -458,6 +500,8 @@ export default function JoinBoardDetail() {
                     </small>
                   </div>
                 </div>
+
+                {/* 수정/삭제 버튼 */}
                 <div
                   className="position-relative ms-2"
                   style={{ flexShrink: 0 }}
@@ -469,6 +513,7 @@ export default function JoinBoardDetail() {
                   >
                     <FiMoreVertical size="1.5rem" />
                   </button>
+
                   {dropdownOpen === idx && (
                     <ul
                       className="dropdown-menu show"
@@ -485,7 +530,7 @@ export default function JoinBoardDetail() {
                       <li>
                         <button
                           className="dropdown-item"
-                          onClick={() => handleDeleteReply(idx)}
+                          onClick={() => handleDeleteReply(reply.replyNo)}
                         >
                           삭제
                         </button>

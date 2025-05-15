@@ -1,6 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { useRecoilValue, useRecoilState } from "recoil";
-import { loginState, locationState, categoryState } from "../utils/storage";
+import {
+  loginState,
+  locationState,
+  categoryState,
+  userNoState,
+} from "../utils/storage";
 import Header from "../components/Header";
 import CrewTopNav from "../components/CrewTopNav";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -20,6 +25,7 @@ import MeetingCard from "../components/MeetingCard";
 export default function CrewDetail() {
   const navigate = useNavigate();
   const login = useRecoilValue(loginState);
+  const userNo = useRecoilValue(userNoState);
   const [location, setLocation] = useRecoilState(locationState);
   const [category, setCategory] = useRecoilState(categoryState);
   const { crewNo } = useParams();
@@ -49,6 +55,68 @@ export default function CrewDetail() {
     return { Authorization: `Bearer ${token.trim()}` };
   };
 
+  /* 모임 데이터 불러오기 */
+  const fetchCrewData = async () => {
+    try {
+      const res = await axios.get(`http://localhost:8080/api/crew/${crewNo}`);
+      setCrewData(res.data);
+    } catch (err) {
+      console.error("모임 데이터 불러오기 실패:", err.message);
+    }
+  };
+
+  /* 찜 여부 확인 */
+  const checkLikeStatus = async () => {
+    if (!login || !userNo) return;
+
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/crew/findLikeGroup/${userNo}`,
+        { headers: getAuthHeaders() }
+      );
+
+      // 찜한 모임 중 현재 모임이 있는지 확인
+      const likedGroups = res.data;
+      const isLikedGroup = likedGroups.some(
+        (group) => group.crewNo === parseInt(crewNo)
+      );
+
+      setIsLiked(isLikedGroup);
+    } catch (err) {
+      console.error("찜 여부 확인 실패:", err.message);
+    }
+  };
+
+  /* 찜(좋아요) 토글 */
+  const handleHeartClick = async () => {
+    if (!login) {
+      window.confirm("로그인이 필요합니다.");
+      return;
+    }
+
+    const payload = {
+      crewNo: parseInt(crewNo),
+      memberNo: userNo,
+    };
+
+    try {
+      if (isLiked) {
+        await axios.delete(`http://localhost:8080/api/crew/deleteLike`, {
+          data: payload,
+          headers: getAuthHeaders(),
+        });
+      } else {
+        await axios.post(`http://localhost:8080/api/crew/updateLike`, payload, {
+          headers: getAuthHeaders(),
+        });
+      }
+      setIsLiked(!isLiked);
+    } catch (err) {
+      console.error("찜 처리 실패:", err.message);
+      window.confirm("찜 처리에 실패했습니다.");
+    }
+  };
+
   //모임 멤버 목록 불러오기
   const fetchMembers = async () => {
     try {
@@ -70,33 +138,73 @@ export default function CrewDetail() {
     }
   };
 
+  /* 초기 데이터 로드 */
+  useEffect(() => {
+    fetchCrewData();
+    checkLikeStatus();
+    fetchMembers();
+  }, [crewNo, login, userNo]);
+
   //가입하기 버튼 클릭 시
+  // const handleJoinClick = async () => {
+  //   try {
+  //     const token = localStorage.getItem("refreshToken");
+
+  //     if (!token || token.trim() === "") {
+  //       window.confirm("로그인이 필요합니다.");
+  //       return;
+  //     }
+
+  //     const authHeader = `Bearer ${token.trim()}`;
+
+  //     if (joinMessage.trim() === "") {
+  //       window.confirm("가입 인사를 입력해 주세요.");
+  //       return;
+  //     }
+
+  //     console.log("Authorization Header:", authHeader); // 디버깅용
+
+  //     const response = await axios.post(
+  //       `http://localhost:8080/api/crewmember/${crewNo}/join`,
+  //       {},
+  //       {
+  //         headers: {
+  //           Authorization: authHeader,
+  //         },
+  //       }
+  //     );
+
+  //     if (response.status === 200) {
+  //       window.confirm("모임에 가입되었습니다.");
+  //       setIsMember(true);
+  //       setShowJoinSheet(false);
+  //       setJoinMessage("");
+
+  //       await fetchMembers();
+  //     }
+  //   } catch (err) {
+  //     console.error("Error joining crew:", err.message);
+  //     window.confirm("모임 가입에 실패했습니다.");
+  //   }
+  // };
   const handleJoinClick = async () => {
     try {
-      const token = localStorage.getItem("refreshToken");
+      if (crewData?.crewLimit && members.length >= crewData.crewLimit) {
+        window.confirm("모임 인원이 가득 찼습니다. 모임장에게 문의하세요.");
+        return;
+      }
 
+      const token = localStorage.getItem("refreshToken");
       if (!token || token.trim() === "") {
         window.confirm("로그인이 필요합니다.");
         return;
       }
 
       const authHeader = `Bearer ${token.trim()}`;
-
-      if (joinMessage.trim() === "") {
-        window.confirm("가입 인사를 입력해 주세요.");
-        return;
-      }
-
-      console.log("Authorization Header:", authHeader); // 디버깅용
-
       const response = await axios.post(
         `http://localhost:8080/api/crewmember/${crewNo}/join`,
         {},
-        {
-          headers: {
-            Authorization: authHeader,
-          },
-        }
+        { headers: { Authorization: authHeader } }
       );
 
       if (response.status === 200) {
@@ -104,7 +212,6 @@ export default function CrewDetail() {
         setIsMember(true);
         setShowJoinSheet(false);
         setJoinMessage("");
-
         await fetchMembers();
       }
     } catch (err) {
@@ -261,16 +368,6 @@ export default function CrewDetail() {
   // 신고처리
   const handleReport = () => {
     setShowReportInput(true);
-  };
-
-  // 좋아요 처리
-  const handleHeartClick = () => {
-    if (!login) {
-      window.confirm("비회원은 사용할 수 없는 기능입니다.");
-      return;
-    }
-    // setIsLiked(!isLiked);
-    setIsLiked((prev) => !prev);
   };
 
   // 모임 멤버 더보기
@@ -499,7 +596,7 @@ export default function CrewDetail() {
                 alignItems: "center",
               }}
             >
-              모임 멤버 {members.length || 0}
+              참여 멤버 {members.length || 0}
             </h3>
             <div
               className="member-list"
@@ -508,7 +605,7 @@ export default function CrewDetail() {
               {/* {Array.isArray(members) && members.length > 0 ? ( */}
               {members.length > 0 ? (
                 members
-                  // slice(0, visibleCount).
+                  .slice(0, visibleCount)
                   .map((member) => (
                     <div
                       key={member.memberNo}
@@ -651,7 +748,7 @@ export default function CrewDetail() {
                   onClick={handleLoadMoreMembers}
                   style={{ padding: "0.5rem 1rem" }}
                 >
-                  더보기
+                  멤버 더보기
                 </button>
               </div>
             )}

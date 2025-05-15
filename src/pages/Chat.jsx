@@ -40,6 +40,12 @@ export default function Chat() {
       setMessages(res.data);
     };
     if (currRoom) fetchData();
+
+    client.publish({
+      destination: "/app/member/read",
+      headers: { accessToken },
+      body: JSON.stringify({ target: currRoom, content: "" }),
+    });
   }, [currRoom]);
 
   useEffect(() => {
@@ -67,6 +73,20 @@ export default function Chat() {
       headers: { accessToken },
     });
   }, [isConnected, receivedMessage]);
+
+  useEffect(() => {
+    if (!isConnected || !client?.active || !currRoom) return;
+
+    if (
+      receivedMessage?.targetNo === currRoom &&
+      receivedMessage?.accountNo !== userNo
+    )
+      client.publish({
+        destination: "/app/member/read",
+        headers: { accessToken },
+        body: JSON.stringify({ target: currRoom, content: "" }),
+      });
+  }, [receivedMessage, currRoom, isConnected]);
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;

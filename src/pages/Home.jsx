@@ -33,6 +33,14 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const fetchData = async () => {
+      const res = await axios.get("http://localhost:8080/api/board/joinboard");
+      setJoinBoardData([...res.data]);
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
     if (keyword !== "") navigate(`/crew/list?keyword=${keyword}`);
   }, [keyword]);
 
@@ -62,11 +70,7 @@ export default function Home() {
         const res = await axios.get(
           `http://localhost:8080/api/crew/findLikedGroup/${userNo}`
         );
-        const res2 = await axios.get(
-          "http://localhost:8080/api/board/joinboard"
-        );
         setLikedGroupData([...res.data]);
-        setJoinBoardData([...res2.data]);
       };
       fetchData();
     }

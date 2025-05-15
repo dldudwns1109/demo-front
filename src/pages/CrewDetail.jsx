@@ -91,7 +91,7 @@ export default function CrewDetail() {
 
       const response = await axios.post(
         `http://localhost:8080/api/crewmember/${crewNo}/join`,
-        {},
+        { chatContent: joinMessage },
         {
           headers: {
             Authorization: authHeader,

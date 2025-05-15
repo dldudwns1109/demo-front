@@ -23,7 +23,7 @@ export default function Header({
   setCategory = null,
   location = null,
   setLocation = null,
-  searchKeyword = null,
+  // searchKeyword = null,
   setSearchKeyword = null,
 }) {
   const windowWidth = useRecoilValue(windowWidthState);
@@ -52,8 +52,13 @@ export default function Header({
   const navigate = useNavigate();
 
   useEffect(() => {
-    // console.log(searchKeyword);
-  }, [searchKeyword]);
+    const city = localStorage.getItem("city");
+    const area = localStorage.getItem("area");
+
+    if (city && area && location !== null) {
+      setLocation({ city, area });
+    }
+  }, []);
 
   useEffect(() => {
     category

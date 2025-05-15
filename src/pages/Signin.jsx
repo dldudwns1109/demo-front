@@ -61,6 +61,8 @@ export default function Signin() {
           ] = `Bearer ${res.data.accessToken}`;
           localStorage.setItem("accessToken", res.data.accessToken);
           localStorage.setItem("refreshToken", res.data.refreshToken);
+          localStorage.setItem("city", res.data.location.split(" ")[0]);
+          localStorage.setItem("area", res.data.location.split(" ")[1]);
           navigate("/");
         }
       } catch (e) {

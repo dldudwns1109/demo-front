@@ -40,9 +40,7 @@ export default function JoinBoard() {
           "http://localhost:8080/api/board/joinboard",
           {
             params:
-              selectedCategory !== "전체"
-                ? { category: selectedCategory }
-                : {},
+              selectedCategory !== "전체" ? { category: selectedCategory } : {},
           }
         );
         setBoardList(res.data);
@@ -60,9 +58,15 @@ export default function JoinBoard() {
   return (
     <>
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
-      <div className="container" style={{ paddingTop: "5rem", paddingBottom: "2rem" }}>
+      <div
+        className="container"
+        style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
+      >
         <div className="mb-5">
-          <h2 className="fw-bold" style={{ fontSize: "2rem", marginTop: "3rem" }}>
+          <h2
+            className="fw-bold"
+            style={{ fontSize: "2rem", marginTop: "3rem" }}
+          >
             모임 가입 게시판
           </h2>
         </div>
@@ -75,9 +79,11 @@ export default function JoinBoard() {
                 type="button"
                 className="btn btn-sm rounded-pill"
                 style={{
-                  backgroundColor: selectedCategory === cat ? "#F9B4ED" : "#ffffff",
+                  backgroundColor:
+                    selectedCategory === cat ? "#F9B4ED" : "#ffffff",
                   color: selectedCategory === cat ? "#ffffff" : "#F9B4ED",
-                  border: selectedCategory === cat ? "none" : "1px solid #F9B4ED",
+                  border:
+                    selectedCategory === cat ? "none" : "1px solid #F9B4ED",
                   padding: "0.5rem 1rem",
                   fontSize: "0.95rem",
                 }}
@@ -98,57 +104,97 @@ export default function JoinBoard() {
 
         <div className="row">
           {boardList.length === 0 && (
-            <p className="text-muted text-center mt-5" style={{ fontSize: "1rem" }}>
+            <p
+              className="text-muted text-center mt-5"
+              style={{ fontSize: "1rem" }}
+            >
               게시글이 없습니다.
             </p>
           )}
 
           {boardList.slice(0, visibleCount).map((board) => (
-            <div key={board.boardNo} className="col-md-6 mb-4 position-relative">
+            <div
+              key={board.boardNo}
+              className="col-md-6 mb-4 position-relative"
+            >
               <Link
                 to={`/join/board/detail/${board.boardNo}`}
                 className="text-decoration-none text-dark"
               >
-                <div className="card shadow-sm h-100" style={{ backgroundColor: "#f1f3f5", border: "none" }}>
+                <div
+                  className="card shadow-sm h-100"
+                  style={{ backgroundColor: "#f1f3f5", border: "none" }}
+                >
                   <div className="card-body" style={{ padding: "1.5rem" }}>
                     <div className="d-flex align-items-center mb-3">
                       <img
                         src={`http://localhost:8080/api/member/image/${board.boardWriter}`}
                         alt="프로필"
                         className="rounded-circle me-3"
-                        style={{ width: "3rem", height: "3rem", objectFit: "cover", cursor: "pointer" }}
+                        style={{
+                          width: "3rem",
+                          height: "3rem",
+                          objectFit: "cover",
+                          cursor: "pointer",
+                        }}
                         onClick={(e) => {
                           e.preventDefault();
                           setShowPopoverId(
-                            board.boardNo === showPopoverId ? null : board.boardNo
+                            board.boardNo === showPopoverId
+                              ? null
+                              : board.boardNo
                           );
                         }}
                       />
                       <div>
-                        <strong>{board.boardWriterNickname || "알 수 없음"}</strong>
-                        <div className="text-muted" style={{ fontSize: "0.85rem" }}>
-                          {board.boardWriterGender === "m" ? "남성" : "여성"} · {board.boardWriterBirth} · {board.boardWriterMbti}
+                        <strong>
+                          {board.boardWriterNickname || "알 수 없음"}
+                        </strong>
+                        <div
+                          className="text-muted"
+                          style={{ fontSize: "0.85rem" }}
+                        >
+                          {board.boardWriterGender === "m" ? "남성" : "여성"} ·{" "}
+                          {board.boardWriterBirth} · {board.boardWriterMbti}
                         </div>
                       </div>
                     </div>
-                    <div className="mb-2" style={{ color: "#DABFFF", fontWeight: "bold", fontSize: "0.9rem" }}>
+                    <div
+                      className="mb-2"
+                      style={{
+                        color: "#DABFFF",
+                        fontWeight: "bold",
+                        fontSize: "0.9rem",
+                      }}
+                    >
                       {board.boardCategory}
                     </div>
-                    <h5 className="fw-bold mb-2" style={{ fontSize: "1.2rem" }}>{board.boardTitle}</h5>
-                    <p className="text-truncate mb-2" style={{ fontSize: "0.95rem", maxWidth: "100%" }}>
-                      {board.boardContent?.length > 20 ? board.boardContent.slice(0, 20) + "..." : board.boardContent}
+                    <h5 className="fw-bold mb-2" style={{ fontSize: "1.2rem" }}>
+                      {board.boardTitle}
+                    </h5>
+                    <p
+                      className="text-truncate mb-2"
+                      style={{ fontSize: "0.95rem", maxWidth: "100%" }}
+                    >
+                      {board.boardContent?.length > 20
+                        ? board.boardContent.slice(0, 20) + "..."
+                        : board.boardContent}
                     </p>
                     <small className="text-muted d-flex align-items-center gap-1">
                       {board.boardWriteTime
-                        ? new Date(board.boardWriteTime).toLocaleString("ko-KR", {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
+                        ? new Date(board.boardWriteTime).toLocaleString(
+                            "ko-KR",
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )
                         : "시간 정보 없음"}
-                      / <FaRegCommentDots style={{ marginBottom: "2px" }} /> 댓글 {replyCounts[board.boardNo] ?? board.boardReply}
+                      / <FaRegCommentDots style={{ marginBottom: "2px" }} />{" "}
+                      댓글 {replyCounts[board.boardNo] ?? board.boardReply}
                     </small>
                   </div>
                 </div>

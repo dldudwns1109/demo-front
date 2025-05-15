@@ -45,17 +45,18 @@ export default function JoinBoardEdit() {
           boardWriter: res.data.boardWriter,
         });
         // 작성자와 로그인한 사용자가 다를 경우 접근 차단
-        if (res.data.boardWriter !== userNo) {
+        // if (res.data.boardWriter !== userNo) {
+        if (userNo && res.data.boardWriter !== userNo) {
           alert("수정 권한이 없습니다.");
-          navigate(`/join/board/detail/${boardNo}`);
+          navigate(`/crew/${crewNo}/board/detail/${boardNo}`);
         }
       } catch (err) {
         console.error(err);
         alert("게시글 정보를 불러오는데 실패했습니다.");
-        navigate("/join/board");
+        navigate("/crew/${crewNo}/board");
       }
     };
-    fetchBoard();
+    if (userNo) fetchBoard();
   }, [boardNo, navigate, userNo]);
 
   // 프로필 불러오기
@@ -81,20 +82,26 @@ export default function JoinBoardEdit() {
   //   fetchProfile();
   // }, []);
 
+  // 프로필 불러오기
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!userNo) {
+        console.warn("userNo가 유효하지 않습니다.");
+        return;
+      }
+
       try {
         const res = await axios.get(
           `http://localhost:8080/api/member/mypage/${userNo}`
         );
         setProfile(res.data);
       } catch (err) {
-        console.error(err);
+        console.error("프로필 불러오기 실패:", err);
       }
     };
 
     fetchProfile();
-  }, [navigate]);
+  }, [userNo]);
 
   const handleEdit = async () => {
     if (
@@ -130,7 +137,10 @@ export default function JoinBoardEdit() {
       <div className="container py-4">
         {/* 목록으로 버튼 */}
         <div className="mb-5">
-          <Link to="/join/board" className="btn btn-outline-secondary btn-sm">
+          <Link
+            to={`/crew/${crewNo}/board`}
+            className="btn btn-outline-secondary btn-sm"
+          >
             목록으로
           </Link>
         </div>
@@ -227,7 +237,7 @@ export default function JoinBoardEdit() {
           <button
             className="btn btn-secondary px-5 py-2"
             style={{ fontSize: "1rem" }}
-            onClick={() => navigate(`/join/board/detail/${boardNo}`)}
+            onClick={() => navigate(`/crew/board/detail/${boardNo}`)}
           >
             뒤로가기
           </button>

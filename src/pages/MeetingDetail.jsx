@@ -236,40 +236,59 @@ export default function MeetingDetail() {
               </div>
 
               {/* 버튼 그룹 */}
-              {userNo === meeting.meetingOwnerNo && (
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <button
-                    style={{
-                      backgroundColor: "#007BFF",
-                      color: "#ffffff",
-                      padding: "6px 12px",
-                      fontSize: "14px",
-                      fontWeight: "bold",
-                      border: "none",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => navigate(`/meeting/edit/${meetingNo}`)}
-                  >
-                    수정
-                  </button>
-                  <button
-                    style={{
-                      backgroundColor: "#DC3545",
-                      color: "#ffffff",
-                      padding: "6px 12px",
-                      fontSize: "14px",
-                      fontWeight: "bold",
-                      border: "none",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                    }}
-                    onClick={meetingDelete}
-                  >
-                    삭제
-                  </button>
-                </div>
-              )}
+
+              <div style={{ display: "flex", gap: "8px" }}>
+                {/* ← 모임으로 돌아가기 */}
+                <button
+                  style={{
+                    backgroundColor: "#6c757d",
+                    color: "#ffffff",
+                    padding: "6px 12px",
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => navigate(`/crew/${crewNo}/detail`)}
+                >
+                  모임으로 돌아가기
+                </button>
+                {userNo === meeting.meetingOwnerNo && (
+                  <>
+                    <button
+                      style={{
+                        backgroundColor: "#007BFF",
+                        color: "#ffffff",
+                        padding: "6px 12px",
+                        fontSize: "14px",
+                        fontWeight: "bold",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => navigate(`/meeting/edit/${meetingNo}`)}
+                    >
+                      수정
+                    </button>
+                    <button
+                      style={{
+                        backgroundColor: "#DC3545",
+                        color: "#ffffff",
+                        padding: "6px 12px",
+                        fontSize: "14px",
+                        fontWeight: "bold",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                      }}
+                      onClick={meetingDelete}
+                    >
+                      삭제
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* 날짜 */}

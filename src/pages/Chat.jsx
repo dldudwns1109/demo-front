@@ -41,12 +41,14 @@ export default function Chat() {
     };
     if (currRoom) fetchData();
 
+    if (!isConnected || !client?.active || !currRoom) return;
+
     client.publish({
       destination: "/app/member/read",
       headers: { accessToken },
       body: JSON.stringify({ target: currRoom, content: "" }),
     });
-  }, [currRoom]);
+  }, [currRoom, isConnected]);
 
   useEffect(() => {
     if (!login) return;
@@ -80,12 +82,13 @@ export default function Chat() {
     if (
       receivedMessage?.targetNo === currRoom &&
       receivedMessage?.accountNo !== userNo
-    )
+    ) {
       client.publish({
         destination: "/app/member/read",
         headers: { accessToken },
         body: JSON.stringify({ target: currRoom, content: "" }),
       });
+    }
   }, [receivedMessage, currRoom, isConnected]);
 
   useEffect(() => {
@@ -94,6 +97,10 @@ export default function Chat() {
       scrollContainer.scrollTop = scrollContainer.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    console.log(chatRoom);
+  }, [chatRoom]);
 
   const connectToServer = useCallback(() => {
     const socket = new SockJS("http://localhost:8080/ws");
@@ -106,6 +113,10 @@ export default function Chat() {
         });
 
         chatRoom?.forEach((room) => {
+          client.subscribe(`/private/member/read/${room.roomNo}`, (message) => {
+            setMessages(JSON.parse(message.body));
+          });
+
           client.subscribe(`/private/member/chat/${room.roomNo}`, (message) => {
             setReceivedMessage({
               ...JSON.parse(message.body),
@@ -224,7 +235,7 @@ export default function Chat() {
               {chatRoom.map((room, idx) => (
                 <button
                   key={idx}
-                  className="w-100 btn d-flex justify-content-between align-items-center p-3"
+                  className="w-100 btn d-flex justify-content-between align-items-center p-3 position-relative"
                   style={{
                     backgroundColor:
                       room.roomNo === currRoom ? "#EBEBEB" : "transparent",
@@ -262,6 +273,32 @@ export default function Chat() {
                   <div style={{ minWidth: "80px" }}>
                     {moment(room.time).format("a h:mm")}
                   </div>
+                  {room.chatRead !== 0 && (
+                    <span
+                      className="position-absolute px-2 text-white"
+                      style={{
+                        fontSize: "16px",
+                        backgroundColor: "#F9B4ED",
+                        right: "-8px",
+                        top: "-8px",
+                        borderRadius: "999px",
+                      }}
+                    >
+                      {room.chatRead}
+                    </span>
+                  )}
+                  {/* <span
+                    className="position-absolute px-2 text-white"
+                    style={{
+                      fontSize: "16px",
+                      backgroundColor: "#F9B4ED",
+                      right: "-8px",
+                      top: "-8px",
+                      borderRadius: "999px",
+                    }}
+                  >
+                    {room.chatRead}
+                  </span> */}
                 </button>
               ))}
             </div>
@@ -336,6 +373,11 @@ export default function Chat() {
                   >
                     {message.accountNo === userNo ? (
                       <>
+                        {message.chatRead !== 0 && (
+                          <span style={{ fontSize: "14px", color: "#F9B4ED" }}>
+                            {message.chatRead}
+                          </span>
+                        )}
                         {isLastMessage(message, idx) && (
                           <span style={{ fontSize: "14px", color: "#333333" }}>
                             {moment(message.time).format("a h:mm")}
@@ -408,6 +450,9 @@ export default function Chat() {
                             </div>
                           </div>
                         </div>
+                        {/* {message.chatRead !== 0 && (
+                          <span>{message.chatRead}</span>
+                        )} */}
                         {isLastMessage(message, idx) && (
                           <span style={{ fontSize: "14px", color: "#333333" }}>
                             {moment(message.time).format("a h:mm")}

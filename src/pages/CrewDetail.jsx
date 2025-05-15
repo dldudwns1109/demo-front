@@ -16,6 +16,8 @@ import {
 } from "react-icons/fa";
 import "../css/CrewDetail.css";
 import MeetingCard from "../components/MeetingCard";
+import { windowWidthState } from "../utils/storage";
+import ProfilePopover from "../components/ProfilePopover";
 
 export default function CrewDetail() {
   const navigate = useNavigate();
@@ -43,6 +45,22 @@ export default function CrewDetail() {
 
   const [meetingCount, setMeetingCount] = useState(0);
   const [meetingList, setMeetingList] = useState([]);
+
+  const windowWidth = useRecoilValue(windowWidthState);
+
+  // 상태: 초기 1줄만 보여주기
+  const [visibleRows, setVisibleRows] = useState(1);
+
+  // 칼럼 수 계산
+  const columnCount = windowWidth > 1024 ? 3 : windowWidth > 768 ? 2 : 1;
+
+  // 보여줄 개수 계산
+  const [meetingvisibleCount, setMeetingVisibleCount] = useState(columnCount);
+
+  // ✅ windowWidth나 visibleRows가 변경되면 visibleCount 재계산
+  useEffect(() => {
+    setMeetingVisibleCount(columnCount * visibleRows);
+  }, [columnCount, visibleRows]);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("refreshToken");
@@ -455,7 +473,7 @@ export default function CrewDetail() {
             <button
               className="btn btn-primary"
               style={{
-                padding: "12px",
+                padding: "8px",
                 backgroundColor: "#007BFF",
                 color: "#ffffff",
                 fontWeight: "bold",
@@ -476,10 +494,13 @@ export default function CrewDetail() {
 
           {/* 정모 카드 목록 */}
           <div
-            className="d-flex flex-wrap"
-            style={{ justifyContent: "flex-start", gap: "60px" }}
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
+              gap: "60px",
+            }}
           >
-            {meetingList.map((meeting) => (
+            {meetingList.slice(0, meetingvisibleCount).map((meeting) => (
               <MeetingCard
                 key={meeting.meetingNo}
                 meeting={meeting}
@@ -487,6 +508,27 @@ export default function CrewDetail() {
               />
             ))}
           </div>
+
+          {meetingList.length > meetingvisibleCount && (
+            <div className="text-center mt-4">
+              <button
+                className="btn btn-primary"
+                style={{
+                padding: "8px",
+                backgroundColor: "#007BFF",
+                color: "#ffffff",
+                fontWeight: "bold",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: "0.85rem",
+              }}
+                onClick={() => setVisibleRows((prev) => prev + 1)}
+              >
+                정모 더보기
+              </button>
+            </div>
+          )}
 
           <div className="member-section" style={{ marginBottom: "1.5rem" }}>
             <h3
@@ -579,60 +621,10 @@ export default function CrewDetail() {
                       </div>
                       {/* 팝오버 */}
                       {showPopoverId === member.memberNo && (
-                        <div
-                          ref={popoverRef}
-                          className="shadow position-absolute bg-white rounded p-3"
-                          style={{
-                            top: "3.5rem",
-                            left: "1rem",
-                            zIndex: 10,
-                            width: "300px",
-                            fontSize: "0.9rem",
-                            border: "1px solid #ddd",
-                          }}
-                        >
-                          <div className="d-flex align-items-center mb-3">
-                            <img
-                              src="/images/default-profile.png"
-                              alt="프로필"
-                              className="rounded-circle me-3"
-                              style={{
-                                width: "3.5rem",
-                                height: "3.5rem",
-                                objectFit: "cover",
-                              }}
-                            />
-                            <div>
-                              <div className="fw-bold">{member.nickname}</div>
-                              <div className="badge bg-info text-white me-1">
-                                {member.mbti || "정보 없음"}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="text-muted mb-2">
-                            {member.location || "지역 정보 없음"} ·{" "}
-                            {member.birth || "생년월일 없음"}
-                          </div>
-
-                          <hr />
-
-                          <div className="fw-bold">가입한 모임 예시</div>
-                          <div className="d-flex align-items-center mt-2">
-                            <img
-                              src="/images/sample-group.jpg"
-                              className="me-2 rounded"
-                              style={{ width: "2rem", height: "2rem" }}
-                              alt="모임"
-                            />
-                            <div
-                              className="text-muted"
-                              style={{ fontSize: "0.8rem" }}
-                            >
-                              모임 이름
-                            </div>
-                          </div>
-                        </div>
+                        <ProfilePopover
+                          memberNo={member.memberNo}
+                          onClose={() => setShowPopoverId(null)}
+                        />
                       )}
                     </div>
                   ))

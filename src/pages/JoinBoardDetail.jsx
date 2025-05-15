@@ -320,56 +320,10 @@ export default function JoinBoardDetail() {
 
           {/* 작성자 팝오버 */}
           {showBoardWriterPopover && (
-            <div
-              ref={boardPopoverRef}
-              className="shadow position-absolute bg-white rounded p-3"
-              style={{
-                top: "5rem",
-                left: "1rem",
-                zIndex: 10,
-                width: "300px",
-                fontSize: "0.9rem",
-                border: "1px solid #ddd",
-              }}
-            >
-              <div className="d-flex align-items-center mb-3">
-                <img
-                  src={
-                    board.boardWriterProfileUrl || "/images/default-profile.png"
-                  }
-                  alt="프로필"
-                  className="rounded-circle me-3"
-                  style={{
-                    width: "3.5rem",
-                    height: "3.5rem",
-                    objectFit: "cover",
-                  }}
-                />
-                <div>
-                  <div className="fw-bold">{board.boardWriterNickname}</div>
-                  <div className="badge bg-info text-white me-1">
-                    {board.boardWriterMbti || "MBTI"}
-                  </div>
-                </div>
-              </div>
-              <div className="text-muted mb-2">
-                {board.boardWriterLocation} · {board.boardWriterSchool} ·{" "}
-                {board.boardWriterBirth}
-              </div>
-              <hr />
-              <div className="fw-bold">가입한 모임 예시</div>
-              <div className="d-flex align-items-center mt-2">
-                <img
-                  src="/images/sample-group.jpg"
-                  className="me-2 rounded"
-                  style={{ width: "2rem", height: "2rem" }}
-                  alt="모임"
-                />
-                <div className="text-muted" style={{ fontSize: "0.8rem" }}>
-                  모임 이름
-                </div>
-              </div>
-            </div>
+            <ProfilePopover
+              memberNo={board.boardWriter}
+              onClose={() => setShowBoardWriterPopover(false)}
+            />
           )}
         </div>
 

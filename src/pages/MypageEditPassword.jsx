@@ -100,7 +100,13 @@ export default function MypageEditPassword() {
     <>
       {/* 헤더 */}
       <Header input={false} />
-      <ToastContainer position="top-center" autoClose={2000} />
+      <ToastContainer
+            position="bottom-right"
+            autoClose={2000}
+            pauseOnHover={false}
+            theme="light"
+            limit={1}
+          />
       <div
         className="d-flex flex-column align-items-center"
         style={{

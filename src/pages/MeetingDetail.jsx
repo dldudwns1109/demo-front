@@ -151,7 +151,13 @@ export default function MeetingDetail() {
   return (
     <>
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
-      <ToastContainer position="top-center" autoClose={2000} />
+      <ToastContainer
+            position="bottom-right"
+            autoClose={2000}
+            pauseOnHover={false}
+            theme="light"
+            limit={1}
+          />
 
       {/* ✅ 위임 모달 */}
       {isDelegating && (

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../css/Mypage.css";
 import { FaRegPaperPlane } from "react-icons/fa";
+import { loginState } from "../utils/storage";
+import { useRecoilValue } from "recoil";
 
 export default function ProfilePopover({ memberNo, onClose }) {
   const popoverRef = useRef();
@@ -12,6 +14,8 @@ export default function ProfilePopover({ memberNo, onClose }) {
   const [crewList, setCrewList] = useState([]);
   const [showDmInput, setShowDmInput] = useState(false);
   const [dmMessage, setDmMessage] = useState("");
+
+  const login = useRecoilValue(loginState);
 
   // 외부 클릭 시 닫기
   useEffect(() => {
@@ -38,6 +42,13 @@ export default function ProfilePopover({ memberNo, onClose }) {
   }, [memberNo]);
 
   const handleDmClick = useCallback(async () => {
+    if (!login) {
+      const result = window.confirm("로그인이 필요한 기능입니다. 로그인하시겠습니까?");
+      if (result) {
+        navigate("/signin");
+      }
+      return;
+    }
     try {
       const res = await axios.get(
         `http://localhost:8080/api/chat/dm/${memberNo}`,

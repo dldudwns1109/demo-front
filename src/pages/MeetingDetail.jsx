@@ -29,33 +29,45 @@ export default function MeetingDetail() {
 
   const [showPopoverId, setShowPopoverId] = useState(null);
 
+  const [isMeetingLeader, setIsMeetingLeader] = useState(false);
+
   const isFull = useMemo(() => {
     return meeting && memberList.length >= meeting.meetingLimit;
   }, [meeting, memberList]);
 
   const fetchMeetingDetail = useCallback(() => {
-    axios
-      .get(`http://localhost:8080/api/meeting/${meetingNo}`)
-      .then((res) => {
-        if (res.data === null) {
-          alert("삭제된 정모입니다.");
-          navigate("/");
-        } else {
-          setMeeting(res.data);
-        }
-      })
-      .catch((err) => {
-        console.error("정모 정보 조회 실패", err);
+  axios
+    .get(`http://localhost:8080/api/meeting/${meetingNo}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    })
+    .then((res) => {
+      setMeeting(res.data);
+    })
+    .catch((err) => {
+      console.error("정모 정보 조회 실패", err);
+      if (err.response?.status === 403) {
+        alert("해당 모임에 가입한 회원만 정모를 볼 수 있어요.");
+      } else if (err.response?.status === 404) {
+        alert("삭제된 정모입니다.");
+      } else {
         alert("정모 정보를 불러오지 못했습니다.");
-        navigate("/");
-      });
-  }, [meetingNo, navigate]);
+      }
+      navigate(`/crew/${crewNo}/detail`);
+    });
+}, [meetingNo, navigate, crewNo]);
+
 
   const fetchMeetingMemberList = useCallback(() => {
     if (!userNo) return;
     axios
       .get(`http://localhost:8080/api/meetingMember/${meetingNo}`)
-      .then((res) => setMemberList(res.data))
+      .then((res) => {
+        setMemberList(res.data);
+        const myData = res.data.find((m) => m.memberNo === userNo);
+        setIsMeetingLeader(myData?.isLeader === "Y");
+      })
       .catch((err) => console.error("참여자 목록 조회 실패", err));
   }, [meetingNo, userNo]);
 
@@ -124,10 +136,21 @@ export default function MeetingDetail() {
   }, [meetingNo, meeting, navigate]);
 
   useEffect(() => {
-    fetchMeetingDetail();
-    fetchMeetingMemberList();
-    checkMeetingJoin();
-  }, [fetchMeetingDetail, fetchMeetingMemberList, checkMeetingJoin]);
+  if (!login) {
+    const confirmed = window.confirm("로그인이 필요한 기능입니다. 로그인 페이지로 이동할까요?");
+    if (confirmed) {
+      navigate("/signin");
+    } else {
+      navigate(`/crew/${crewNo}/detail`);
+    }
+    return;
+  }
+
+  fetchMeetingDetail();
+  fetchMeetingMemberList();
+  checkMeetingJoin();
+}, [fetchMeetingDetail, fetchMeetingMemberList, checkMeetingJoin, login, crewNo, navigate]);
+
 
   if (!meeting) return null;
   const dateObj = new Date(meeting.meetingDate);
@@ -140,16 +163,6 @@ export default function MeetingDetail() {
     hour: "2-digit",
     minute: "2-digit",
   });
-
-  // 모임 번호가 없으면 잘못된 접근으로 간주
-  if (!crewNo) {
-    return (
-      <div className="vh-100">
-        <Header input={false} loginState={`${login ? "loggined" : "login"}`} />
-        <Unauthorized />
-      </div>
-    );
-  }
 
   return (
     <>
@@ -173,31 +186,34 @@ export default function MeetingDetail() {
             setIsDelegating(false);
             setSelectedMember(null);
           }}
-          onDelegate={() => {
+          onDelegate={async () => {
             if (!selectedMember) return;
-            axios
-              .put(
+
+            try {
+              await axios.put(
                 `http://localhost:8080/api/meeting/${meetingNo}/owner`,
                 null,
                 {
-                  params: { newOwnerNo: selectedMember.memberNo }, // 👈 필수
+                  params: { newOwnerNo: selectedMember.memberNo },
                   headers: {
                     Authorization: `Bearer ${localStorage.getItem(
                       "accessToken"
                     )}`,
                   },
                 }
-              )
-              .then(() => {
-                toast.success("모임장 위임이 완료되었습니다.");
-                setIsDelegating(false);
-                fetchMeetingDetail();
-                fetchMeetingMemberList();
-              })
-              .catch((err) => {
-                console.error("모임장 위임 실패", err);
-                toast.error("모임장 위임 중 오류 발생");
-              });
+              );
+
+              toast.success("모임장 위임이 완료되었습니다.");
+              setIsDelegating(false);
+              setSelectedMember(null);
+
+              // ✅ 반드시 순서 보장되도록 await로 처리
+              await fetchMeetingMemberList();
+              await fetchMeetingDetail();
+            } catch (err) {
+              console.error("모임장 위임 실패", err);
+              toast.error("모임장 위임 중 오류 발생");
+            }
           }}
         />
       )}
@@ -263,7 +279,7 @@ export default function MeetingDetail() {
                 >
                   모임으로 돌아가기
                 </button>
-                {userNo === meeting.meetingOwnerNo && (
+                {isMeetingLeader && (
                   <>
                     <button
                       style={{
@@ -457,7 +473,7 @@ export default function MeetingDetail() {
             </div>
 
             <div style={{ marginTop: "64px" }}>
-              {userNo === meeting.meetingOwnerNo ? (
+              {isMeetingLeader ? (
                 <button
                   style={{
                     width: "100%",

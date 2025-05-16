@@ -1,16 +1,18 @@
 import { useState, useCallback } from "react";
 import { useRecoilValue } from "recoil";
-import { userNoState } from "../utils/storage";
+import { loginState, userNoState } from "../utils/storage";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Header from "../components/Header";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Unauthorized from "../components/Unauthorized";
 
 export default function MypageEditPassword() {
   const navigate = useNavigate();
 
   const userNo = useRecoilValue(userNoState);
+  const login = useRecoilValue(loginState);
 
   const [originPw, setOriginPw] = useState("");
   const [newPw, setNewPw] = useState("");
@@ -96,17 +98,26 @@ export default function MypageEditPassword() {
     }
   }, [newPw, originPw, isVerified, userNo, navigate]);
 
+  if (!login) {
+    return (
+      <div className="vh-100">
+        <Header input={false} loginState={`${login ? "loggined" : "login"}`} />
+        <Unauthorized />
+      </div>
+    );
+  }
+
   return (
     <>
       {/* 헤더 */}
       <Header input={false} />
       <ToastContainer
-            position="bottom-right"
-            autoClose={2000}
-            pauseOnHover={false}
-            theme="light"
-            limit={1}
-          />
+        position="bottom-right"
+        autoClose={2000}
+        pauseOnHover={false}
+        theme="light"
+        limit={1}
+      />
       <div
         className="d-flex flex-column align-items-center"
         style={{

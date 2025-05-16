@@ -44,6 +44,16 @@ export default function MeetingEdit() {
     );
   }, [meeting, errors]);
 
+  function formatToDatetimeLocal(dateStr) {
+    const date = new Date(dateStr); // 예: "2025-05-16T19:11:00"
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}`; // → 2025-05-16T19:11
+  }
+
   const changeMeeting = useCallback((e) => {
     const { name, value } = e.target;
     if (name === "meetingPrice") {
@@ -80,9 +90,9 @@ export default function MeetingEdit() {
 
       setMeeting({
         meetingName: data.meetingName,
-        meetingDate: data.meetingDate.replace(" ", "T").slice(0, 16),
+        meetingDate: formatToDatetimeLocal(data.meetingDate), // ✅ 이 부분만 수정
         meetingLocation: data.meetingLocation,
-        meetingPrice: data.meetingPrice.toLocaleString(),
+        meetingPrice: data.meetingPrice.toLocaleString(), // 또는 숫자 그대로 유지
         meetingLimit: data.meetingLimit,
       });
       setPreviewUrl(`http://localhost:8080/api/meeting/image/${meetingNo}`);

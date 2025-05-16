@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import axios from "axios";
 import Header from "../components/Header";
-import { locationState, userNoState } from "../utils/storage";
+import { locationState, loginState, userNoState } from "../utils/storage";
 
 import locationData from "../json/location.json";
 import schoolData from "../json/school.json";
 import categoryData from "../json/category.json";
 import mbtiData from "../json/mbti.json";
 import { RiArrowDropDownLine } from "react-icons/ri";
+import Unauthorized from "../components/Unauthorized";
 
 const locationOptions = locationData;
 const schoolOptions = schoolData;
@@ -18,6 +19,7 @@ const mbtiOptions = mbtiData;
 
 export default function MypageEdit() {
   const userNo = useRecoilValue(userNoState);
+  const login = useRecoilValue(loginState);
   const [location, setLocation] = useRecoilState(locationState);
   const navigate = useNavigate();
 
@@ -49,7 +51,6 @@ export default function MypageEdit() {
     memberLike: true,
   });
 
-
   const fileInputRef = useRef(null);
   const isFirstRender = useRef(true);
   const locationRef = useRef(null);
@@ -79,23 +80,23 @@ export default function MypageEdit() {
   }, [location, city]);
 
   useEffect(() => {
-  if (isFirstRender.current) {
-    isFirstRender.current = false;
-    return;
-  }
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
 
-  const hasLike = member.memberLike.size > 0;
+    const hasLike = member.memberLike.size > 0;
 
-  setBlurMessage((prev) => ({
-    ...prev,
-    memberLike: hasLike ? "" : "최소한 한 개의 관심사를 선택해주세요.",
-  }));
+    setBlurMessage((prev) => ({
+      ...prev,
+      memberLike: hasLike ? "" : "최소한 한 개의 관심사를 선택해주세요.",
+    }));
 
-  setIsValid((prev) => ({
-    ...prev,
-    memberLike: hasLike,
-  }));
-}, [member.memberLike]);
+    setIsValid((prev) => ({
+      ...prev,
+      memberLike: hasLike,
+    }));
+  }, [member.memberLike]);
 
   useEffect(() => {
     const clickLocationRefOutside = (e) => {
@@ -158,12 +159,12 @@ export default function MypageEdit() {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-      if (file && file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        reader.onload = () => {
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = () => {
         setPreviewImg(reader.result);
         setAttach(file);
-      }
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -198,6 +199,15 @@ export default function MypageEdit() {
       alert("수정 중 오류가 발생했습니다");
     }
   };
+
+  if (!login) {
+    return (
+      <div className="vh-100">
+        <Header input={false} loginState={`${login ? "loggined" : "login"}`} />
+        <Unauthorized />
+      </div>
+    );
+  }
 
   //view
   return (
@@ -381,6 +391,7 @@ export default function MypageEdit() {
                 value="f"
                 checked={member.memberGender === "f"}
                 onChange={changeMember}
+                disabled
               />
               <label style={{ marginLeft: "8px" }}>여자</label>
             </div>
@@ -452,6 +463,7 @@ export default function MypageEdit() {
                             city,
                             area: v,
                           });
+                          setIsOpenLocationRef(false);
                         }}
                       >
                         {v}
@@ -510,6 +522,7 @@ export default function MypageEdit() {
                             ...member,
                             memberSchool: v,
                           });
+                          setIsOpenSchoolRef(false);
                         }}
                       >
                         {v}

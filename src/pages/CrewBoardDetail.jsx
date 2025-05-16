@@ -26,6 +26,7 @@ export default function CrewBoardDetail() {
   const replyPopoverRefs = useRef([]);
   const navigate = useNavigate();
   const [replyCounts, setReplyCounts] = useRecoilState(replyCountState);
+  const boardDropdownRef = useRef(null);
 
   const login = useRecoilValue(loginState);
   const [location, setLocation] = useRecoilState(locationState);
@@ -143,23 +144,85 @@ export default function CrewBoardDetail() {
     fetchBoardData();
   }, [boardNo]);
 
+  // useEffect(() => {
+  //   const handleClickOutside = (e) => {
+  //     if (
+  //       boardPopoverRef.current &&
+  //       !boardPopoverRef.current.contains(e.target)
+  //     ) {
+  //       setShowBoardWriterPopover(false);
+  //     }
+  //     if (
+  //       !replyPopoverRefs.current.some((ref) => ref && ref.contains(e.target))
+  //     ) {
+  //       setReplyPopoverIndex(null);
+  //     }
+  //   };
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => document.removeEventListener("mousedown", handleClickOutside);
+  // }, []);
+  // useEffect(() => {
+  //   const handleClickOutside = (e) => {
+  //     // 게시글 작성자 팝오버 외부 클릭 시 닫힘
+  //     if (
+  //       boardPopoverRef.current &&
+  //       !boardPopoverRef.current.contains(e.target)
+  //     ) {
+  //       setShowBoardWriterPopover(false);
+  //     }
+
+  //     // 게시글 드롭다운 외부 클릭 시 닫힘
+  //     if (
+  //       boardDropdownOpen &&
+  //       boardDropdownRef.current &&
+  //       !boardDropdownRef.current.contains(e.target)
+  //     ) {
+  //       setBoardDropdownOpen(false);
+  //     }
+
+  //     // 댓글 드롭다운 외부 클릭 시 닫힘
+  //     let isReplyDropdownClicked = false;
+  //     replyPopoverRefs.current.forEach((ref) => {
+  //       if (ref && ref.contains(e.target)) {
+  //         isReplyDropdownClicked = true;
+  //       }
+  //     });
+
+  //     if (!isReplyDropdownClicked) {
+  //       setDropdownOpen(null);
+  //       setReplyPopoverIndex(null);
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => document.removeEventListener("mousedown", handleClickOutside);
+  // }, [boardDropdownOpen, dropdownOpen]);
+
   useEffect(() => {
     const handleClickOutside = (e) => {
+      const isReplyDropdownClicked = replyPopoverRefs.current.some(
+        (ref) => ref && ref.contains(e.target)
+      );
+
+      // 게시글 드롭다운 외부 클릭 시 닫힘
       if (
-        boardPopoverRef.current &&
-        !boardPopoverRef.current.contains(e.target)
+        boardDropdownOpen &&
+        boardDropdownRef.current &&
+        !boardDropdownRef.current.contains(e.target)
       ) {
-        setShowBoardWriterPopover(false);
+        setBoardDropdownOpen(false);
       }
-      if (
-        !replyPopoverRefs.current.some((ref) => ref && ref.contains(e.target))
-      ) {
+
+      // 댓글 드롭다운 외부 클릭 시 닫힘
+      if (!isReplyDropdownClicked) {
+        setDropdownOpen(null);
         setReplyPopoverIndex(null);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [boardDropdownOpen, dropdownOpen]);
 
   useEffect(() => {
     const fetchReplies = async () => {
@@ -203,73 +266,43 @@ export default function CrewBoardDetail() {
     }
   };
 
+  // const handleEditReply = (idx) => {
+  //   const replyWriter = replies[idx].replyWriter;
+
+  //   if (replyWriter !== userNo) {
+  //     window.confirm("수정 권한이 없습니다.");
+  //     setDropdownOpen(null);
+  //     return;
+  //   }
+
+  //   const updatedReplies = [...replies];
+  //   updatedReplies[idx].isEditing = true;
+  //   updatedReplies[idx].previousContent = updatedReplies[idx].replyContent;
+  //   setReplies(updatedReplies);
+  //   setDropdownOpen(null);
+  // };
   const handleEditReply = (idx) => {
     const replyWriter = replies[idx].replyWriter;
 
     if (replyWriter !== userNo) {
-      window.confirm("수정 권한이 없습니다.");
+      alert("수정 권한이 없습니다.");
       setDropdownOpen(null);
       return;
     }
 
     const updatedReplies = [...replies];
-    updatedReplies[idx].isEditing = true;
-    updatedReplies[idx].previousContent = updatedReplies[idx].replyContent;
+
+    // 기존 내용 백업
+    updatedReplies[idx] = {
+      ...updatedReplies[idx],
+      isEditing: true,
+      backupContent: updatedReplies[idx].replyContent,
+    };
+
     setReplies(updatedReplies);
+
     setDropdownOpen(null);
   };
-
-  // const handleUpdateReply = async (idx, newContent) => {
-  //   const updatedReplies = [...replies];
-  //   const replyNo = updatedReplies[idx].replyNo;
-
-  //   try {
-  //     await axios.put(`http://localhost:8080/api/reply/${replyNo}`, {
-  //       replyContent: newContent,
-  //     });
-
-  //     updatedReplies[idx].replyContent = newContent;
-  //     updatedReplies[idx].isEditing = false;
-  //     setReplies(
-  //       updatedReplies.sort(
-  //         (a, b) => new Date(b.replyWtime) - new Date(a.replyWtime)
-  //       )
-  //     );
-  //   } catch (err) {
-  //     console.error("댓글 수정 에러:", err);
-  //   }
-  // };
-  // const handleUpdateReply = async (replyNo, idx, newContent) => {
-  //   if (!newContent.trim()) return;
-
-  //   try {
-  //     const response = await axios.put(
-  //       `http://localhost:8080/api/reply/${replyNo}`,
-  //       { replyContent: newContent }
-  //     );
-
-  //     if (response.data) {
-  //       const updatedReplies = replies.map((reply) =>
-  //         reply.replyNo === replyNo
-  //           ? {
-  //               ...reply,
-  //               replyContent: newContent,
-  //               replyWtime: new Date().toISOString(),
-  //               isEditing: false,
-  //             }
-  //           : reply
-  //       );
-
-  //       updatedReplies.sort(
-  //         (a, b) => new Date(b.replyWtime) - new Date(a.replyWtime)
-  //       );
-
-  //       setReplies(updatedReplies);
-  //     }
-  //   } catch (err) {
-  //     console.error("댓글 수정 에러:", err);
-  //   }
-  // };
 
   const handleUpdateReply = async (replyNo, idx, newContent) => {
     if (!newContent.trim()) return;
@@ -303,19 +336,28 @@ export default function CrewBoardDetail() {
     }
   };
 
+  // const handleCancelEdit = (idx) => {
+  //   const updatedReplies = [...replies];
+  //   updatedReplies[idx].isEditing = false;
+  //   updatedReplies[idx].replyContent = updatedReplies[idx].backupContent; // 백업된 내용으로 복구
+  //   delete updatedReplies[idx].backupContent; // 백업 제거
+  //   setReplies(updatedReplies);
+  //   setDropdownOpen(null);
+  // };
   const handleCancelEdit = (idx) => {
     const updatedReplies = [...replies];
-    updatedReplies[idx].isEditing = false;
-    updatedReplies[idx].replyContent = updatedReplies[idx].backupContent; // 백업된 내용으로 복구
-    delete updatedReplies[idx].backupContent; // 백업 제거
+
+    // backupContent를 원본으로 복구
+    updatedReplies[idx] = {
+      ...updatedReplies[idx],
+      isEditing: false,
+      replyContent: updatedReplies[idx].backupContent,
+    };
+
+    delete updatedReplies[idx].backupContent; // 백업 데이터 제거
     setReplies(updatedReplies);
-    setDropdownOpen(null);
   };
 
-  // const handleKeyPress = (e) => {
-  //   if (e.key === "Enter") handleUpdateReply(idx, e.target.value);
-  //   // if (e.key === "Escape") handleCancelEdit(idx);
-  // };
   const handleKeyPress = (e, replyNo = null, idx = null) => {
     const newContent = e.target.value;
 
@@ -332,6 +374,39 @@ export default function CrewBoardDetail() {
     }
   };
 
+  // const handleDeleteReply = async (replyNo, idx) => {
+  //   const replyWriter = replies[idx].replyWriter;
+
+  //   if (!userNo || (replyWriter !== userNo && board.boardWriter !== userNo)) {
+  //     window.confirm("삭제 권한이 없습니다.");
+  //     setDropdownOpen(null);
+  //     return;
+  //   }
+
+  //   const confirmDelete = window.confirm("댓글을 삭제하시겠습니까?");
+  //   if (!confirmDelete) {
+  //     setDropdownOpen(null);
+  //     return;
+  //   }
+
+  //   try {
+  //     await axios.delete(`http://localhost:8080/api/reply/${replyNo}`, {
+  //       params: { replyOrigin: boardNo, userNo: userNo },
+  //     });
+
+  //     const updatedReplies = replies.filter((_, i) => i !== idx);
+  //     setReplies(updatedReplies);
+
+  //     setReplyCounts((prev) => ({
+  //       ...prev,
+  //       [boardNo]: (prev[boardNo] ?? 1) - 1,
+  //     }));
+
+  //     setDropdownOpen(null); // 드롭다운 자동 닫기
+  //   } catch (err) {
+  //     console.error("댓글 삭제 에러:", err);
+  //   }
+  // };
   const handleDeleteReply = async (replyNo, idx) => {
     const replyWriter = replies[idx].replyWriter;
 
@@ -342,7 +417,10 @@ export default function CrewBoardDetail() {
     }
 
     const confirmDelete = window.confirm("댓글을 삭제하시겠습니까?");
-    if (!confirmDelete) return;
+    if (!confirmDelete) {
+      setDropdownOpen(null);
+      return;
+    }
 
     try {
       await axios.delete(`http://localhost:8080/api/reply/${replyNo}`, {
@@ -352,12 +430,19 @@ export default function CrewBoardDetail() {
       const updatedReplies = replies.filter((_, i) => i !== idx);
       setReplies(updatedReplies);
 
+      // 서버로부터 최신 댓글 수를 받아와서 업데이트
+      const res = await axios.get(
+        `http://localhost:8080/api/reply/count/${boardNo}`
+      );
+      const updatedCount = res.data;
+
       setReplyCounts((prev) => ({
         ...prev,
-        [boardNo]: (prev[boardNo] ?? 1) - 1,
+        [boardNo]: updatedCount,
       }));
 
-      setDropdownOpen(null); // 드롭다운 자동 닫기
+      // 강제 새로고침
+      window.location.reload();
     } catch (err) {
       console.error("댓글 삭제 에러:", err);
     }
@@ -402,10 +487,6 @@ export default function CrewBoardDetail() {
     window.location.reload();
   };
 
-  // Unauthorized 페이지로 리다이렉트
-  // if (!isMember) {
-  //   return <Unauthorized />;
-  // }
   if (!isMember || board === null) {
     return <Unauthorized />;
   }
@@ -507,7 +588,7 @@ export default function CrewBoardDetail() {
             </div>
           </div>
 
-          <div className="position-relative">
+          <div className="position-relative" ref={boardDropdownRef}>
             <button
               className="btn btn-link p-0"
               onClick={toggleBoardDropdown}
@@ -693,6 +774,7 @@ export default function CrewBoardDetail() {
                   {dropdownOpen === idx && (
                     <ul
                       className="dropdown-menu show"
+                      ref={(el) => (replyPopoverRefs.current[idx] = el)}
                       style={{ position: "absolute", right: 0 }}
                     >
                       <li>

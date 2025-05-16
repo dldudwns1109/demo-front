@@ -34,6 +34,7 @@ export default function CrewEdit() {
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [city, setCity] = useState("서울특별시");
+  const [crewNameError, setCrewNameError] = useState("");
 
   // 로그인 및 사용자 정보
   const login = useRecoilValue(loginState);
@@ -59,19 +60,49 @@ export default function CrewEdit() {
   };
 
   /* 모임장 여부 확인 */
+  // const checkLeaderStatus = async () => {
+  //   try {
+  //     const res = await axios.get(
+  //       `http://localhost:8080/api/crewmember/${crewNo}/leader`,
+  //       {
+  //         headers: getAuthHeaders(),
+  //       }
+  //     );
+  //     setIsLeader(res.data);
+  //   } catch (err) {
+  //     console.error("Error checking leader status:", err.message);
+  //   }
+  // };
+
   const checkLeaderStatus = async () => {
     try {
+      if (!login || !userNo) {
+        alert("권한이 없습니다.");
+        navigate(`/crew/${crewNo}/detail`);
+        return;
+      }
+
+      const headers = getAuthHeaders();
       const res = await axios.get(
         `http://localhost:8080/api/crewmember/${crewNo}/leader`,
-        {
-          headers: getAuthHeaders(),
-        }
+        { headers }
       );
-      setIsLeader(res.data);
+
+      // 모임장 여부가 아니면 예외 처리
+      if (!res.data) throw new Error("권한이 없습니다.");
+
+      setIsLeader(true);
     } catch (err) {
-      console.error("Error checking leader status:", err.message);
+      console.error("모임장 여부 확인 실패:", err.message);
+      alert("권한이 없습니다.");
+      navigate(`/crew/${crewNo}/detail`);
     }
   };
+
+  useEffect(() => {
+    checkLeaderStatus();
+    fetchCrewData();
+  }, [login, crewNo]);
 
   /* 모임 정보 불러오기 */
   const fetchCrewData = async () => {
@@ -143,8 +174,22 @@ export default function CrewEdit() {
     fileInputRef.current.click();
   };
 
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setCrew((prev) => ({ ...prev, [name]: value }));
+  // };
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    // 모임이름 길이 체크
+    if (name === "crewName") {
+      if (value.length < 4 || value.length > 20) {
+        setCrewNameError("모임이름은 4글자~ 20글자 사이로 작성하십시오.");
+      } else {
+        setCrewNameError("");
+      }
+    }
+
     setCrew((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -276,7 +321,15 @@ export default function CrewEdit() {
             name="crewName"
             value={crew.crewName}
             onChange={handleInputChange}
+            style={{
+              borderColor: crewNameError ? "#dc3545" : "#ced4da", 
+            }}
           />
+          {crewNameError && (
+            <div className="text-danger" style={{ marginTop: "4px" }}>
+              {crewNameError}
+            </div>
+          )}
         </div>
         <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
           <label className="label-text">모임 소개</label>

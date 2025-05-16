@@ -335,7 +335,7 @@ export default function Chat() {
                 className={`d-flex flex-column gap-2 overflow-auto ${
                   windowWidth > 1024 ? "p-4" : "my-4"
                 }`}
-                style={{ height: windowWidth > 1024 ? "80vh" : "63vh" }}
+                style={{ height: windowWidth > 1024 ? "76vh" : "60vh" }}
               >
                 {messages.map((message, idx) => (
                   <div key={idx} className="d-flex flex-column gap-3">

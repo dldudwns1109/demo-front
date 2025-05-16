@@ -243,7 +243,10 @@ export default function CrewChat() {
         location={location}
         setLocation={setLocation}
       />
-      <div className="container" style={{ paddingTop: "70px" }}>
+      <div
+        className="container"
+        style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
+      >
         <CrewTopNav />
       </div>
 
@@ -258,7 +261,7 @@ export default function CrewChat() {
               className={`d-flex flex-column gap-2 overflow-auto ${
                 windowWidth > 1024 ? "p-4" : "my-4"
               }`}
-              style={{ height: windowWidth > 1024 ? "80vh" : "63vh" }}
+              style={{ height: windowWidth > 1024 ? "65vh" : "60vh" }}
             >
               {messages.map((message, idx) => (
                 <div key={idx} className="d-flex flex-column gap-3">

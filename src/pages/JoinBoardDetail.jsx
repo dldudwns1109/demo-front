@@ -7,6 +7,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { replyCountState } from "../store/replyCountState";
 import { loginState, userNoState, locationState } from "../utils/storage";
 import Header from "../components/Header";
+import ProfilePopover from "../components/ProfilePopover";
 
 export default function JoinBoardDetail() {
   const { boardNo } = useParams();
@@ -495,23 +496,10 @@ export default function JoinBoardDetail() {
 
                 {/* 댓글 작성자 팝오버 */}
                 {replyPopoverIndex === idx && (
-                  <div
-                    ref={(el) => (replyPopoverRefs.current[idx] = el)}
-                    className="shadow position-absolute bg-white rounded p-3"
-                    style={{
-                      top: "3.5rem",
-                      left: "0",
-                      zIndex: 10,
-                      width: "250px",
-                      border: "1px solid #ddd",
-                    }}
-                  >
-                    <div className="fw-bold mb-2">댓글 작성자 프로필</div>
-                    <div className="text-muted mb-2">
-                      {reply.memberLocation} · {reply.memberSchool} ·{" "}
-                      {reply.memberMbti}
-                    </div>
-                  </div>
+                  <ProfilePopover
+                    memberNo={board.boardWriter}
+                    onClose={() => setShowBoardWriterPopover(false)}
+                  />
                 )}
               </div>
             ))

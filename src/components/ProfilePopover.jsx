@@ -2,6 +2,9 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../css/Mypage.css";
+import { FaRegPaperPlane } from "react-icons/fa";
+import { loginState } from "../utils/storage";
+import { useRecoilValue } from "recoil";
 
 export default function ProfilePopover({ memberNo, onClose }) {
   const popoverRef = useRef();
@@ -11,6 +14,8 @@ export default function ProfilePopover({ memberNo, onClose }) {
   const [crewList, setCrewList] = useState([]);
   const [showDmInput, setShowDmInput] = useState(false);
   const [dmMessage, setDmMessage] = useState("");
+
+  const login = useRecoilValue(loginState);
 
   // 외부 클릭 시 닫기
   useEffect(() => {
@@ -37,6 +42,13 @@ export default function ProfilePopover({ memberNo, onClose }) {
   }, [memberNo]);
 
   const handleDmClick = useCallback(async () => {
+    if (!login) {
+      const result = window.confirm("로그인이 필요한 기능입니다. 로그인하시겠습니까?");
+      if (result) {
+        navigate("/signin");
+      }
+      return;
+    }
     try {
       const res = await axios.get(
         `http://localhost:8080/api/chat/dm/${memberNo}`,
@@ -58,10 +70,17 @@ export default function ProfilePopover({ memberNo, onClose }) {
   }, [memberNo, navigate]);
 
   const handleDmSend = useCallback(async () => {
+    if (!dmMessage.trim()) {
+      alert("메시지를 입력해주세요!");
+      return;
+    }
     try {
       const res = await axios.post(
         "http://localhost:8080/api/chat/dm",
-        { targetNo: memberNo, content: dmMessage },
+        {
+          targetNo: memberNo,
+          content: dmMessage,
+        },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -110,11 +129,11 @@ export default function ProfilePopover({ memberNo, onClose }) {
           <div
             className="mbti-badge"
             style={{
-                backgroundColor: "#f9b4ed",
-                color: "#ffffff",
-                marginTop: "4px",
-                fontSize: "0.8rem",
-                fontWeight: "bold",
+              backgroundColor: "#f9b4ed",
+              color: "#ffffff",
+              marginTop: "4px",
+              fontSize: "0.8rem",
+              fontWeight: "bold",
             }}
           >
             {memberInfo.memberMbti}
@@ -137,19 +156,51 @@ export default function ProfilePopover({ memberNo, onClose }) {
       </div>
 
       {showDmInput && (
-        <div className="mb-3">
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px", // 🔧 간격 살짝 증가
+            marginTop: "12px",
+          }}
+        >
           <input
             type="text"
-            className="form-control"
             value={dmMessage}
             onChange={(e) => setDmMessage(e.target.value)}
-            placeholder="인사 메시지 입력"
+            placeholder="메시지 입력"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault(); // 폼 제출 방지
+                handleDmSend(); // 엔터 시 전송
+              }
+            }}
+            style={{
+              flex: 1,
+              padding: "10px 14px",
+              height: "42px",
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              fontSize: "14px",
+              outline: "none",
+            }}
           />
           <button
-            className="btn btn-primary btn-sm mt-2"
             onClick={handleDmSend}
+            style={{
+              width: "42px", // ✅ 정사각형으로 맞춤
+              height: "42px",
+              backgroundColor: "#007BFF",
+              color: "white",
+              border: "none",
+              borderRadius: "8px", // 🔧 둥근 버튼
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+            }}
           >
-            보내기
+            <FaRegPaperPlane size={18} color="#ffffff" />
           </button>
         </div>
       )}

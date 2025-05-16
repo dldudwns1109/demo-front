@@ -10,6 +10,7 @@ import MeetingDelegateModal from "../components/DelegateModal";
 import { FaLocationDot, FaRegCalendar } from "react-icons/fa6";
 import { FaClock, FaWonSign } from "react-icons/fa";
 import Unauthorized from "../components/Unauthorized";
+import ProfilePopover from "../components/ProfilePopover";
 
 export default function MeetingDetail() {
   const location = useLocation();
@@ -25,6 +26,8 @@ export default function MeetingDetail() {
 
   const [isDelegating, setIsDelegating] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
+
+  const [showPopoverId, setShowPopoverId] = useState(null);
 
   const isFull = useMemo(() => {
     return meeting && memberList.length >= meeting.meetingLimit;
@@ -151,7 +154,13 @@ export default function MeetingDetail() {
   return (
     <>
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
-      <ToastContainer position="top-center" autoClose={2000} />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={2000}
+        pauseOnHover={false}
+        theme="light"
+        limit={1}
+      />
 
       {/* ✅ 위임 모달 */}
       {isDelegating && (
@@ -535,6 +544,8 @@ export default function MeetingDetail() {
                     display: "flex",
                     alignItems: "center",
                     marginBottom: "18px",
+                    position: "relative",
+                    cursor: "pointer",
                   }}
                 >
                   <div
@@ -557,6 +568,14 @@ export default function MeetingDetail() {
                         objectFit: "cover",
                         marginRight: "12px",
                       }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowPopoverId(
+                          showPopoverId === member.memberNo
+                            ? null
+                            : member.memberNo
+                        );
+                      }}
                     />
                     <span style={{ fontSize: "20px", fontWeight: "bold" }}>
                       {member.memberNickname}
@@ -575,6 +594,13 @@ export default function MeetingDetail() {
                       </span>
                     )}
                   </div>
+                  {/* 팝오버 */}
+                  {showPopoverId === member.memberNo && (
+                    <ProfilePopover
+                      memberNo={member.memberNo}
+                      onClose={() => setShowPopoverId(null)}
+                    />
+                  )}
                 </div>
               ))}
             </div>

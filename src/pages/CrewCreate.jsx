@@ -350,6 +350,7 @@ export default function CrewCreate() {
                             city,
                             area: v,
                           });
+                          setIsOpenLocationRef(false);
                         }}
                       >
                         {v}

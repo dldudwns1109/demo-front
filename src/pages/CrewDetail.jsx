@@ -573,26 +573,28 @@ export default function CrewDetail() {
               정모 일정 {meetingCount}
             </h3>
 
-            <button
-              className="btn btn-primary"
-              style={{
-                padding: "8px",
-                backgroundColor: "#007BFF",
-                color: "#ffffff",
-                fontWeight: "bold",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontSize: "0.85rem",
-              }}
-              onClick={() =>
-                navigate("/meeting/create", {
-                  state: { crewNo: Number(crewNo) },
-                })
-              }
-            >
-              정모 추가
-            </button>
+            {login && isMember && (
+                <button
+                  className="btn btn-primary"
+                  style={{
+                    padding: "8px",
+                    backgroundColor: "#007BFF",
+                    color: "#ffffff",
+                    fontWeight: "bold",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontSize: "0.85rem",
+                  }}
+                  onClick={() =>
+                    navigate("/meeting/create", {
+                      state: { crewNo: Number(crewNo) },
+                    })
+                  }
+                >
+                  정모 추가
+                </button>
+              )}
           </div>
 
           {/* 정모 카드 목록 */}

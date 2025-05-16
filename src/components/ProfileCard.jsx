@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
+import axios from "axios";
 import { Modal } from "bootstrap";
 import { windowWidthState } from "../utils/storage";
 
@@ -96,13 +97,14 @@ export default function ProfileCard({ member }) {
                   className="d-flex align-items-center gap-1 fs-6"
                   style={{ color: "#666666" }}
                 >
+                  <div>{member.memberGender === "m" ? "남자" : "여자"}</div>
+                  <span>·</span>
                   <div>{member.memberLocation}</div>
                   <span>·</span>
                   <div>{member.memberSchool}</div>
                   <span>·</span>
                   <div>{member.memberBirth}</div>
                 </div>
-                {/* <p style={{ marginBottom: "40px" }}>{member.statusMessage}</p> */}
               </div>
               <div
                 className={`d-flex flex-wrap ${windowWidth < 768 && "mt-4"}`}

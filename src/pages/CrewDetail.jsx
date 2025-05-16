@@ -361,6 +361,7 @@ export default function CrewDetail() {
       if (res.status === 200) {
         alert("회원이 강퇴되었습니다.");
         fetchMembers();
+        window.location.reload();
       }
     } catch (err) {
       console.error("강퇴 실패:", err.message);

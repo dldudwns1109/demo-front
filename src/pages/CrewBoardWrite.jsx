@@ -30,8 +30,9 @@ export default function CrewBoardWrite() {
   // 모임원 여부 확인
   useEffect(() => {
     const checkMemberStatus = async () => {
-      if (!login) {
-        navigate(`/crew/${crewNo}`);
+      if (!login || !userNo) {
+        alert("모임원만 접근할 수 있는 페이지입니다");
+        navigate(`/crew/${crewNo}/detail`);
         return;
       }
 
@@ -41,21 +42,19 @@ export default function CrewBoardWrite() {
           `http://localhost:8080/api/crewmember/${crewNo}/member`,
           { headers }
         );
-        if (!res.data) {
-          alert("모임원만 접근할 수 있는 페이지입니다.");
-          navigate(`/crew/${crewNo}`);
-        } else {
-          setIsMember(true);
-        }
+        
+        if (!res.data) throw new Error("권한이 없습니다.");
+
+        setIsMember(true);
       } catch (err) {
-        console.error("모임원 여부 확인 실패:", err.message);
-        setIsMember(false);
-        navigate(`/crew/${crewNo}`);
+        console.error("모임장 여부 확인 실패:", err.message);
+        alert("권한이 없습니다.");
+        navigate(`/crew/${crewNo}/detail`);
       }
     };
 
     checkMemberStatus();
-  }, [login, crewNo, navigate]);
+  }, [login, crewNo]);
 
   // 프로필 정보 불러오기
   useEffect(() => {
@@ -73,7 +72,7 @@ export default function CrewBoardWrite() {
     if (isMember) fetchProfile();
   }, [userNo, isMember]);
 
-   const handleSubmit = async () => {
+  const handleSubmit = async () => {
     if (!selectedCategory) {
       alert("카테고리를 선택해주세요.");
       return;

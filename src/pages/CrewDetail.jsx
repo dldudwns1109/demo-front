@@ -334,7 +334,7 @@ export default function CrewDetail() {
       );
 
       if (response.data) {
-        window.confirm("모임에서 탈퇴되었습니다.");
+        window.confirm("모임에서 탈퇴되었습니다. 작성한 게시글과 댓글은 모두 삭제됩니다.");
         setIsMember(false);
         fetchMembers();
       } else {
@@ -368,6 +368,18 @@ export default function CrewDetail() {
       alert("회원 강퇴에 실패했습니다.");
     }
   };
+
+  const handleShareClick = async () => {
+  try {
+    const currentUrl = window.location.href;
+    await navigator.clipboard.writeText(currentUrl);
+    window.confirm("주소가 복사되었습니다.");
+  } catch (err) {
+    console.error("URL 복사 실패:", err.message);
+    window.confirm("URL 복사에 실패했습니다.");
+  }
+};
+
 
   // 신고처리
   const handleReport = () => {
@@ -427,6 +439,7 @@ export default function CrewDetail() {
               <button
                 className="action-btn share-btn"
                 style={{ padding: "0.2rem 0.4rem" }}
+                onClick={handleShareClick}
               >
                 <FaShareAlt /> 공유하기
               </button>

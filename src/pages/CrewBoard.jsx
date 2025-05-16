@@ -95,6 +95,31 @@ export default function CrewBoard() {
   //   };
   //   fetchData();
   // }, [crewNo, selectedCategory]);
+  // useEffect(() => {
+  //   const fetchBoardList = async () => {
+  //     try {
+  //       const res = await axios.get(
+  //         `http://localhost:8080/api/board/crew/${crewNo}`,
+  //         {
+  //           params:
+  //             selectedCategory !== "전체" ? { category: selectedCategory } : {},
+  //         }
+  //       );
+
+  //       const updatedBoardList = res.data.map((board) => ({
+  //         ...board,
+  //         boardReply: replyCounts[board.boardNo] ?? board.boardReply,
+  //       }));
+
+  //       setBoardList(updatedBoardList);
+  //       setVisibleCount(4);
+  //     } catch (err) {
+  //       console.error("게시글 불러오기 에러:", err);
+  //     }
+  //   };
+
+  //   fetchBoardList();
+  // }, [crewNo, selectedCategory, replyCounts, isMember]);
   useEffect(() => {
     const fetchBoardList = async () => {
       try {
@@ -106,10 +131,26 @@ export default function CrewBoard() {
           }
         );
 
-        const updatedBoardList = res.data.map((board) => ({
-          ...board,
-          boardReply: replyCounts[board.boardNo] ?? board.boardReply,
-        }));
+        const updatedBoardList = await Promise.all(
+          res.data.map(async (board) => {
+            try {
+              const replyCountRes = await axios.get(
+                `http://localhost:8080/api/reply/count/${board.boardNo}`
+              );
+
+              return {
+                ...board,
+                boardReply: replyCountRes.data, // 서버에서 가져온 최신 댓글 수로 업데이트
+              };
+            } catch (err) {
+              console.error(
+                `댓글 수 불러오기 에러 (게시글 ${board.boardNo}):`,
+                err
+              );
+              return board;
+            }
+          })
+        );
 
         setBoardList(updatedBoardList);
         setVisibleCount(4);
@@ -119,7 +160,7 @@ export default function CrewBoard() {
     };
 
     fetchBoardList();
-  }, [crewNo, selectedCategory, replyCounts]);
+  }, [crewNo, selectedCategory]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -138,8 +179,6 @@ export default function CrewBoard() {
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 4);
   };
-
-  
 
   return (
     <>

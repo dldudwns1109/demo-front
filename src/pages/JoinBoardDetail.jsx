@@ -71,23 +71,52 @@ export default function JoinBoardDetail() {
     fetchReplies();
   }, [boardNo]);
 
+  // useEffect(() => {
+  //   const handleClickOutside = (e) => {
+  //     if (
+  //       boardPopoverRef.current &&
+  //       !boardPopoverRef.current.contains(e.target)
+  //     ) {
+  //       setShowBoardWriterPopover(false);
+  //     }
+  //     if (
+  //       !replyPopoverRefs.current.some((ref) => ref && ref.contains(e.target))
+  //     ) {
+  //       setReplyPopoverIndex(null);
+  //     }
+  //   };
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => document.removeEventListener("mousedown", handleClickOutside);
+  // }, []);
   useEffect(() => {
     const handleClickOutside = (e) => {
+      // 게시글 드롭다운 외부 클릭 시 닫힘
+      const boardDropdownElement = document.getElementById("boardDropdown");
       if (
-        boardPopoverRef.current &&
-        !boardPopoverRef.current.contains(e.target)
+        boardDropdownOpen &&
+        boardDropdownElement &&
+        !boardDropdownElement.contains(e.target)
       ) {
-        setShowBoardWriterPopover(false);
+        setBoardDropdownOpen(false);
       }
-      if (
-        !replyPopoverRefs.current.some((ref) => ref && ref.contains(e.target))
-      ) {
+
+      // 댓글 드롭다운 외부 클릭 시 닫힘
+      let isReplyDropdownClicked = false;
+      replyPopoverRefs.current.forEach((ref) => {
+        if (ref && ref.contains(e.target)) {
+          isReplyDropdownClicked = true;
+        }
+      });
+
+      if (!isReplyDropdownClicked) {
+        setDropdownOpen(null);
         setReplyPopoverIndex(null);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [boardDropdownOpen, dropdownOpen]);
 
   // const handleReplySubmit = () => {
   //   if (newReply.trim()) {
@@ -426,7 +455,7 @@ export default function JoinBoardDetail() {
           </div>
 
           {/* 게시글 드롭다운 */}
-          <div className="position-relative">
+          <div className="position-relative" id="boardDropdown">
             <button
               className="btn btn-link p-0"
               onClick={toggleBoardDropdown}
@@ -562,6 +591,7 @@ export default function JoinBoardDetail() {
                 <div
                   className="position-relative ms-2"
                   style={{ flexShrink: 0 }}
+                  ref={(el) => (replyPopoverRefs.current[idx] = el)}
                 >
                   <button
                     className="btn btn-link p-0"

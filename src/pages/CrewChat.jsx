@@ -248,9 +248,8 @@ export default function CrewChat() {
         style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
       >
         <CrewTopNav />
-      </div>
 
-      {isCrewMember !== null && isCrewMember && login ? (
+        {isCrewMember !== null && isCrewMember && login ? (
         <div className={`d-flex ${windowWidth <= 1024 && "flex-column"}`}>
           <div
             className="mx-auto"
@@ -446,6 +445,9 @@ export default function CrewChat() {
       ) : (
         <Unauthorized />
       )}
+      </div>
+
+      
     </div>
   );
 }

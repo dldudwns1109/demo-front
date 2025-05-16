@@ -35,6 +35,7 @@ export default function CrewChat() {
   const [receivedMessage, setReceivedMessage] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [currRoom, setCurrRoom] = useState(null);
+  const [isCrewMember, setIsCrewMember] = useState(null);
 
   const scrollContainerRef = useRef(null);
 
@@ -49,24 +50,47 @@ export default function CrewChat() {
       );
       setCurrRoom(res.data);
     };
-    fetchData();
-  }, [crewNo]);
+    const checkCrewMember = async () => {
+      const res = await axios.get(
+        `http://localhost:8080/api/crewmember/${crewNo}/member`,
+        {
+          headers: {
+            Authorization: accessToken,
+          },
+        }
+      );
+      setIsCrewMember(res.data);
+    };
+    if (crewNo && login) {
+      checkCrewMember();
+      fetchData();
+    }
+  }, [crewNo, login]);
 
   useEffect(() => {
-    console.log(currRoom);
-  }, [currRoom]);
+    if (isCrewMember !== null && !isCrewMember) {
+      console.log(isCrewMember);
+    }
+  }, [isCrewMember]);
 
-  // useEffect(() => {
-  //   const fetchCrewName = async () => {
-  //     try {
-  //       const res = await axios.get(`http://localhost:8080/api/crew/${crewNo}`);
-  //       setCrewName(res.data.crewName);
-  //     } catch (err) {
-  //       console.error("크루 이름 불러오기 실패", err);
-  //     }
-  //   };
-  //   fetchCrewName();
-  // }, [crewNo]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await axios.get(
+        `http://localhost:8080/api/chat/messages/${currRoom}`
+      );
+      setMessages(res.data);
+    };
+    if (currRoom) fetchData();
+
+    if (!isConnected || !client?.active || !currRoom) return;
+
+    console.log("메세지 확인");
+    client.publish({
+      destination: "/app/member/read",
+      headers: { accessToken },
+      body: JSON.stringify({ target: currRoom, content: "", crewNo: crewNo }),
+    });
+  }, [currRoom, receivedMessage, isConnected]);
 
   useEffect(() => {
     if (!login) return;
@@ -79,15 +103,6 @@ export default function CrewChat() {
       setClient(null);
     };
   }, [login, currRoom]);
-
-  // useEffect(() => {
-  //   if (!isConnected || !client?.active) return;
-
-  //   client.publish({
-  //     destination: "/app/member/room",
-  //     headers: { accessToken },
-  //   });
-  // }, [isConnected, receivedMessage]);
 
   useEffect(() => {
     if (!isConnected || !client?.active || !currRoom) return;
@@ -118,20 +133,19 @@ export default function CrewChat() {
       webSocketFactory: () => socket,
       onConnect: async () => {
         client.subscribe(`/private/member/read/${currRoom}`, (message) => {
-          console.log(JSON.parse(message.body));
           setMessages(JSON.parse(message.body));
         });
 
         client.subscribe(`/private/member/chat/${currRoom}`, (message) => {
           setReceivedMessage({
             ...JSON.parse(message.body),
-            type: "CHAT",
+            type: "CREW",
           });
           setMessages((messages) => [
             ...messages,
             {
               ...JSON.parse(message.body),
-              type: "CHAT",
+              type: "CREW",
             },
           ]);
         });
@@ -233,11 +247,8 @@ export default function CrewChat() {
         <CrewTopNav />
       </div>
 
-      {login ? (
-        <div
-          className={`d-flex ${windowWidth <= 1024 && "flex-column"}`}
-          style={{ paddingTop: "70px" }}
-        >
+      {isCrewMember !== null && isCrewMember && login ? (
+        <div className={`d-flex ${windowWidth <= 1024 && "flex-column"}`}>
           <div
             className="mx-auto"
             style={{ width: windowWidth > 1024 ? "53%" : "80%" }}
@@ -300,7 +311,7 @@ export default function CrewChat() {
                           </div>
                         </div>
                       </>
-                    ) : (
+                    ) : message.accountNo !== null ? (
                       <>
                         <div className="d-flex" style={{ gap: "12px" }}>
                           {isSenderVisible(message, idx) && (
@@ -351,15 +362,31 @@ export default function CrewChat() {
                             </div>
                           </div>
                         </div>
-                        {message.chatRead !== 0 && (
-                          <span>{message.chatRead}</span>
-                        )}
                         {isLastMessage(message, idx) && (
                           <span style={{ fontSize: "14px", color: "#333333" }}>
                             {moment(message.time).format("a h:mm")}
                           </span>
                         )}
+                        {message.chatRead !== 0 && (
+                          <span style={{ fontSize: "14px", color: "#F9B4ED" }}>
+                            {message.chatRead}
+                          </span>
+                        )}
                       </>
+                    ) : (
+                      <div className="d-inline-flex justify-content-center w-100">
+                        <span
+                          className="px-3 py-2"
+                          style={{
+                            backgroundColor: "#F1F3F5",
+                            borderRadius: "999px",
+                            fontSize: "14px",
+                            color: "#666666",
+                          }}
+                        >
+                          {message.content}
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>

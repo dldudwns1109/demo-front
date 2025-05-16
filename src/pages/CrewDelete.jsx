@@ -65,7 +65,7 @@ export default function CrewDelete() {
         <Header input={false} loginState={`${login ? "loggined" : "login"}`} />
         {login ? (
           isLeader ? (
-            <div className="d-flex justify-content-center">
+            <div className="d-flex justify-content-center h-100">
               <div
                 className="d-flex flex-column align-items-center"
                 style={{ paddingTop: "70px", width: "360px" }}
@@ -105,7 +105,9 @@ export default function CrewDelete() {
                   </span>
                   <span>
                     해체를 진행하실 경우, 해당 모임과 관련된{" "}
-                    <span className="text-danger fw-bold">모든 정보는 즉시 삭제</span>
+                    <span className="text-danger fw-bold">
+                      모든 정보는 즉시 삭제
+                    </span>
                     되며, 이후에는{" "}
                     <span className="text-danger fw-bold">
                       어떠한 방식으로도 복구가 불가능합니다.
@@ -128,7 +130,9 @@ export default function CrewDelete() {
                   <span>
                     해체된 모임은 더 이상 검색되거나 접근할 수 없으며, 동일한
                     이름으로 다시 생성하더라도 기존의 데이터나 혜택은{" "}
-                    <span className="text-danger fw-bold">절대 복원되지 않습니다.</span>
+                    <span className="text-danger fw-bold">
+                      절대 복원되지 않습니다.
+                    </span>
                   </span>
                   <span>
                     <strong>모임원들과 충분히 상의하셨나요?</strong> 본 결정은

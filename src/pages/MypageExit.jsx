@@ -41,7 +41,7 @@ export default function MypageExit() {
       <Header input={false} loginState={`${login ? "loggined" : "login"}`} />
 
       {login ? (
-        <div className="d-flex justify-content-center">
+        <div className="d-flex justify-content-center h-100">
           <div
             className="d-flex flex-column align-items-center"
             style={{ paddingTop: "70px", width: "360px" }}

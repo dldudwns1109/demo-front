@@ -80,14 +80,14 @@ export default function CrewChat() {
     };
   }, [login, currRoom]);
 
-  useEffect(() => {
-    if (!isConnected || !client?.active) return;
+  // useEffect(() => {
+  //   if (!isConnected || !client?.active) return;
 
-    client.publish({
-      destination: "/app/member/room",
-      headers: { accessToken },
-    });
-  }, [isConnected, receivedMessage]);
+  //   client.publish({
+  //     destination: "/app/member/room",
+  //     headers: { accessToken },
+  //   });
+  // }, [isConnected, receivedMessage]);
 
   useEffect(() => {
     if (!isConnected || !client?.active || !currRoom) return;
@@ -99,7 +99,7 @@ export default function CrewChat() {
       client.publish({
         destination: "/app/member/read",
         headers: { accessToken },
-        body: JSON.stringify({ target: currRoom, content: "" }),
+        body: JSON.stringify({ target: currRoom, content: "", crewNo: crewNo }),
       });
     }
   }, [receivedMessage, currRoom, isConnected]);

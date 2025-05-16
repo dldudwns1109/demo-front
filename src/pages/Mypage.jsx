@@ -4,11 +4,11 @@ import axios from "axios";
 import Header from "../components/Header";
 import ProfileCard from "../components/ProfileCard";
 import GroupItem from "../components/GroupItem";
-import MeetingCard from "../components/MeetingCard";
 import Unauthorized from "../components/Unauthorized";
 import { userNoState, loginState, windowWidthState } from "../utils/storage";
 
 import "../css/Mypage.css";
+import GroupMeetingCard from "../components/GroupMeetingCard";
 
 export default function Mypage() {
   const windowWidth = useRecoilValue(windowWidthState);
@@ -63,7 +63,7 @@ export default function Mypage() {
 
   const loadMeetingList = useCallback(async () => {
     const res = await axios.get(
-      `http://localhost:8080/api/meeting/member/${userNo}`
+      `http://localhost:8080/api/meeting/crew/${userNo}`
     );
     console.log(res.data);
     const list = Array.isArray(res.data) ? res.data : [];
@@ -241,7 +241,7 @@ export default function Mypage() {
                   }}
                 >
                   {meetingList.map((meeting, idx) => (
-                    <MeetingCard
+                    <GroupMeetingCard
                       key={idx}
                       meeting={meeting}
                       crewNo={meeting.meetingCrewNo}

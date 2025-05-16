@@ -17,7 +17,7 @@ export default function JoinBoardItem({ data }) {
       </span>
       <div className="d-flex gap-3 mb-3" style={{ marginTop: "12px" }}>
         <img
-          src={`http://localhost:8080/api/board/profile/${data.boardWriter}`}
+          src={`http://localhost:8080/api/member/image/${data.boardWriter}`}
           width={80}
           height={80}
           style={{ borderRadius: "999px" }}

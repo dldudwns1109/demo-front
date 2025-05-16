@@ -48,20 +48,21 @@ export default function CrewDetail() {
   // const [reportMessage, setReportMessage] = useState("");
   const [showPopoverId, setShowPopoverId] = useState(null);
   const popoverRef = useRef();
+  const modalRef = useRef(null);
 
   const [meetingCount, setMeetingCount] = useState(0);
   const [meetingList, setMeetingList] = useState([]);
 
   const windowWidth = useRecoilValue(windowWidthState);
-
   // 상태: 초기 1줄만 보여주기
   const [visibleRows, setVisibleRows] = useState(1);
-
   // 칼럼 수 계산
   const columnCount = windowWidth > 1024 ? 3 : windowWidth > 768 ? 2 : 1;
-
   // 보여줄 개수 계산
   const [meetingvisibleCount, setMeetingVisibleCount] = useState(columnCount);
+
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [isManaging, setIsManaging] = useState(false);
 
   // ✅ windowWidth나 visibleRows가 변경되면 visibleCount 재계산
   useEffect(() => {
@@ -163,48 +164,23 @@ export default function CrewDetail() {
     fetchMembers();
   }, [crewNo, login, userNo]);
 
-  //가입하기 버튼 클릭 시
-  // const handleJoinClick = async () => {
-  //   try {
-  //     const token = localStorage.getItem("refreshToken");
+  useEffect(() => {
+    const fetchMemberStatus = async () => {
+      try {
+        const headers = getAuthHeaders();
+        const leaderRes = await axios.get(
+          `http://localhost:8080/api/crewmember/${crewNo}/leader`,
+          { headers }
+        );
+        setIsLeader(leaderRes.data);
+      } catch (err) {
+        console.error("Error checking leader status:", err.message);
+      }
+    };
 
-  //     if (!token || token.trim() === "") {
-  //       window.confirm("로그인이 필요합니다.");
-  //       return;
-  //     }
+    if (login) fetchMemberStatus();
+  }, [login, crewNo]);
 
-  //     const authHeader = `Bearer ${token.trim()}`;
-
-  //     if (joinMessage.trim() === "") {
-  //       window.confirm("가입 인사를 입력해 주세요.");
-  //       return;
-  //     }
-
-  //     console.log("Authorization Header:", authHeader); // 디버깅용
-
-  //     const response = await axios.post(
-  //       `http://localhost:8080/api/crewmember/${crewNo}/join`,
-  //       {},
-  //       {
-  //         headers: {
-  //           Authorization: authHeader,
-  //         },
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       window.confirm("모임에 가입되었습니다.");
-  //       setIsMember(true);
-  //       setShowJoinSheet(false);
-  //       setJoinMessage("");
-
-  //       await fetchMembers();
-  //     }
-  //   } catch (err) {
-  //     console.error("Error joining crew:", err.message);
-  //     window.confirm("모임 가입에 실패했습니다.");
-  //   }
-  // };
   const handleJoinClick = async () => {
     try {
       if (crewData?.crewLimit && members.length >= crewData.crewLimit) {
@@ -250,12 +226,20 @@ export default function CrewDetail() {
     ) {
       setShowJoinSheet(false);
     }
+
+    if (
+      isManaging &&
+      modalRef.current &&
+      !modalRef.current.contains(e.target)
+    ) {
+      setIsManaging(false);
+    }
   };
 
   useEffect(() => {
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [showJoinSheet]);
+  }, [showJoinSheet, isManaging]);
 
   /** 
      모임 정보 및 회원 목록 불러오기 
@@ -362,30 +346,27 @@ export default function CrewDetail() {
     }
   };
 
-  /** 모임 해체 처리 */
-  // const handleDeleteCrew = async () => {
-  //   if (!isLeader) {
-  //     window.confirm("모임장만 해체할 수 있습니다.");
-  //     return;
-  //   }
+  const handleKickMember = async (memberNo) => {
+    const confirmKick = window.confirm("해당 회원을 강퇴하시겠습니까?");
+    if (!confirmKick) return;
 
-  //   try {
-  //     const headers = getAuthHeaders();
-  //     await axios.delete(`http://localhost:8080/api/crew/${crewNo}`, {
-  //       headers,
-  //     });
-  //     window.confirm("모임이 해체되었습니다.");
-  //     navigate("/crew");
-  //   } catch (err) {
-  //     console.error("Error deleting crew:", err.message);
-  //     window.confirm("모임 해체에 실패했습니다.");
-  //   }
-  // };
+    try {
+      const res = await axios.delete(
+        `http://localhost:8080/api/crewmember/${crewNo}/kick/${memberNo}`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
 
-  // 가입처리
-  // const handleJoin = () => {
-  //   setShowJoinInput(true);
-  // };
+      if (res.status === 200) {
+        alert("회원이 강퇴되었습니다.");
+        fetchMembers();
+      }
+    } catch (err) {
+      console.error("강퇴 실패:", err.message);
+      alert("회원 강퇴에 실패했습니다.");
+    }
+  };
 
   // 신고처리
   const handleReport = () => {
@@ -630,6 +611,148 @@ export default function CrewDetail() {
               >
                 정모 더보기
               </button>
+            </div>
+          )}
+
+          {/* 회원 관리 버튼 - 모임장 전용 */}
+          {login && isLeader && (
+            <button
+              className="btn btn-primary"
+              onClick={() => setIsManaging(true)}
+              style={{ marginBottom: "1rem" }}
+            >
+              회원 관리
+            </button>
+          )}
+
+          {/* 모달 */}
+          {isManaging && (
+            <div
+              className="modal-overlay"
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1000,
+              }}
+            >
+              <div
+                className="modal-content"
+                ref={modalRef}
+                style={{
+                  width: "400px",
+                  maxHeight: "450px",
+                  backgroundColor: "#FFFFFF",
+                  // overflowY: "auto",
+                  boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.15)",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                {/* 통합된 컨테이너 */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0", // 간격 완전히 제거
+                  }}
+                >
+                  <div
+                    style={{
+                      backgroundColor: "#FFFFFF",
+                      // padding: "12px",
+                      padding: "10px 16px",
+                      borderBottom: "1px solid #EEE",
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      fontSize: "16px",
+                      color: "#333",
+                    }}
+                  >
+                    회원 관리
+                  </div>
+
+                  <div
+                    style={{
+                      maxHeight: "450px",
+                      overflowY: "auto",
+                      padding: "0",
+                    }}
+                  >
+                    {members.length > 0 ? (
+                      members.map((member) => (
+                        <div
+                          key={member.memberNo}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "10px",
+                            backgroundColor: "#FFFFFF", // 여기에서 배경색을 강제 설정
+                            borderBottom: "1px solid #EEE",
+                            gap: "12px",
+                          }}
+                        >
+                          <img
+                            src={`http://localhost:8080/api/member/image/${member.memberNo}`}
+                            alt="프로필"
+                            style={{
+                              width: "40px",
+                              height: "40px",
+                              borderRadius: "50%",
+                              objectFit: "cover",
+                              marginRight: "12px",
+                            }}
+                          />
+
+                          <span
+                            style={{
+                              flex: 1,
+                              fontWeight: "500",
+                              color: "#333",
+                            }}
+                          >
+                            {member.nickname}
+                          </span>
+
+                          {member.leader !== "Y" && (
+                            <button
+                              className="btn btn-danger"
+                              onClick={() => handleKickMember(member.memberNo)}
+                              style={{
+                                padding: "4px 8px",
+                                fontSize: "12px",
+                                backgroundColor: "#FF4D4F",
+                                color: "#FFFFFF",
+                                borderRadius: "6px",
+                                border: "none",
+                                cursor: "pointer",
+                              }}
+                            >
+                              강퇴
+                            </button>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p
+                        style={{
+                          textAlign: "center",
+                          color: "#888",
+                          padding: "16px",
+                        }}
+                      >
+                        모임원이 없습니다.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 

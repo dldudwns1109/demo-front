@@ -59,6 +59,7 @@ export default function JoinBoardDetail() {
         const res = await axios.get(
           `http://localhost:8080/api/reply/${boardNo}`
         );
+        console.log("댓글 데이터:", res.data);
         setReplies(res.data);
       } catch (err) {
         console.error("댓글 불러오기 에러:", err);
@@ -128,7 +129,7 @@ export default function JoinBoardDetail() {
         replyData
       );
       setReplies([res.data, ...replies]);
-      
+
       setReplyCounts((prev) => ({
         ...prev,
         [boardNo]: (prev[boardNo] ?? 0) + 1,
@@ -139,16 +140,65 @@ export default function JoinBoardDetail() {
     }
   };
 
-  const handleDeleteReply = async (replyNo) => {
-    if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
+  // const handleDeleteReply = async (replyNo, idx) => {
+  //   const replyWriter = replies[idx].replyWriter;
+
+  //   if (replyWriter !== userNo && board.boardWriter !== userNo) {
+  //     alert("삭제 권한이 없습니다.");
+  //     return;
+  //   }
+
+  //   if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
+
+  //   try {
+  //     await axios.delete(`http://localhost:8080/api/reply/${replyNo}`, {
+  //       params: { replyOrigin: boardNo },
+  //     });
+
+  //     setReplies(replies.filter((reply) => reply.replyNo !== replyNo));
+
+  //     setReplies(updatedReplies);
+  //     setDropdownOpen(null);
+
+  //     setReplyCounts((prev) => ({
+  //       ...prev,
+  //       [boardNo]: (prev[boardNo] ?? 1) - 1,
+  //     }));
+  //   } catch (err) {
+  //     console.error("댓글 삭제 에러:", err);
+  //   }
+  // };
+
+  const handleDeleteReply = async (replyNo, idx) => {
+    // 댓글 작성자 확인
+    const replyWriter = replies[idx].replyWriter;
+
+    // 삭제 권한 체크: 비회원 또는 권한 없는 사용자
+    if (!userNo || (replyWriter !== userNo && board.boardWriter !== userNo)) {
+      alert("삭제 권한이 없습니다.");
+      setDropdownOpen(null); // 드롭다운 즉시 닫기
+      return;
+    }
+
+    // 삭제 확인
+    const confirmDelete = window.confirm("댓글을 삭제하시겠습니까?");
+    setDropdownOpen(null); // 드롭다운 닫기
+
+    if (!confirmDelete) return;
 
     try {
+      // 댓글 삭제 요청
       await axios.delete(`http://localhost:8080/api/reply/${replyNo}`, {
-        params: { replyOrigin: boardNo },
+        params: {
+          replyOrigin: boardNo,
+          userNo: userNo,
+        },
       });
 
-      setReplies(replies.filter((reply) => reply.replyNo !== replyNo));
-
+      // 삭제 후 댓글 목록 갱신
+      const updatedReplies = replies.filter(
+        (reply) => reply.replyNo !== replyNo
+      );
       setReplies(updatedReplies);
       setDropdownOpen(null);
 
@@ -156,8 +206,10 @@ export default function JoinBoardDetail() {
         ...prev,
         [boardNo]: (prev[boardNo] ?? 1) - 1,
       }));
+      alert("댓글이 삭제되었습니다.");
     } catch (err) {
       console.error("댓글 삭제 에러:", err);
+      alert("댓글 삭제에 실패했습니다.");
     }
   };
 
@@ -173,12 +225,29 @@ export default function JoinBoardDetail() {
     setBoardDropdownOpen(!boardDropdownOpen);
   };
 
+  // const handleEditReply = (idx) => {
+  //   const updatedReplies = [...replies];
+  //   updatedReplies[idx].isEditing = true;
+  //   updatedReplies[idx].backupContent = updatedReplies[idx].replyContent;
+  //   setReplies(updatedReplies);
+  //   setDropdownOpen(null);
+  // };
+
   const handleEditReply = (idx) => {
+    const replyWriter = replies[idx].replyWriter;
+
+    setDropdownOpen(null);
+
+    // 댓글 작성자가 아닌 경우 수정 차단
+    if (replyWriter !== userNo) {
+      alert("수정 권한이 없습니다.");
+      return;
+    }
+
     const updatedReplies = [...replies];
     updatedReplies[idx].isEditing = true;
-    updatedReplies[idx].backupContent = updatedReplies[idx].replyContent;
+    updatedReplies[idx].backupContent = updatedReplies[idx].replyContent; // 백업 내용 저장
     setReplies(updatedReplies);
-    setDropdownOpen(null);
   };
 
   const handleCancelEdit = (idx) => {
@@ -187,6 +256,7 @@ export default function JoinBoardDetail() {
     updatedReplies[idx].replyContent = updatedReplies[idx].backupContent; // 백업된 내용으로 복구
     delete updatedReplies[idx].backupContent; // 백업 제거
     setReplies(updatedReplies);
+    setDropdownOpen(null);
   };
 
   // const handleUpdateReply = (idx, newContent) => {
@@ -202,6 +272,15 @@ export default function JoinBoardDetail() {
   // };
   const handleUpdateReply = async (replyNo, idx, newContent) => {
     if (!newContent.trim()) return;
+
+    const replyWriter = replies[idx].replyWriter;
+
+    setDropdownOpen(null);
+
+    if (replyWriter !== userNo) {
+      alert("수정 권한이 없습니다.");
+      return;
+    }
 
     try {
       const response = await axios.put(
@@ -245,12 +324,20 @@ export default function JoinBoardDetail() {
   // };
 
   const handleBoardEdit = () => {
-    navigate(`/join/board/edit/${boardNo}`);
+    if (board.boardWriter !== userNo) {
+      window.confirm("수정 권한이 없습니다.");
+      setBoardDropdownOpen(null);
+      return;
+    }
+
+    setBoardDropdownOpen(null);
+    navigate(`/join/board/edit/${board.boardNo}`);
   };
 
   const handleBoardDelete = async () => {
     if (board.boardWriter !== userNo) {
       window.confirm("삭제 권한이 없습니다.");
+      setBoardDropdownOpen(null);
       return;
     }
 
@@ -265,6 +352,11 @@ export default function JoinBoardDetail() {
       console.error(err);
       alert("게시글 삭제에 실패했습니다.");
     }
+  };
+
+  const handleBoardReturn = () => {
+    navigate(`/join/board`);
+    window.location.reload();
   };
 
   if (!board) return <div>로딩 중...</div>;
@@ -282,13 +374,19 @@ export default function JoinBoardDetail() {
         style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
       >
         <div className="mb-5">
-          <Link
+          {/* <Link
             to="/join/board"
             className="btn btn-outline-secondary btn-sm"
             style={{ marginTop: "3rem" }}
           >
             목록으로
-          </Link>
+          </Link> */}
+          <button
+            className="btn btn-outline-secondary btn-sm mt-4"
+            onClick={handleBoardReturn}
+          >
+            목록으로
+          </button>
         </div>
 
         {/* 작성자 프로필 + 드롭다운 */}
@@ -429,7 +527,11 @@ export default function JoinBoardDetail() {
                         }
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
-                            handleUpdateReply(reply.replyNo, idx, e.target.value);
+                            handleUpdateReply(
+                              reply.replyNo,
+                              idx,
+                              e.target.value
+                            );
                           } else if (e.key === "Escape") {
                             handleCancelEdit(idx);
                           }
@@ -484,7 +586,8 @@ export default function JoinBoardDetail() {
                       <li>
                         <button
                           className="dropdown-item"
-                          onClick={() => handleDeleteReply(reply.replyNo)}
+                          // onClick={() => handleDeleteReply(reply.replyNo)}
+                          onClick={() => handleDeleteReply(reply.replyNo, idx)}
                         >
                           삭제
                         </button>

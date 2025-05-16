@@ -204,6 +204,14 @@ export default function CrewBoardDetail() {
   };
 
   const handleEditReply = (idx) => {
+    const replyWriter = replies[idx].replyWriter;
+
+    if (replyWriter !== userNo) {
+      window.confirm("수정 권한이 없습니다.");
+      setDropdownOpen(null);
+      return;
+    }
+
     const updatedReplies = [...replies];
     updatedReplies[idx].isEditing = true;
     updatedReplies[idx].previousContent = updatedReplies[idx].replyContent;
@@ -301,6 +309,7 @@ export default function CrewBoardDetail() {
     updatedReplies[idx].replyContent = updatedReplies[idx].backupContent; // 백업된 내용으로 복구
     delete updatedReplies[idx].backupContent; // 백업 제거
     setReplies(updatedReplies);
+    setDropdownOpen(null);
   };
 
   // const handleKeyPress = (e) => {
@@ -323,17 +332,26 @@ export default function CrewBoardDetail() {
     }
   };
 
-  const handleDeleteReply = async (idx) => {
-    const replyNo = replies[idx].replyNo;
+  const handleDeleteReply = async (replyNo, idx) => {
+    const replyWriter = replies[idx].replyWriter;
+
+    if (!userNo || (replyWriter !== userNo && board.boardWriter !== userNo)) {
+      window.confirm("삭제 권한이 없습니다.");
+      setDropdownOpen(null);
+      return;
+    }
+
+    const confirmDelete = window.confirm("댓글을 삭제하시겠습니까?");
+    if (!confirmDelete) return;
 
     try {
       await axios.delete(`http://localhost:8080/api/reply/${replyNo}`, {
-        params: { replyOrigin: boardNo },
+        params: { replyOrigin: boardNo, userNo: userNo },
       });
 
       const updatedReplies = replies.filter((_, i) => i !== idx);
       setReplies(updatedReplies);
-      
+
       setReplyCounts((prev) => ({
         ...prev,
         [boardNo]: (prev[boardNo] ?? 1) - 1,
@@ -361,10 +379,12 @@ export default function CrewBoardDetail() {
     // 삭제 권한 확인: 작성자 또는 리더만 가능
     if (board.boardWriter !== userNo && !isLeader) {
       window.confirm("삭제 권한이 없습니다.");
+      setBoardDropdownOpen(false);
       return;
     }
 
     const confirmDelete = window.confirm("이 게시글을 삭제하시겠습니까?");
+    setBoardDropdownOpen(false);
     if (!confirmDelete) return;
 
     try {
@@ -378,10 +398,8 @@ export default function CrewBoardDetail() {
   };
 
   const handleBoardReturn = () => {
-    // ✅ Recoil 상태 강제 업데이트
-    setReplyCounts((prev) => ({ ...prev }));
-
     navigate(`/crew/${crewNo}/board`);
+    window.location.reload();
   };
 
   // Unauthorized 페이지로 리다이렉트
@@ -406,12 +424,18 @@ export default function CrewBoardDetail() {
         <CrewTopNav />
 
         <div className="mb-4">
-          <Link
+          {/* <Link
             to={`/crew/${crewNo}/board`}
             className="btn btn-outline-secondary btn-sm mt-4"
           >
             목록으로
-          </Link>
+          </Link> */}
+          <button
+            className="btn btn-outline-secondary btn-sm mt-4"
+            onClick={handleBoardReturn}
+          >
+            목록으로
+          </button>
         </div>
 
         <div className="d-flex justify-content-between align-items-start mb-4 position-relative">
@@ -682,7 +706,7 @@ export default function CrewBoardDetail() {
                       <li>
                         <button
                           className="dropdown-item"
-                          onClick={() => handleDeleteReply(idx)}
+                          onClick={() => handleDeleteReply(reply.replyNo, idx)}
                         >
                           삭제
                         </button>

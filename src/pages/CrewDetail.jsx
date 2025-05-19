@@ -973,6 +973,7 @@ export default function CrewDetail() {
                   <input
                     type="text"
                     placeholder="가입 인사를 입력하세요"
+                    style={{ outline: "none" }}
                     value={joinMessage}
                     onChange={(e) => setJoinMessage(e.target.value)}
                     maxLength={100}
@@ -990,6 +991,7 @@ export default function CrewDetail() {
                   <input
                     type="text"
                     placeholder="신고 내용을 입력하세요"
+                    style={{ outline: "none" }}
                     value={reportMessage}
                     onChange={(e) => setReportMessage(e.target.value)}
                     maxLength={100}

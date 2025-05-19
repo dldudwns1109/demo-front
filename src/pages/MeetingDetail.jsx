@@ -17,12 +17,12 @@ import ProfilePopover from "../components/ProfilePopover";
 
 export default function MeetingDetail() {
   const location = useLocation();
-  const [crewNo, setCrewNo] = useState(location.state?.crewNo);
+  const navigate = useNavigate();
   const { meetingNo } = useParams();
   const userNo = useRecoilValue(userNoState);
   const login = useRecoilValue(loginState);
-  const navigate = useNavigate();
 
+  const [crewNo, setCrewNo] = useState(location.state?.crewNo);
   const [meeting, setMeeting] = useState(null);
   const [memberList, setMemberList] = useState([]);
   const [isJoined, setIsJoined] = useState(false);
@@ -30,7 +30,10 @@ export default function MeetingDetail() {
   const [selectedMember, setSelectedMember] = useState(null);
   const [showPopoverId, setShowPopoverId] = useState(null);
   const [isMeetingLeader, setIsMeetingLeader] = useState(false);
+  const [unauthorized, setUnauthorized] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
+  // 정원 체크
   const isFull = useMemo(
     () => meeting && memberList.length >= meeting.meetingLimit,
     [meeting, memberList]
@@ -51,21 +54,27 @@ export default function MeetingDetail() {
       .catch((err) => {
         console.error("정모 정보 조회 실패", err);
         if (err.response?.status === 403) {
-          alert("해당 모임에 가입한 회원만 정모를 볼 수 있어요.");
-        } else if (err.response?.status === 404) {
-          alert("삭제된 정모입니다.");
-        } else {
-          alert("정모 정보를 불러오지 못했습니다.");
+          // 모임 회원이 아닐 때
+          if (window.confirm("모임 회원만 이용 가능합니다.")) {
+            crewNo ? navigate(`/crew/${crewNo}/detail`) : navigate(-1);
+          }
+          crewNo ? navigate(`/crew/${crewNo}/detail`) : navigate(-1);
+          return;
         }
-        // crewNo 없으면 뒤로, 있으면 크루 상세로
-        if (crewNo) navigate(`/crew/${crewNo}/detail`);
-        else navigate(-1);
+        if (err.response?.status === 404) {
+          toast.error("삭제된 정모입니다.");
+          setErrorMessage("삭제된 정모이거나 존재하지 않는 페이지입니다.");
+          setUnauthorized(true);
+          return;
+        }
+        toast.error("정모 정보를 불러오는 중 오류가 발생했습니다.");
+        setErrorMessage("정모 정보를 불러오는 중 오류가 발생했습니다.");
+        setUnauthorized(true);
       });
-  }, [meetingNo, navigate, crewNo]);
+  }, [meetingNo, navigate]);
 
-  // 2) 참여자 목록
+  // 2) 참여자 목록 조회
   const fetchMeetingMemberList = useCallback(() => {
-    if (!userNo) return;
     axios
       .get(`http://localhost:8080/api/meetingMember/${meetingNo}`)
       .then((res) => {
@@ -78,7 +87,6 @@ export default function MeetingDetail() {
 
   // 3) 참여 여부 확인
   const checkMeetingJoin = useCallback(() => {
-    if (!userNo) return;
     axios
       .get(`http://localhost:8080/api/meetingMember/${meetingNo}/check`, {
         headers: {
@@ -87,13 +95,13 @@ export default function MeetingDetail() {
       })
       .then((res) => setIsJoined(res.data))
       .catch((err) => console.error("참여 여부 확인 실패", err));
-  }, [meetingNo, userNo]);
+  }, [meetingNo]);
 
   // 4) 참여 / 나가기 / 삭제
   const meetingJoin = useCallback(() => {
     axios
       .post(
-        "http://localhost:8080/api/meetingMember/",
+        `http://localhost:8080/api/meetingMember/`,
         { meetingNo },
         {
           headers: {
@@ -131,17 +139,25 @@ export default function MeetingDetail() {
         },
       })
       .then(() => {
-        alert("정모가 삭제되었습니다.");
+        toast.success("정모가 삭제되었습니다.");
         if (crewNo) navigate(`/crew/${crewNo}/detail`);
         else navigate(-1);
       })
       .catch((err) => {
         console.error("정모 삭제 실패", err);
-        alert("정모 삭제 중 오류가 발생했습니다.");
+        toast.error("정모 삭제 중 오류가 발생했습니다.");
       });
   }, [meetingNo, crewNo, navigate]);
 
   // 초기 로드
+  useEffect(() => {
+    if (!login) return;
+    fetchMeetingDetail();
+    fetchMeetingMemberList();
+    checkMeetingJoin();
+  }, [login, fetchMeetingDetail, fetchMeetingMemberList, checkMeetingJoin]);
+
+  // 로그인 필수: useEffect로 옮기기
   useEffect(() => {
     if (!login) {
       if (
@@ -151,25 +167,39 @@ export default function MeetingDetail() {
       ) {
         navigate("/signin");
       } else {
-        if (crewNo) navigate(`/crew/${crewNo}/detail`);
-        else navigate(-1);
+        navigate(crewNo ? `/crew/${crewNo}/detail` : -1);
       }
-      return;
     }
-    fetchMeetingDetail();
-    fetchMeetingMemberList();
-    checkMeetingJoin();
-  }, [
-    login,
-    fetchMeetingDetail,
-    fetchMeetingMemberList,
-    checkMeetingJoin,
-    navigate,
-    crewNo,
-  ]);
+  }, [login, crewNo, navigate]);
+
+  // render 단계에선 로그인 여부만 검사
+  if (!login) {
+    return null;
+  }
+
+  // 권한 또는 기타 에러
+  if (unauthorized) {
+    return (
+      <div className="vh-100">
+        <Header input={false} loginState={login ? "loggined" : "login"} />
+        <Unauthorized message={errorMessage} />
+      </div>
+    );
+  }
+
+  // 올바르지 않은 접근: 유효한 crewNo가 없을 때
+  if (!crewNo) {
+    return (
+      <div className="vh-100">
+        <Header input={false} loginState={login ? "loggined" : "login"} />
+        <Unauthorized message="잘못된 접근입니다." />
+      </div>
+    );
+  }
 
   if (!meeting) return null;
 
+  // 날짜/시간 포맷팅
   const dateObj = new Date(meeting.meetingDate);
   const dateStr = dateObj.toLocaleDateString("ko-KR", {
     month: "long",
@@ -183,7 +213,7 @@ export default function MeetingDetail() {
 
   return (
     <>
-      <Header loginState={login ? "loggined" : "login"} input={false} />
+      <Header loginState={login ? "loggedIn" : "login"} input={false} />
       <ToastContainer
         position="bottom-right"
         autoClose={2000}
@@ -335,7 +365,7 @@ export default function MeetingDetail() {
                     fontSize: "16px",
                     fontWeight: "bold",
                     color: "#333333",
-                    lineHeight: "1", // 추가로 균형 잡기
+                    lineHeight: "1",
                   }}
                 >
                   정모 날짜
@@ -374,7 +404,7 @@ export default function MeetingDetail() {
                     fontSize: "16px",
                     fontWeight: "bold",
                     color: "#333333",
-                    lineHeight: "1", // 추가로 균형 잡기
+                    lineHeight: "1",
                   }}
                 >
                   정모 시간
@@ -413,7 +443,7 @@ export default function MeetingDetail() {
                     fontSize: "16px",
                     fontWeight: "bold",
                     color: "#333333",
-                    lineHeight: "1", // 추가로 균형 잡기
+                    lineHeight: "1",
                   }}
                 >
                   정모 위치
@@ -452,7 +482,7 @@ export default function MeetingDetail() {
                     fontSize: "16px",
                     fontWeight: "bold",
                     color: "#333333",
-                    lineHeight: "1", // 추가로 균형 잡기
+                    lineHeight: "1",
                   }}
                 >
                   인당 비용
@@ -464,6 +494,7 @@ export default function MeetingDetail() {
             </p>
           </div>
 
+          {/* 참여/위임 버튼 */}
           <div style={{ marginTop: "64px" }}>
             {isMeetingLeader ? (
               <button
@@ -602,7 +633,6 @@ export default function MeetingDetail() {
                     </span>
                   )}
                 </div>
-                {/* 팝오버 */}
                 {showPopoverId === member.memberNo && (
                   <ProfilePopover
                     memberNo={member.memberNo}

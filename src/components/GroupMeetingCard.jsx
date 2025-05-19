@@ -38,8 +38,10 @@ export default function GroupMeetingCard({ meeting, crewNo }) {
       <img
         src={
           meeting.attachmentNo
-            ? `/attachment/${meeting.attachmentNo}`
-            : "${import.meta.env.VITE_AJAX_BASE_URL}/images/default-thumbnail.png"
+            ? `${import.meta.env.VITE_AJAX_BASE_URL}/attachment/${
+                meeting.attachmentNo
+              }`
+            : "/images/default-thumbnail.png"
         }
         alt="썸네일"
         style={{

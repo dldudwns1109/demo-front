@@ -54,11 +54,7 @@ export default function MeetingDetail() {
       .catch((err) => {
         console.error("정모 정보 조회 실패", err);
         if (err.response?.status === 403) {
-          if (
-            window.confirm(
-              "모임 회원만 이용 가능합니다."
-            )
-          ) {
+          if (window.confirm("모임 회원만 이용 가능합니다.")) {
             return navigate(-1);
           }
           return navigate(-1);
@@ -587,7 +583,9 @@ export default function MeetingDetail() {
                   <img
                     src={
                       member.attachmentNo
-                        ? `/attachment/${member.attachmentNo}`
+                        ? `${import.meta.env.VITE_AJAX_BASE_URL}/attachment/${
+                            member.attachmentNo
+                          }`
                         : "/images/default-profile.png"
                     }
                     style={{

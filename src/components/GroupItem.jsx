@@ -30,7 +30,9 @@ export default function GroupItem({ data, onLikeToggle }) {
     >
       <div className="position-relative" style={{ marginBottom: "12px" }}>
         <img
-          src={`/attachment/${data.crewAttachmentNo}`}
+          src={`${import.meta.env.VITE_AJAX_BASE_URL}/attachment/${
+            data.crewAttachmentNo
+          }`}
           className="w-100"
           style={{
             borderRadius: "8px",

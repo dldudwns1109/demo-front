@@ -337,6 +337,7 @@ export default function CrewDetail() {
         window.confirm("모임에서 탈퇴되었습니다. 작성한 게시글과 댓글은 모두 삭제됩니다.");
         setIsMember(false);
         fetchMembers();
+        window.location.reload();
       } else {
         window.confirm("모임 탈퇴에 실패했습니다.");
       }

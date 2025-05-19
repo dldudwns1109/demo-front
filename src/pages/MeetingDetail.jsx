@@ -56,10 +56,10 @@ export default function MeetingDetail() {
         if (err.response?.status === 403) {
           if (
             window.confirm(
-              "모임 회원만 이용 가능합니다. 크루 상세로 이동할까요?"
+              "모임 회원만 이용 가능합니다."
             )
           ) {
-            return navigate(`/crew/${crewNo}/detail`);
+            return navigate(-1);
           }
           return navigate(-1);
         }
@@ -284,11 +284,10 @@ export default function MeetingDetail() {
                   fontWeight: "bold"
                 }}
                 onClick={() => {
-                  if (!crewNo) return navigate(-1);
-                  navigate(`/crew/${crewNo}/detail`);
+                  return navigate(-1);
                 }}
               >
-                모임으로 돌아가기
+                뒤로가기
               </button>
               {isMeetingLeader && (
                 <>

@@ -30,7 +30,7 @@ export default function GroupItem({ data }) {
     >
       <div className="position-relative" style={{ marginBottom: "12px" }}>
         <img
-          src={`http://localhost:8080/api/attachment/${data.crewAttachmentNo}`}
+          src={`/attachment/${data.crewAttachmentNo}`}
           className="w-100"
           style={{
             borderRadius: "8px",
@@ -51,14 +51,14 @@ export default function GroupItem({ data }) {
             e.stopPropagation();
 
             if (toggle) {
-              await axios.delete("http://localhost:8080/api/crew/deleteLike", {
+              await axios.delete("/crew/deleteLike", {
                 data: {
                   memberNo: userNo,
                   crewNo: data.crewNo,
                 },
               });
             } else {
-              await axios.post("http://localhost:8080/api/crew/updateLike", {
+              await axios.post("/crew/updateLike", {
                 memberNo: userNo,
                 crewNo: data.crewNo,
               });

@@ -48,7 +48,7 @@ export default function ProfileCard({ member }) {
                 height: "200px",
                 objectFit: "cover",
               }}
-              src={`http://localhost:8080/api/member/image/${member.memberNo}`}
+              src={`/member/image/${member.memberNo}`}
             />
 
             <div className="d-flex flex-column justify-content-between">
@@ -182,7 +182,7 @@ export default function ProfileCard({ member }) {
                         ] = `Bearer ${accessToken}`;
 
                         await axios.post(
-                          "http://localhost:8080/api/member/signout"
+                          "/member/signout"
                         );
                       } catch (e) {
                       } finally {

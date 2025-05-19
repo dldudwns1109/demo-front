@@ -32,7 +32,7 @@ export default function CrewBoardEdit() {
   const checkMemberStatus = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/crewmember/${crewNo}/member`
+        `/crewmember/${crewNo}/member`
       );
       setIsMember(res.data);
     } catch (err) {
@@ -46,7 +46,7 @@ export default function CrewBoardEdit() {
    */
   const fetchBoardData = async () => {
     try {
-      const res = await axios.get(`http://localhost:8080/api/board/${boardNo}`);
+      const res = await axios.get(`/board/${boardNo}`);
       if (res.data) {
         setBoard({
           boardTitle: res.data.boardTitle,
@@ -104,7 +104,7 @@ export default function CrewBoardEdit() {
     const fetchProfile = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8080/api/member/mypage/${userNo}`
+          `/member/mypage/${userNo}`
         );
         setProfile(res.data);
       } catch (err) {
@@ -116,6 +116,13 @@ export default function CrewBoardEdit() {
       fetchProfile();
     }
   }, [userNo]);
+
+  useEffect(() => {
+  if (!userNo) {
+    window.confirm("권한이 없습니다.");
+    navigate("/");
+  }
+}, [userNo]);
 
   /**
    * 7. 게시글 수정
@@ -131,7 +138,7 @@ export default function CrewBoardEdit() {
     }
 
     try {
-      await axios.put(`http://localhost:8080/api/board/${boardNo}`, {
+      await axios.put(`/board/${boardNo}`, {
         boardTitle: board.boardTitle,
         boardContent: board.boardContent,
         boardCategory: board.boardCategory,
@@ -163,7 +170,7 @@ export default function CrewBoardEdit() {
         {profile && (
           <div className="d-flex align-items-center mb-4">
             <img
-              src={`http://localhost:8080/api/member/image/${userNo}`}
+              src={`/member/image/${userNo}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{ width: "3rem", height: "3rem", objectFit: "cover" }}

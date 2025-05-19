@@ -27,7 +27,7 @@ export default function CrewDelete() {
       try {
         const headers = getAuthHeaders();
         const res = await axios.get(
-          `http://localhost:8080/api/crewmember/${crewNo}/leader`,
+          `/crewmember/${crewNo}/leader`,
           { headers }
         );
         setIsLeader(res.data);
@@ -45,7 +45,7 @@ export default function CrewDelete() {
   const handleDeleteCrew = async () => {
     try {
       const headers = getAuthHeaders();
-      await axios.delete(`http://localhost:8080/api/crew/${crewNo}`, {
+      await axios.delete(`/crew/${crewNo}`, {
         headers,
       });
 

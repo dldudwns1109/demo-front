@@ -122,12 +122,12 @@ export default function MypageEdit() {
   useEffect(() => {
     if (!userNo) return;
 
-    axios.get(`http://localhost:8080/api/member/${userNo}`).then((res) => {
+    axios.get(`/member/${userNo}`).then((res) => {
       const data = res.data;
       const [city, area] = data.memberLocation.split(" ");
       setCity(city);
       setLocation({ city, area });
-      setPreviewImg(`http://localhost:8080/api/member/image/${data.memberNo}`);
+      setPreviewImg(`/member/image/${data.memberNo}`);
 
       setMember({
         memberId: data.memberId,
@@ -182,7 +182,7 @@ export default function MypageEdit() {
 
     try {
       await axios.patch(
-        `http://localhost:8080/api/member/${userNo}`,
+        `/member/${userNo}`,
         formData,
         {
           headers: {
@@ -300,7 +300,7 @@ export default function MypageEdit() {
 
               try {
                 const res = await axios.get(
-                  `http://localhost:8080/api/member/checkNickname/${nickname}`
+                  `/member/checkNickname/${nickname}`
                 );
                 const { isDuplicated, nicknameOwnerUserNo } = res.data;
 

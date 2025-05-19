@@ -18,7 +18,7 @@ export default function JoinBoard() {
     "음악",
     "게임",
     "공연",
-    "자기개발",
+    "자기계발",
     "요리",
   ];
   const [selectedCategory, setSelectedCategory] = useState("전체");
@@ -37,7 +37,7 @@ export default function JoinBoard() {
     const fetchBoardList = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:8080/api/board/joinboard",
+          `/board/joinboard`,
           {
             params:
               selectedCategory !== "전체" ? { category: selectedCategory } : {},
@@ -127,7 +127,7 @@ export default function JoinBoard() {
                   <div className="card-body" style={{ padding: "1.5rem" }}>
                     <div className="d-flex align-items-center mb-3">
                       <img
-                        src={`http://localhost:8080/api/member/image/${board.boardWriter}`}
+                        src={`/member/image/${board.boardWriter}`}
                         alt="프로필"
                         className="rounded-circle me-3"
                         style={{

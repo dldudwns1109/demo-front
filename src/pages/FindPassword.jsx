@@ -31,7 +31,7 @@ export default function FindPassword() {
 
       try {
         const res = await axios.patch(
-          `http://localhost:8080/api/member/updatePw`,
+          `/member/updatePw`,
           { memberEmail }
         );
 

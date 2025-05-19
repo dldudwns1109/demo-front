@@ -38,7 +38,7 @@ export default function GroupMeetingCard({ meeting, crewNo }) {
       <img
         src={
           meeting.attachmentNo
-            ? `http://localhost:8080/api/attachment/${meeting.attachmentNo}`
+            ? `/attachment/${meeting.attachmentNo}`
             : "/images/default-thumbnail.png"
         }
         alt="썸네일"

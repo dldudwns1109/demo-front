@@ -57,7 +57,7 @@ export default function MeetingCreate() {
 
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/crewmember/${crewNo}/member`,
+        `/crewmember/${crewNo}/member`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -169,7 +169,7 @@ export default function MeetingCreate() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/meeting/",
+        "/meeting/",
         formData,
         {
           headers: {

@@ -18,7 +18,7 @@ export default function SignupFinish() {
 
     const fetchData = async () => {
       const res = await axios.get(
-        `http://localhost:8080/api/member/findMemberNo/${userNickname}`
+        `/member/findMemberNo/${userNickname}`
       );
       setMemberNo(res.data);
     };
@@ -53,7 +53,7 @@ export default function SignupFinish() {
               src={
                 memberNo === null
                   ? "images/default-profile.svg"
-                  : `http://localhost:8080/api/member/image/${memberNo}`
+                  : `/member/image/${memberNo}`
               }
               className="shadow-sm"
               style={{ marginTop: "48px", borderRadius: "999px" }}

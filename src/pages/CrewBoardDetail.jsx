@@ -43,7 +43,7 @@ export default function CrewBoardDetail() {
       try {
         const headers = getAuthHeaders();
         const res = await axios.get(
-          `http://localhost:8080/api/crewmember/${crewNo}/member`,
+          `/crewmember/${crewNo}/member`,
           { headers }
         );
 
@@ -70,7 +70,7 @@ export default function CrewBoardDetail() {
 
       try {
         const res = await axios.get(
-          `http://localhost:8080/api/board/leader/${userNo}/${crewNo}`
+          `/board/leader/${userNo}/${crewNo}`
         );
         setIsLeader(res.data);
       } catch (err) {
@@ -82,49 +82,12 @@ export default function CrewBoardDetail() {
     checkLeaderStatus();
   }, [userNo, crewNo]);
 
-  /* 게시글 데이터 불러오기 (모임원만 가능) */
-  // useEffect(() => {
-  //   const fetchBoardData = async () => {
-  //     try {
-  //       const res = await axios.get(
-  //         `http://localhost:8080/api/board/${boardNo}`
-  //       );
-  //       setBoard(res.data);
-  //     } catch (err) {
-  //       console.error("게시글 데이터 불러오기 실패:", err.message);
-  //     }
-  //   };
-
-  //   if (isMember) {
-  //     fetchBoardData();
-  //   }
-  // }, [boardNo, isMember]);
-
-  // useEffect(() => {
-  //   const fetchBoardData = async () => {
-  //     try {
-  //       const res = await axios.get(
-  //         `http://localhost:8080/api/board/${boardNo}`
-  //       );
-  //       if (res.data) {
-  //         setBoard(res.data);
-  //       } else {
-  //         console.warn(`게시글 ${boardNo}이(가) 존재하지 않습니다.`);
-  //         setBoard(null); // 명확하게 `null`로 처리
-  //       }
-  //     } catch (err) {
-  //       console.error("게시글 데이터 불러오기 실패:", err.message);
-  //       setBoard(null);
-  //     }
-  //   };
-
-  //   fetchBoardData();
-  // }, [boardNo]);
+  
   useEffect(() => {
     const fetchBoardData = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8080/api/board/${boardNo}`
+          `/board/${boardNo}`
         );
         if (res.data) {
           setBoard({
@@ -228,7 +191,7 @@ export default function CrewBoardDetail() {
     const fetchReplies = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8080/api/reply/${boardNo}`
+          `/reply/${boardNo}`
         );
         setReplies(res.data);
       } catch (err) {
@@ -251,7 +214,7 @@ export default function CrewBoardDetail() {
       };
 
       const res = await axios.post(
-        `http://localhost:8080/api/reply`,
+        `/reply`,
         replyData
       );
       setReplies([res.data, ...replies]);
@@ -309,7 +272,7 @@ export default function CrewBoardDetail() {
 
     try {
       const response = await axios.put(
-        `http://localhost:8080/api/reply/${replyNo}`,
+        `/reply/${replyNo}`,
         { replyContent: newContent }
       );
 
@@ -374,39 +337,7 @@ export default function CrewBoardDetail() {
     }
   };
 
-  // const handleDeleteReply = async (replyNo, idx) => {
-  //   const replyWriter = replies[idx].replyWriter;
 
-  //   if (!userNo || (replyWriter !== userNo && board.boardWriter !== userNo)) {
-  //     window.confirm("삭제 권한이 없습니다.");
-  //     setDropdownOpen(null);
-  //     return;
-  //   }
-
-  //   const confirmDelete = window.confirm("댓글을 삭제하시겠습니까?");
-  //   if (!confirmDelete) {
-  //     setDropdownOpen(null);
-  //     return;
-  //   }
-
-  //   try {
-  //     await axios.delete(`http://localhost:8080/api/reply/${replyNo}`, {
-  //       params: { replyOrigin: boardNo, userNo: userNo },
-  //     });
-
-  //     const updatedReplies = replies.filter((_, i) => i !== idx);
-  //     setReplies(updatedReplies);
-
-  //     setReplyCounts((prev) => ({
-  //       ...prev,
-  //       [boardNo]: (prev[boardNo] ?? 1) - 1,
-  //     }));
-
-  //     setDropdownOpen(null); // 드롭다운 자동 닫기
-  //   } catch (err) {
-  //     console.error("댓글 삭제 에러:", err);
-  //   }
-  // };
   const handleDeleteReply = async (replyNo, idx) => {
     const replyWriter = replies[idx].replyWriter;
 
@@ -423,7 +354,7 @@ export default function CrewBoardDetail() {
     }
 
     try {
-      await axios.delete(`http://localhost:8080/api/reply/${replyNo}`, {
+      await axios.delete(`/reply/${replyNo}`, {
         params: { replyOrigin: boardNo, userNo: userNo },
       });
 
@@ -432,7 +363,7 @@ export default function CrewBoardDetail() {
 
       // 서버로부터 최신 댓글 수를 받아와서 업데이트
       const res = await axios.get(
-        `http://localhost:8080/api/reply/count/${boardNo}`
+        `/reply/count/${boardNo}`
       );
       const updatedCount = res.data;
 
@@ -473,7 +404,7 @@ export default function CrewBoardDetail() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:8080/api/board/${boardNo}`);
+      await axios.delete(`/board/${boardNo}`);
       window.confirm("게시글이 삭제되었습니다.");
       navigate(`/crew/${crewNo}/board`);
     } catch (err) {
@@ -493,11 +424,7 @@ export default function CrewBoardDetail() {
 
   return (
     <>
-      <Header
-        loginState={`${login ? "loggined" : "login"}`}
-        location={location}
-        setLocation={setLocation}
-      />
+      <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
       <div
         className="container"
         style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
@@ -522,7 +449,7 @@ export default function CrewBoardDetail() {
         <div className="d-flex justify-content-between align-items-start mb-4 position-relative">
           <div className="d-flex align-items-center">
             <img
-              src={`http://localhost:8080/api/member/image/${board.boardWriter}`}
+              src={`/member/image/${board.boardWriter}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{
@@ -706,7 +633,7 @@ export default function CrewBoardDetail() {
                 style={{ fontSize: "0.95rem" }}
               >
                 <img
-                  src={`http://localhost:8080/api/attachment/${reply.profileUrl}`}
+                  src={`/attachment/${reply.profileUrl}`}
                   alt="프로필"
                   className="rounded-circle me-2"
                   style={{

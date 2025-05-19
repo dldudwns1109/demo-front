@@ -45,7 +45,7 @@ export default function MeetingDetail() {
   // 1) 회의 상세 조회
   const fetchMeetingDetail = useCallback(() => {
     axios
-      .get(`http://localhost:8080/api/meeting/${meetingNo}`, {
+      .get(`/meeting/${meetingNo}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
@@ -78,7 +78,7 @@ export default function MeetingDetail() {
   // 2) 참여자 목록 조회
   const fetchMeetingMemberList = useCallback(() => {
     axios
-      .get(`http://localhost:8080/api/meetingMember/${meetingNo}`)
+      .get(`/meetingMember/${meetingNo}`)
       .then((res) => {
         setMemberList(res.data);
         const me = res.data.find((m) => m.memberNo === userNo);
@@ -90,7 +90,7 @@ export default function MeetingDetail() {
   // 3) 참여 여부 확인
   const checkMeetingJoin = useCallback(() => {
     axios
-      .get(`http://localhost:8080/api/meetingMember/${meetingNo}/check`, {
+      .get(`/meetingMember/${meetingNo}/check`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
@@ -103,7 +103,7 @@ export default function MeetingDetail() {
   const meetingJoin = useCallback(() => {
     axios
       .post(
-        `http://localhost:8080/api/meetingMember/`,
+        `/meetingMember/`,
         { meetingNo },
         {
           headers: {
@@ -120,7 +120,7 @@ export default function MeetingDetail() {
 
   const meetingExit = useCallback(() => {
     axios
-      .delete(`http://localhost:8080/api/meetingMember/${meetingNo}`, {
+      .delete(`/meetingMember/${meetingNo}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
@@ -135,7 +135,7 @@ export default function MeetingDetail() {
   const meetingDelete = useCallback(() => {
     if (!window.confirm("정말로 이 정모를 삭제하시겠습니까?")) return;
     axios
-      .delete(`http://localhost:8080/api/meeting/${meetingNo}`, {
+      .delete(`/meeting/${meetingNo}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
@@ -218,7 +218,7 @@ export default function MeetingDetail() {
             if (!selectedMember) return;
             try {
               await axios.put(
-                `http://localhost:8080/api/meeting/${meetingNo}/owner`,
+                `/meeting/${meetingNo}/owner`,
                 null,
                 {
                   params: { newOwnerNo: selectedMember.memberNo },
@@ -245,7 +245,7 @@ export default function MeetingDetail() {
       <div>
         {meeting.attachmentNo && (
           <img
-            src={`http://localhost:8080/api/meeting/image/${meetingNo}`}
+            src={`/meeting/image/${meetingNo}`}
             alt="정모 이미지"
             style={{
               width: "100%",
@@ -584,7 +584,7 @@ export default function MeetingDetail() {
                   <img
                     src={
                       member.attachmentNo
-                        ? `http://localhost:8080/api/attachment/${member.attachmentNo}`
+                        ? `/attachment/${member.attachmentNo}`
                         : "/images/default-profile.png"
                     }
                     style={{

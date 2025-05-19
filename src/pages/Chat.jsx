@@ -35,7 +35,7 @@ export default function Chat() {
   useEffect(() => {
     const fetchData = async () => {
       const res = await axios.get(
-        `http://localhost:8080/api/chat/messages/${currRoom}`
+        `/chat/messages/${currRoom}`
       );
       setMessages(res.data);
     };
@@ -247,7 +247,7 @@ export default function Chat() {
                       <img
                         className="shadow-sm"
                         style={{ borderRadius: "999px", objectFit: "cover" }}
-                        src={`http://localhost:8080/api/member/image/${room.accountNo}`}
+                        src={`/member/image/${room.accountNo}`}
                         width={64}
                         height={64}
                       />
@@ -313,7 +313,7 @@ export default function Chat() {
                     <img
                       className="shadow-sm"
                       style={{ borderRadius: "999px", objectFit: "cover" }}
-                      src={`http://localhost:8080/api/member/image/${room.accountNo}`}
+                      src={`/member/image/${room.accountNo}`}
                       width={48}
                       height={48}
                     />
@@ -404,7 +404,7 @@ export default function Chat() {
                                   marginBottom:
                                     windowWidth > 1024 ? "0px" : "12px",
                                 }}
-                                src={`http://localhost:8080/api/member/image/${message.accountNo}`}
+                                src={`/member/image/${message.accountNo}`}
                                 width={windowWidth > 1024 ? 64 : 48}
                                 height={windowWidth > 1024 ? 64 : 48}
                               />

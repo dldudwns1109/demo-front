@@ -373,7 +373,7 @@ export default function Header({
                           ] = `Bearer ${accessToken}`;
 
                           await axios.post(
-                            "http://localhost:8080/api/member/signout"
+                            "/member/signout"
                           );
                         } catch (e) {
                         } finally {

@@ -29,25 +29,11 @@ export default function JoinBoardDetail() {
   const [location, setLocation] = useRecoilState(locationState);
   const userNo = useRecoilValue(userNoState);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const res = await axios.get(
-  //         `http://localhost:8080/api/board/${boardNo}`
-  //       );
-  //       setBoard(res.data);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-  //   fetchData();
-  // }, [boardNo]);
-
   useEffect(() => {
     const fetchBoard = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8080/api/board/${boardNo}`
+          `/board/${boardNo}`
         );
         setBoard(res.data);
       } catch (err) {
@@ -58,7 +44,7 @@ export default function JoinBoardDetail() {
     const fetchReplies = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8080/api/reply/${boardNo}`
+          `/reply/${boardNo}`
         );
         console.log("댓글 데이터:", res.data);
         setReplies(res.data);
@@ -155,7 +141,7 @@ export default function JoinBoardDetail() {
       };
 
       const res = await axios.post(
-        "http://localhost:8080/api/reply",
+        "/reply",
         replyData
       );
       setReplies([res.data, ...replies]);
@@ -170,34 +156,6 @@ export default function JoinBoardDetail() {
     }
   };
 
-  // const handleDeleteReply = async (replyNo, idx) => {
-  //   const replyWriter = replies[idx].replyWriter;
-
-  //   if (replyWriter !== userNo && board.boardWriter !== userNo) {
-  //     alert("삭제 권한이 없습니다.");
-  //     return;
-  //   }
-
-  //   if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
-
-  //   try {
-  //     await axios.delete(`http://localhost:8080/api/reply/${replyNo}`, {
-  //       params: { replyOrigin: boardNo },
-  //     });
-
-  //     setReplies(replies.filter((reply) => reply.replyNo !== replyNo));
-
-  //     setReplies(updatedReplies);
-  //     setDropdownOpen(null);
-
-  //     setReplyCounts((prev) => ({
-  //       ...prev,
-  //       [boardNo]: (prev[boardNo] ?? 1) - 1,
-  //     }));
-  //   } catch (err) {
-  //     console.error("댓글 삭제 에러:", err);
-  //   }
-  // };
 
   const handleDeleteReply = async (replyNo, idx) => {
     // 댓글 작성자 확인
@@ -218,7 +176,7 @@ export default function JoinBoardDetail() {
 
     try {
       // 댓글 삭제 요청
-      await axios.delete(`http://localhost:8080/api/reply/${replyNo}`, {
+      await axios.delete(`/reply/${replyNo}`, {
         params: {
           replyOrigin: boardNo,
           userNo: userNo,
@@ -314,7 +272,7 @@ export default function JoinBoardDetail() {
 
     try {
       const response = await axios.put(
-        `http://localhost:8080/api/reply/${replyNo}`,
+        `/reply/${replyNo}`,
         { replyContent: newContent }
       );
 
@@ -375,7 +333,7 @@ export default function JoinBoardDetail() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:8080/api/board/${board.boardNo}`);
+      await axios.delete(`/board/${board.boardNo}`);
       alert("게시글이 삭제되었습니다.");
       navigate("/join/board");
     } catch (err) {
@@ -423,7 +381,7 @@ export default function JoinBoardDetail() {
         <div className="d-flex justify-content-between align-items-start mb-4 position-relative">
           <div className="d-flex align-items-center">
             <img
-              src={`http://localhost:8080/api/member/image/${board.boardWriter}`}
+              src={`/member/image/${board.boardWriter}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{
@@ -531,7 +489,7 @@ export default function JoinBoardDetail() {
                 style={{ fontSize: "0.95rem" }}
               >
                 <img
-                  src={`http://localhost:8080/api/attachment/${reply.profileUrl}`}
+                  src={`/attachment/${reply.profileUrl}`}
                   alt="프로필"
                   className="rounded-circle me-2"
                   style={{

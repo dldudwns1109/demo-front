@@ -35,6 +35,7 @@ export default function CrewEdit() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [city, setCity] = useState("서울특별시");
   const [crewNameError, setCrewNameError] = useState("");
+  const [crewIntroError, setCrewIntroError] = useState("");
 
   // 로그인 및 사용자 정보
   const login = useRecoilValue(loginState);
@@ -50,7 +51,7 @@ export default function CrewEdit() {
     "음악",
     "게임",
     "공연",
-    "자기개발",
+    "자기계발",
     "요리",
   ];
 
@@ -58,21 +59,6 @@ export default function CrewEdit() {
     const token = localStorage.getItem("refreshToken");
     return { Authorization: `Bearer ${token.trim()}` };
   };
-
-  /* 모임장 여부 확인 */
-  // const checkLeaderStatus = async () => {
-  //   try {
-  //     const res = await axios.get(
-  //       `http://localhost:8080/api/crewmember/${crewNo}/leader`,
-  //       {
-  //         headers: getAuthHeaders(),
-  //       }
-  //     );
-  //     setIsLeader(res.data);
-  //   } catch (err) {
-  //     console.error("Error checking leader status:", err.message);
-  //   }
-  // };
 
   const checkLeaderStatus = async () => {
     try {
@@ -84,7 +70,7 @@ export default function CrewEdit() {
 
       const headers = getAuthHeaders();
       const res = await axios.get(
-        `http://localhost:8080/api/crewmember/${crewNo}/leader`,
+        `/crewmember/${crewNo}/leader`,
         { headers }
       );
 
@@ -107,7 +93,7 @@ export default function CrewEdit() {
   /* 모임 정보 불러오기 */
   const fetchCrewData = async () => {
     try {
-      const res = await axios.get(`http://localhost:8080/api/crew/${crewNo}`);
+      const res = await axios.get(`/crew/${crewNo}`);
       const crewData = res.data;
 
       const [city, area] = crewData.crewLocation.split(" ");
@@ -117,11 +103,11 @@ export default function CrewEdit() {
         crewCategory: crewData.crewCategory,
         crewLocation: crewData.crewLocation,
         crewIntro: crewData.crewIntro,
-        crewImage: `http://localhost:8080/api/crew/image/${crewNo}`,
+        crewImage: `/crew/image/${crewNo}`,
       });
 
       setLocation({ city, area });
-      setImagePreview(`http://localhost:8080/api/crew/image/${crewNo}`);
+      setImagePreview(`/crew/image/${crewNo}`);
     } catch (err) {
       console.error("Error fetching crew data:", err.message);
       alert("모임 정보를 불러오는데 실패했습니다.");
@@ -161,23 +147,11 @@ export default function CrewEdit() {
     }
   };
 
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     setSelectedFile(file);
-  //     setImagePreview(URL.createObjectURL(file));
-  //   }
-  // };
-
   /** 이미지 클릭 시 파일 선택 */
   const openFileSelector = () => {
     fileInputRef.current.click();
   };
 
-  // const handleInputChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setCrew((prev) => ({ ...prev, [name]: value }));
-  // };
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
@@ -187,6 +161,14 @@ export default function CrewEdit() {
         setCrewNameError("모임이름은 4글자~ 20글자 사이로 작성하십시오.");
       } else {
         setCrewNameError("");
+      }
+    }
+
+    if (name === "crewIntro") {
+      if (value.length < 10) {
+        setCrewIntroError("소개는 최소 10자 이상 입력해주세요.");
+      } else {
+        setCrewIntroError("");
       }
     }
 
@@ -206,37 +188,6 @@ export default function CrewEdit() {
     setIsOpenLocation(false);
   };
 
-  // const handleSubmit = async () => {
-  //   if (!crew.crewName.trim() || !crew.crewIntro.trim()) {
-  //     alert("모임명과 소개를 모두 입력해주세요.");
-  //     return;
-  //   }
-
-  //   try {
-  //     const formData = new FormData();
-  //     Object.entries(crew).forEach(([key, value]) => {
-  //       formData.append(key, value);
-  //     });
-
-  //     if (selectedFile) {
-  //       formData.append("crewImage", selectedFile);
-  //     }
-
-  //     await axios.patch(`http://localhost:8080/api/crew/${crewNo}`, formData, {
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem("refreshToken")}`,
-  //         "Content-Type": "multipart/form-data",
-  //       },
-  //     });
-
-  //     alert("모임이 수정되었습니다.");
-  //     navigate(`/crew/${crewNo}/detail`);
-  //   } catch (err) {
-  //     console.error("Error updating crew:", err.message);
-  //     alert("모임 수정에 실패했습니다.");
-  //   }
-  // };
-
   const handleSubmit = async () => {
     if (!crew.crewName.trim() || !crew.crewIntro.trim()) {
       alert("모임명과 소개를 모두 입력해주세요.");
@@ -245,7 +196,7 @@ export default function CrewEdit() {
 
     try {
       const response = await axios.put(
-        `http://localhost:8080/api/crew/${crewNo}`,
+        `/crew/${crewNo}`,
         {
           crewNo: crewNo,
           crewName: crew.crewName,
@@ -272,201 +223,228 @@ export default function CrewEdit() {
       alert("모임 수정에 실패했습니다.");
     }
   };
+  const boxStyle = {
+    width: "100%",
+    maxWidth: "380px",
+    padding: "0 16px",
+    margin: "0 auto 24px",
+  };
 
   return (
     <>
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
       <div
-        className="container d-flex flex-column align-items-center"
-        style={{
-          paddingTop: "70px",
-          paddingBottom: "80px",
-          maxWidth: "100%",
-          overflowX: window.innerWidth <= 380 ? "auto" : "unset",
-          boxSizing: "border-box",
-        }}
+        className="d-flex flex-column align-items-center"
+        style={{ paddingTop: "70px", paddingBottom: "80px" }}
       >
-        <div style={{ marginBottom: "48px", marginTop: "80px" }}>
-          <span
-            style={{ fontSize: "24px", fontWeight: "bold", color: "#111111" }}
-          >
-            모임 수정
-          </span>
-        </div>
-        <div>
-          <img
-            src={imagePreview}
-            onClick={openFileSelector}
-            className="memberProfile"
-            style={{
-              cursor: "pointer",
-            }}
-            alt="모임 이미지"
-          />
-        </div>
-        {/* <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: "none" }}
-            onChange={handleFileChange}
-          /> */}
+        <h2
+          style={{
+            margin: "60px 0 24px",
+            fontSize: "24px",
+            fontWeight: "bold",
+            color: "#111",
+          }}
+        >
+          모임 수정
+        </h2>
+
+        <img
+          src={imagePreview || "/images/default-profile.svg"}
+          onClick={openFileSelector}
+          className="memberProfile"
+          style={{
+            cursor: "pointer",
+            width: "200px",
+            height: "200px",
+            borderRadius: "50%",
+            margin: "0 auto 24px",
+          }}
+          alt="모임 이미지"
+        />
         <input
           type="file"
-          className="form-control"
-          name="crewImg"
-          accept=".png, .jpg"
-          onChange={handleFileChange}
           ref={fileInputRef}
+          accept="image/*"
           style={{ display: "none" }}
+          onChange={handleFileChange}
         />
 
-        <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
+        {/* 모임명 입력 */}
+        <div style={boxStyle}>
           <label className="label-text">모임명</label>
           <input
             className="member-input"
             name="crewName"
             value={crew.crewName}
             onChange={handleInputChange}
-            style={{
-              borderColor: crewNameError ? "#dc3545" : "#ced4da",
-            }}
+            style={{ borderColor: crewNameError ? "#dc3545" : "#ced4da" }}
           />
           {crewNameError && (
-            <div className="text-danger" style={{ marginTop: "4px" }}>
+            <div className="text-danger" style={{ fontSize: "14px" }}>
               {crewNameError}
             </div>
           )}
         </div>
-        <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
+
+        {/* 모임 소개 */}
+        <div style={boxStyle}>
           <label className="label-text">모임 소개</label>
           <textarea
-            style={{ width: "360px", height: "300px", margin: "0 auto" }}
+            style={{
+              height: "300px",
+              borderColor: crewIntroError ? "#dc3545" : "#ced4da",
+            }}
+            className="member-input"
+            rows="20"
             name="crewIntro"
             value={crew.crewIntro}
-            rows="20"
             onChange={handleInputChange}
           />
+          {crewIntroError && (
+            <div className="text-danger" style={{ fontSize: "14px" }}>
+              {crewIntroError}
+            </div>
+          )}
         </div>
 
-        <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
+        <div style={boxStyle}>
           <label className="label-text">활동 지역</label>
-          <div>
-            <button
-              className="w-100 bg-white border border-1 ps-3 py-2 d-flex justify-content-between align-items-center"
+          <button
+            className="w-100 bg-white border border-1 ps-3 py-2 d-flex justify-content-between align-items-center"
+            style={{
+              borderRadius: "8px",
+              color: "#111111",
+              borderColor: "#EBEBEB",
+            }}
+            onClick={() => setIsOpenLocationRef(!isOpenLocationRef)}
+          >
+            <div className="d-flex align-items-center gap-2">
+              {location.area || "지역을 선택하세요"}
+            </div>
+            <RiArrowDropDownLine size={22} />
+          </button>
+
+          {isOpenLocationRef && (
+            <div
+              ref={locationRef}
+              className="d-flex flex-column bg-white p-4 position-absolute shadow-lg"
               style={{
                 borderRadius: "8px",
-                color: "#111111",
-                borderColor: "#EBEBEB",
+                width: "380px",
+                zIndex: 1000,
               }}
-              // onClick={() => setIsOpenLocationRef(true)}
-              onClick={() => setIsOpenLocationRef(!isOpenLocationRef)}
             >
-              <div className="d-flex align-items-center gap-2">
-                {location.area}
-              </div>
-              <RiArrowDropDownLine size={22} />
-            </button>
-            {isOpenLocationRef && (
-              <div
-                ref={locationRef}
-                className="d-flex flex-column bg-white p-4 position-absolute shadow-lg"
-                style={{ borderRadius: "8px" }}
-              >
-                <span className="mb-4">지역</span>
-                <div className="d-flex">
-                  <div
-                    className="d-flex flex-column overflow-auto"
-                    style={{ height: "300px" }}
-                  >
-                    {locationList.map((v, i) => (
-                      <button
-                        key={i}
-                        className={`text-start border-0 ${
-                          city === v.city ? "bg-primary text-white" : "bg-white"
-                        } ps-2 pe-4 py-2`}
-                        style={{
-                          fontSize: "14px",
-                          borderRadius: "8px",
-                        }}
-                        onClick={() => setCity(v.city)}
-                      >
-                        {v.city}
-                      </button>
-                    ))}
-                  </div>
+              <span className="mb-2">지역</span>
+              <div className="d-flex">
+                {/* 시/도 */}
+                <div
+                  className="d-flex flex-column overflow-auto"
+                  style={{ height: "300px" }}
+                >
+                  {/* {locationList.map((loc, i) => (
+                    <button
+                      key={i}
+                      className={`text-start border-0 ${
+                        city === loc.city ? "bg-primary text-white" : "bg-white"
+                      } ps-2 py-2`}
+                      style={{ fontSize: "14px", borderRadius: "8px" }}
+                      onClick={() => setLocation({ ...location, city: loc.city })}
+                    >
+                      {loc.city}
+                    </button>
+                  ))}
+                </div> */}
+                  {locationList.map((v, i) => (
+                    <button
+                      key={i}
+                      className={`text-start border-0 ${
+                        city === v.city ? "bg-primary text-white" : "bg-white"
+                      } ps-2 pe-4 py-2`}
+                      style={{
+                        fontSize: "14px",
+                        borderRadius: "8px",
+                      }}
+                      onClick={() => setCity(v.city)}
+                    >
+                      {v.city}
+                    </button>
+                  ))}
+                </div>
 
-                  {/* 지역 목록 */}
-                  <div
-                    className="d-flex flex-column overflow-auto"
-                    style={{ width: "160px", height: "300px" }}
-                  >
-                    {areaList.map((v, i) => (
-                      <button
-                        key={i}
-                        className={`text-start border-0 ${
-                          location.area === v
-                            ? "bg-primary text-white"
-                            : "bg-white"
-                        } ps-2 pe-4 py-2`}
-                        style={{
-                          fontSize: "14px",
-                          borderRadius: "8px",
-                        }}
-                        onClick={() => {
-                          setLocation({
-                            city,
-                            area: v,
-                          });
-                          setIsOpenLocationRef(false);
-                        }}
-                      >
-                        {v}
-                      </button>
-                    ))}
-                  </div>
+                {/* 구/군 */}
+                <div
+                  className="d-flex flex-column overflow-auto"
+                  style={{ width: "160px", height: "300px" }}
+                >
+                  {/* {areaList.map((area, i) => (
+                    <button
+                      key={i}
+                      className={`text-start border-0 ${
+                        location.area === area
+                          ? "bg-primary text-white"
+                          : "bg-white"
+                      } ps-2 py-2`}
+                      style={{ fontSize: "14px", borderRadius: "8px" }}
+                      onClick={() => handleLocationSelect(area)}
+                    >
+                      {area}
+                    </button>
+                  ))} */}
+                  {areaList.map((v, i) => (
+                    <button
+                      key={i}
+                      className={`text-start border-0 ${
+                        location.area === v
+                          ? "bg-primary text-white"
+                          : "bg-white"
+                      } ps-2 pe-4 py-2`}
+                      style={{
+                        fontSize: "14px",
+                        borderRadius: "8px",
+                      }}
+                      onClick={() => {
+                        setLocation({
+                          city,
+                          area: v,
+                        });
+                        setIsOpenLocationRef(false);
+                      }}
+                    >
+                      {v}
+                    </button>
+                  ))}
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
+        {/* 관심사 */}
+        <div style={boxStyle}>
           <label className="label-text">관심사</label>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "8px",
-              marginBottom: "24px",
-            }}
-          >
-            {categories.map((like) => (
+          <div className="d-flex gap-2 flex-wrap">
+            {categories.map((cat) => (
               <button
-                key={like}
-                className={`mbti-badge ${
-                  crew.crewCategory === like ? "active" : ""
-                }`}
-                onClick={() => handleCategoryChange(like)}
-                type="button"
+                key={cat}
+                className="btn"
+                style={{
+                  borderColor: "#F9B4ED",
+                  color: crew.crewCategory === cat ? "#FFFFFF" : "#333333",
+                  backgroundColor:
+                    crew.crewCategory === cat ? "#F9B4ED" : "#FFFFFF",
+                  borderRadius: "8px",
+                }}
+                onClick={() => handleCategoryChange(cat)}
               >
-                {like}
+                {cat}
               </button>
             ))}
           </div>
         </div>
 
-        <div style={{ width: "360px", margin: "0 auto" }}>
-          <button
-            className={isLeader ? "blue-btn" : "light-gray-btn"}
-            style={{
-              width: "100%",
-              padding: "12px",
-              fontSize: "16px",
-              fontWeight: "bold",
-            }}
-            onClick={handleSubmit}
-            disabled={!isLeader}
-          >
+        {/* 제출 버튼 */}
+        <div style={boxStyle}>
+          <button className="blue-btn" onClick={handleSubmit}>
             수정하기
           </button>
         </div>

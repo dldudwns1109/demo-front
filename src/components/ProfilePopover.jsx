@@ -30,11 +30,11 @@ export default function ProfilePopover({ memberNo, onClose }) {
 
   useEffect(() => {
     if (memberNo) {
-      axios.get(`http://localhost:8080/api/member/${memberNo}`).then((res) => {
+      axios.get(`/member/${memberNo}`).then((res) => {
         setMemberInfo(res.data);
       });
       axios
-        .get(`http://localhost:8080/api/crew/joined/${memberNo}`)
+        .get(`/crew/joined/${memberNo}`)
         .then((res) => {
           setCrewList(res.data || []);
         });
@@ -51,7 +51,7 @@ export default function ProfilePopover({ memberNo, onClose }) {
     }
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/chat/dm/${memberNo}`,
+        `/chat/dm/${memberNo}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -76,7 +76,7 @@ export default function ProfilePopover({ memberNo, onClose }) {
     }
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/chat/dm",
+        "/chat/dm",
         {
           targetNo: memberNo,
           content: dmMessage,
@@ -115,7 +115,7 @@ export default function ProfilePopover({ memberNo, onClose }) {
       >
         {/* 프로필 이미지 */}
         <img
-          src={`http://localhost:8080/api/member/image/${memberNo}`}
+          src={`/member/image/${memberNo}`}
           alt="프로필"
           className="rounded-circle"
           style={{ width: "3.5rem", height: "3.5rem", objectFit: "cover" }}
@@ -225,7 +225,7 @@ export default function ProfilePopover({ memberNo, onClose }) {
               }}
             >
               <img
-                src={`http://localhost:8080/api/crew/image/${crew.crewNo}`}
+                src={`/crew/image/${crew.crewNo}`}
                 className="rounded-circle me-2"
                 style={{ width: "3rem", height: "3rem", objectFit: "cover" }}
               />

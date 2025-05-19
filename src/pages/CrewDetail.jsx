@@ -23,6 +23,7 @@ import "../css/CrewDetail.css";
 import MeetingCard from "../components/MeetingCard";
 import { windowWidthState } from "../utils/storage";
 import ProfilePopover from "../components/ProfilePopover";
+import changeIcon from "../utils/changeIcon";
 
 export default function CrewDetail() {
   const navigate = useNavigate();
@@ -83,7 +84,7 @@ export default function CrewDetail() {
   /* 모임 데이터 불러오기 */
   const fetchCrewData = async () => {
     try {
-      const res = await axios.get(`http://localhost:8080/api/crew/${crewNo}`);
+      const res = await axios.get(`/crew/${crewNo}`);
       setCrewData(res.data);
     } catch (err) {
       console.error("모임 데이터 불러오기 실패:", err.message);
@@ -96,7 +97,7 @@ export default function CrewDetail() {
 
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/crew/findLikeGroup/${userNo}`,
+        `/crew/findLikeGroup/${userNo}`,
         { headers: getAuthHeaders() }
       );
 
@@ -126,12 +127,12 @@ export default function CrewDetail() {
 
     try {
       if (isLiked) {
-        await axios.delete(`http://localhost:8080/api/crew/deleteLike`, {
+        await axios.delete(`/crew/deleteLike`, {
           data: payload,
           headers: getAuthHeaders(),
         });
       } else {
-        await axios.post(`http://localhost:8080/api/crew/updateLike`, payload, {
+        await axios.post(`/crew/updateLike`, payload, {
           headers: getAuthHeaders(),
         });
       }
@@ -146,7 +147,7 @@ export default function CrewDetail() {
   const fetchMembers = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/crewmember/${crewNo}/members`
+        `/crewmember/${crewNo}/members`
       );
 
       const fetchedMembers = Array.isArray(response.data) ? response.data : [];
@@ -175,7 +176,7 @@ export default function CrewDetail() {
       try {
         const headers = getAuthHeaders();
         const leaderRes = await axios.get(
-          `http://localhost:8080/api/crewmember/${crewNo}/leader`,
+          `/crewmember/${crewNo}/leader`,
           { headers }
         );
         setIsLeader(leaderRes.data);
@@ -202,7 +203,7 @@ export default function CrewDetail() {
 
       const authHeader = `Bearer ${token.trim()}`;
       const response = await axios.post(
-        `http://localhost:8080/api/crewmember/${crewNo}/join`,
+        `/crewmember/${crewNo}/join`,
         { chatContent: joinMessage },
         {
           headers: {
@@ -263,7 +264,7 @@ export default function CrewDetail() {
     const fetchCrewData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/crew/${crewNo}`
+          `/crew/${crewNo}`
         );
         setCrewData(response.data);
       } catch (err) {
@@ -274,7 +275,7 @@ export default function CrewDetail() {
     const fetchMeetingCount = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/meeting/list/${crewNo}`
+          `/meeting/list/${crewNo}`
         );
         setMeetingList(response.data);
         setMeetingCount(response.data.length); // ✅ 여기서 count 설정
@@ -298,24 +299,18 @@ export default function CrewDetail() {
 
         // 모임장 여부 확인
         const leaderRes = await axios.get(
-          `http://localhost:8080/api/crewmember/${crewNo}/leader`,
+          `/crewmember/${crewNo}/leader`,
           { headers }
         );
         setIsLeader(leaderRes.data);
 
         // 모임원 여부 확인
         const memberRes = await axios.get(
-          `http://localhost:8080/api/crewmember/${crewNo}/member`,
+          `/crewmember/${crewNo}/member`,
           { headers }
         );
         setIsMember(memberRes.data);
 
-        // 찜 여부 확인
-        // const likeRes = await axios.get(
-        //   `http://localhost:8080/api/crewmember/${crewNo}/like`,
-        //   { headers }
-        // );
-        // setIsLiked(likeRes.data);
       } catch (err) {
         console.error("Error fetching member status:", err.message);
       }
@@ -343,7 +338,7 @@ export default function CrewDetail() {
     try {
       const headers = getAuthHeaders();
       const response = await axios.delete(
-        `http://localhost:8080/api/crewmember/${crewNo}/leave`,
+        `/crewmember/${crewNo}/leave`,
         { headers }
       );
 
@@ -369,7 +364,7 @@ export default function CrewDetail() {
 
     try {
       const res = await axios.delete(
-        `http://localhost:8080/api/crewmember/${crewNo}/kick/${memberNo}`,
+        `/crewmember/${crewNo}/kick/${memberNo}`,
         {
           headers: getAuthHeaders(),
         }
@@ -430,7 +425,7 @@ export default function CrewDetail() {
     const fetchUserNickname = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/member/${userNo}/nickname`
+          `/member/${userNo}/nickname`
         );
         setUserNickname(response.data);
       } catch (err) {
@@ -458,7 +453,7 @@ export default function CrewDetail() {
 
       console.log("신고 전송 데이터:", payload);
 
-      await axios.post("http://localhost:8080/api/report", payload);
+      await axios.post("/report", payload);
 
       window.alert("신고가 접수되었습니다.");
       setReportMessage("");
@@ -471,13 +466,15 @@ export default function CrewDetail() {
 
   return (
     <div className="vh-100">
-      <Header
-        loginState={login ? "loggined" : "login"}
-        category={category}
-        setCategory={setCategory}
-        location={location}
-        setLocation={setLocation}
-      />
+      <div style={{ position: "relative", zIndex: 1100 }}>
+        <Header
+          loginState={login ? "loggined" : "login"}
+          category={category}
+          setCategory={setCategory}
+          location={location}
+          setLocation={setLocation}
+        />
+      </div>
       {/* <div className="container" style={{ paddingTop: "70px" }}>
         <CrewTopNav />
       </div> */}
@@ -504,7 +501,7 @@ export default function CrewDetail() {
               }}
             >
               <img
-                src={`http://localhost:8080/api/crew/image/${crewNo}`}
+                src={`/crew/image/${crewNo}`}
                 alt="Crew"
                 className="crew-image"
               />
@@ -607,6 +604,7 @@ export default function CrewDetail() {
                   marginBottom: "2rem",
                 }}
               >
+                {changeIcon(crewData?.crewCategory)}
                 <span>{crewData?.crewCategory}</span> ·
                 <span style={{ display: "flex", alignItems: "center" }}>
                   <FaMapMarkerAlt
@@ -805,7 +803,7 @@ export default function CrewDetail() {
                             }}
                           >
                             <img
-                              src={`http://localhost:8080/api/member/image/${member.memberNo}`}
+                              src={`/member/image/${member.memberNo}`}
                               alt="프로필"
                               style={{
                                 width: "40px",
@@ -905,7 +903,7 @@ export default function CrewDetail() {
                     >
                       {/* 이미지 */}
                       <img
-                        src={`http://localhost:8080/api/member/image/${member.memberNo}`}
+                        src={`/member/image/${member.memberNo}`}
                         alt="프로필"
                         style={{
                           width: "50px",

@@ -34,7 +34,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await axios.get("http://localhost:8080/api/board/joinboard");
+      const res = await axios.get("/board/joinboard");
       setJoinBoardData([...res.data]);
     };
     fetchData();
@@ -54,7 +54,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await axios.post("http://localhost:8080/api/crew/search", {
+      const res = await axios.post("/crew/search", {
         memberNo: userNo,
         category,
         location: `${location.city} ${location.area}`,
@@ -68,7 +68,7 @@ export default function Home() {
     if (userNo) {
       const fetchData = async () => {
         const res = await axios.get(
-          `http://localhost:8080/api/crew/findLikedGroup/${userNo}`
+          `/crew/findLikedGroup/${userNo}`
         );
         setLikedGroupData([...res.data]);
       };

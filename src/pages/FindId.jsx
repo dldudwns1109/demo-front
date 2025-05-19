@@ -25,7 +25,7 @@ export default function FindId() {
       }
 
       const res = await axios.get(
-        `http://localhost:8080/api/member/memberEmail/${memberEmail}`
+        `/member/memberEmail/${memberEmail}`
       );
 
       if (res.data === "") {

@@ -84,7 +84,7 @@ export default function MeetingEdit() {
   const loadMeetingData = useCallback(async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/meeting/${meetingNo}`
+        `/meeting/${meetingNo}`
       );
       const data = res.data;
 
@@ -95,7 +95,7 @@ export default function MeetingEdit() {
         meetingPrice: data.meetingPrice.toLocaleString(), // 또는 숫자 그대로 유지
         meetingLimit: data.meetingLimit,
       });
-      setPreviewUrl(`http://localhost:8080/api/meeting/image/${meetingNo}`);
+      setPreviewUrl(`/meeting/image/${meetingNo}`);
 
       // ✅ 모임장 여부 판단
       setIsLeader(data.meetingOwnerNo === userNo);
@@ -141,7 +141,7 @@ export default function MeetingEdit() {
 
     try {
       await axios.put(
-        `http://localhost:8080/api/meeting/${meetingNo}`,
+        `/meeting/${meetingNo}`,
         formData,
         {
           headers: {

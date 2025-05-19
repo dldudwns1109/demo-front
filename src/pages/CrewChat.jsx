@@ -46,13 +46,13 @@ export default function CrewChat() {
   useEffect(() => {
     const fetchData = async () => {
       const res = await axios.get(
-        `http://localhost:8080/api/chat/crew/${crewNo}`
+        `/chat/crew/${crewNo}`
       );
       setCurrRoom(res.data);
     };
     const checkCrewMember = async () => {
       const res = await axios.get(
-        `http://localhost:8080/api/crewmember/${crewNo}/member`,
+        `/crewmember/${crewNo}/member`,
         {
           headers: {
             Authorization: accessToken,
@@ -76,7 +76,7 @@ export default function CrewChat() {
   useEffect(() => {
     const fetchData = async () => {
       const res = await axios.get(
-        `http://localhost:8080/api/chat/messages/${currRoom}`
+        `/chat/messages/${currRoom}`
       );
       setMessages(res.data);
     };
@@ -325,7 +325,7 @@ export default function CrewChat() {
                                 marginBottom:
                                   windowWidth > 1024 ? "0px" : "12px",
                               }}
-                              src={`http://localhost:8080/api/member/image/${message.accountNo}`}
+                              src={`/member/image/${message.accountNo}`}
                               width={windowWidth > 1024 ? 64 : 48}
                               height={windowWidth > 1024 ? 64 : 48}
                             />

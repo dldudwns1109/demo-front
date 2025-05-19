@@ -25,7 +25,7 @@ export default function JoinBoardWrite() {
     "음악",
     "게임",
     "공연",
-    "자기개발",
+    "자기계발",
     "요리",
   ];
 
@@ -34,7 +34,7 @@ export default function JoinBoardWrite() {
     const fetchProfile = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8080/api/member/mypage/${userNo}`
+          `/member/mypage/${userNo}`
         );
         setProfile(res.data);
       } catch (err) {
@@ -54,24 +54,6 @@ export default function JoinBoardWrite() {
     fetchProfile();
   }, [navigate]);
 
-  // useEffect(() => {
-  //   const fetchProfile = async () => {
-  //     try {
-  //       const res = await axios.get("http://localhost:8080/api/profile");
-  //       setProfile(res.data);
-  //     } catch (err) {
-  //       console.error(err);
-  //       setProfile({
-  //         boardWriterProfileUrl: "http://localhost:8080/api/profile",
-  //         boardWriterNickname: "테스트유저",
-  //         boardWriterGender: "M",
-  //         boardWriterBirth: "1995-08-15",
-  //         boardWriterMbti: "ENTP",
-  //       });
-  //     }
-  //   };
-  //   fetchProfile();
-  // }, [navigate]);
 
   const handleSubmit = async () => {
     if (!selectedCategory || !boardTitle.trim() || !boardContent.trim()) {
@@ -79,7 +61,7 @@ export default function JoinBoardWrite() {
       return;
     }
     try {
-      await axios.post("http://localhost:8080/api/board", {
+      await axios.post("/board", {
         boardCategory: selectedCategory,
         boardTitle,
         boardContent,
@@ -95,11 +77,7 @@ export default function JoinBoardWrite() {
 
   return (
     <>
-      <Header
-        loginState={`${login ? "loggined" : "login"}`}
-        location={location}
-        setLocation={setLocation}
-      />
+      <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
       <div
         className="container"
         style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
@@ -118,7 +96,7 @@ export default function JoinBoardWrite() {
         {profile && (
           <div className="d-flex align-items-center mb-4">
             <img
-              src={`http://localhost:8080/api/member/image/${userNo}`}
+              src={`/member/image/${userNo}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{

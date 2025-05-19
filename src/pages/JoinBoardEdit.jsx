@@ -27,7 +27,7 @@ export default function JoinBoardEdit() {
     "음악",
     "게임",
     "공연",
-    "자기개발",
+    "자기계발",
     "요리",
   ];
 
@@ -36,7 +36,7 @@ export default function JoinBoardEdit() {
     const fetchBoard = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8080/api/board/${boardNo}`
+          `/board/${boardNo}`
         );
         setBoard({
           boardTitle: res.data.boardTitle,
@@ -60,28 +60,6 @@ export default function JoinBoardEdit() {
     fetchBoard();
   }, [boardNo, navigate, userNo]);
 
-  // 프로필 불러오기
-  // useEffect(() => {
-  //   const fetchProfile = async () => {
-  //     try {
-  //       // 실제 프로필 불러오기 코드 (주석 해제 시 사용)
-  //       // const res = await axios.get("http://localhost:8080/api/profile");
-  //       // setProfile(res.data);
-
-  //       // 더미 프로필 데이터
-  //       setProfile({
-  //         boardWriterProfileUrl: "/images/default-profile.png",
-  //         boardWriterNickname: "테스트유저",
-  //         boardWriterGender: "M",
-  //         boardWriterBirth: "1995-08-15",
-  //         boardWriterMbti: "ENTP",
-  //       });
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-  //   fetchProfile();
-  // }, []);
 
   // 프로필 불러오기
   useEffect(() => {
@@ -93,7 +71,7 @@ export default function JoinBoardEdit() {
 
       try {
         const res = await axios.get(
-          `http://localhost:8080/api/member/mypage/${userNo}`
+          `/member/mypage/${userNo}`
         );
         setProfile(res.data);
       } catch (err) {
@@ -114,7 +92,7 @@ export default function JoinBoardEdit() {
       return;
     }
     try {
-      await axios.put(`http://localhost:8080/api/board/${boardNo}`, {
+      await axios.put(`/board/${boardNo}`, {
         boardTitle: board.boardTitle,
         boardContent: board.boardContent,
         boardCategory: board.boardCategory,
@@ -147,7 +125,7 @@ export default function JoinBoardEdit() {
         {profile && (
           <div className="d-flex align-items-center mb-4">
             <img
-              src={`http://localhost:8080/api/member/image/${userNo}`}
+              src={`/member/image/${userNo}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{ width: "3rem", height: "3rem", objectFit: "cover" }}

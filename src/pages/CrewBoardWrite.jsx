@@ -39,7 +39,7 @@ export default function CrewBoardWrite() {
       try {
         const headers = getAuthHeaders();
         const res = await axios.get(
-          `http://localhost:8080/api/crewmember/${crewNo}/member`,
+          `/crewmember/${crewNo}/member`,
           { headers }
         );
         
@@ -61,7 +61,7 @@ export default function CrewBoardWrite() {
     const fetchProfile = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8080/api/member/mypage/${userNo}`
+          `/member/mypage/${userNo}`
         );
         setProfile(res.data);
       } catch (err) {
@@ -86,7 +86,7 @@ export default function CrewBoardWrite() {
     try {
       const headers = getAuthHeaders();
       await axios.post(
-        "http://localhost:8080/api/board",
+        "/board",
         {
           boardCrewNo: crewNo,
           boardTitle,
@@ -125,7 +125,7 @@ export default function CrewBoardWrite() {
         {profile && (
           <div className="d-flex align-items-center mb-4">
             <img
-              src={`http://localhost:8080/api/member/image/${userNo}`}
+              src={`/member/image/${userNo}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{

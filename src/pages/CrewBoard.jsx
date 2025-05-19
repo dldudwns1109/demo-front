@@ -52,7 +52,7 @@ export default function CrewBoard() {
       try {
         const headers = getAuthHeaders();
         const res = await axios.get(
-          `http://localhost:8080/api/crewmember/${crewNo}/member`,
+          `/crewmember/${crewNo}/member`,
           { headers }
         );
         setIsMember(res.data);
@@ -68,7 +68,7 @@ export default function CrewBoard() {
   useEffect(() => {
     const fetchCrewName = async () => {
       try {
-        const res = await axios.get(`http://localhost:8080/api/crew/${crewNo}`);
+        const res = await axios.get(`/crew/${crewNo}`);
         setCrewName(res.data.crewName);
       } catch (err) {
         console.error("크루 이름 불러오기 실패", err);
@@ -77,54 +77,12 @@ export default function CrewBoard() {
     fetchCrewName();
   }, [crewNo]);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const res = await axios.get(
-  //         `http://localhost:8080/api/board/crew/${crewNo}`,
-  //         {
-  //           params:
-  //             selectedCategory !== "전체" ? { category: selectedCategory } : {},
-  //         }
-  //       );
-  //       setBoardList(res.data);
-  //       setVisibleCount(4);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-  //   fetchData();
-  // }, [crewNo, selectedCategory]);
-  // useEffect(() => {
-  //   const fetchBoardList = async () => {
-  //     try {
-  //       const res = await axios.get(
-  //         `http://localhost:8080/api/board/crew/${crewNo}`,
-  //         {
-  //           params:
-  //             selectedCategory !== "전체" ? { category: selectedCategory } : {},
-  //         }
-  //       );
-
-  //       const updatedBoardList = res.data.map((board) => ({
-  //         ...board,
-  //         boardReply: replyCounts[board.boardNo] ?? board.boardReply,
-  //       }));
-
-  //       setBoardList(updatedBoardList);
-  //       setVisibleCount(4);
-  //     } catch (err) {
-  //       console.error("게시글 불러오기 에러:", err);
-  //     }
-  //   };
-
-  //   fetchBoardList();
-  // }, [crewNo, selectedCategory, replyCounts, isMember]);
+  
   useEffect(() => {
     const fetchBoardList = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8080/api/board/crew/${crewNo}`,
+          `/board/crew/${crewNo}`,
           {
             params:
               selectedCategory !== "전체" ? { category: selectedCategory } : {},
@@ -135,7 +93,7 @@ export default function CrewBoard() {
           res.data.map(async (board) => {
             try {
               const replyCountRes = await axios.get(
-                `http://localhost:8080/api/reply/count/${board.boardNo}`
+                `/reply/count/${board.boardNo}`
               );
 
               return {
@@ -183,13 +141,16 @@ export default function CrewBoard() {
   return (
     <div className="vh-100">
       {/* 헤더 */}
+      <div style={{ position: "relative", zIndex: 1100 }}>
+
       <Header
         loginState={`${login ? "loggined" : "login"}`}
         category={category}
         setCategory={setCategory}
         location={location}
         setLocation={setLocation}
-      />
+        />
+        </div>
 
       <div
         style={{
@@ -274,7 +235,7 @@ export default function CrewBoard() {
                   <div className="d-flex align-items-center mb-3">
                     {/* 프로필 이미지 클릭 시 팝오버 */}
                     <img
-                      src={`http://localhost:8080/api/member/image/${board.boardWriter}`}
+                      src={`/member/image/${board.boardWriter}`}
                       alt="프로필"
                       className="rounded-circle me-3"
                       style={{
@@ -363,7 +324,7 @@ export default function CrewBoard() {
                 >
                   <div className="d-flex align-items-center mb-3">
                     <img
-                      src={`http://localhost:8080/api/member/image/${userNo}`}
+                      src={`/member/image/${userNo}`}
                       alt="프로필"
                       className="rounded-circle me-3"
                       style={{

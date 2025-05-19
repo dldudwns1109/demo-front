@@ -14,7 +14,7 @@ export default function CrewCreateFinish() {
     if (!crewNo) return;
 
     axios
-      .get(`http://localhost:8080/api/crew/${crewNo}`)
+      .get(`/crew/${crewNo}`)
       .then((res) => setCrew(res.data))
       .catch(() => alert("모임 정보를 불러오지 못했습니다."));
   }, [crewNo]);
@@ -45,7 +45,7 @@ export default function CrewCreateFinish() {
           {crew ? (
             <>
               <img
-                src={`http://localhost:8080/api/crew/image/${crewNo}`}
+                src={`/crew/image/${crewNo}`}
                 className="shadow-sm"
                 style={{ marginTop: "48px", borderRadius: "999px" }}
                 width={200}

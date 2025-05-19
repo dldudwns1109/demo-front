@@ -30,7 +30,7 @@ export default function Mypage() {
   const loadMember = useCallback(async () => {
     if (!userNo) return;
     const res = await axios.get(
-      `http://localhost:8080/api/member/mypage/${userNo}`
+      `/member/mypage/${userNo}`
     );
     setMember(res.data);
   }, [userNo]);
@@ -38,7 +38,7 @@ export default function Mypage() {
   const loadCreateList = useCallback(async () => {
     if (!userNo) return;
     const res = await axios.get(
-      `http://localhost:8080/api/crew/findCreatedGroup/${userNo}`
+      `/crew/findCreatedGroup/${userNo}`
     );
     const list = Array.isArray(res.data) ? res.data : [];
     setCreateList(list);
@@ -47,7 +47,7 @@ export default function Mypage() {
   const loadJoinList = useCallback(async () => {
     if (!userNo) return;
     const res = await axios.get(
-      `http://localhost:8080/api/crew/findJoinedGroup/${userNo}`
+      `/crew/findJoinedGroup/${userNo}`
     );
     const list = Array.isArray(res.data) ? res.data : [];
     setJoinList(list);
@@ -55,7 +55,7 @@ export default function Mypage() {
 
   const loadLikeGroupList = useCallback(async () => {
     const res = await axios.get(
-      `http://localhost:8080/api/crew/findLikeGroup/${userNo}`
+      `/crew/findLikeGroup/${userNo}`
     );
     const list = Array.isArray(res.data) ? res.data : [];
     setLikeList(list);
@@ -63,7 +63,7 @@ export default function Mypage() {
 
   const loadMeetingList = useCallback(async () => {
     const res = await axios.get(
-      `http://localhost:8080/api/meeting/crew/${userNo}`
+      `/meeting/crew/${userNo}`
     );
     console.log(res.data);
     const list = Array.isArray(res.data) ? res.data : [];
@@ -95,8 +95,8 @@ export default function Mypage() {
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
 
       {login ? (
-        <div style={{ paddingTop: "70px" }}>
-          <div>
+        <div style={{ paddingTop: "70px"}}>
+          <div style={{ marginTop: "48px" }}>
             <ProfileCard member={member} />
           </div>
 

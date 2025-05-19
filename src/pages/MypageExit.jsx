@@ -20,7 +20,7 @@ export default function MypageExit() {
   const checkPassword = async () => {
     if (userNo) {
       const res = await axios.post(
-        "http://localhost:8080/api/member/checkPassword",
+        "/member/checkPassword",
         {
           memberNo: userNo,
           memberPw: password,
@@ -156,7 +156,7 @@ export default function MypageExit() {
               onClick={async () => {
                 try {
                   await axios.delete(
-                    `http://localhost:8080/api/member/${userNo}`
+                    `/member/${userNo}`
                   );
                 } catch (e) {
                 } finally {

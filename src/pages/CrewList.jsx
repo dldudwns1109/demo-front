@@ -38,7 +38,7 @@ export default function CrewList() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await axios.post("http://localhost:8080/api/crew/search", {
+      const res = await axios.post("/crew/search", {
         memberNo: userNo,
         category,
         location: `${location.city} ${location.area}`,

@@ -47,7 +47,7 @@ export default function Signin() {
 
       try {
         const res = await axios.post(
-          "http://localhost:8080/api/member/signin",
+          "/member/signin",
           {
             memberId,
             memberPw,

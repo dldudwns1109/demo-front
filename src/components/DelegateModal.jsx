@@ -54,7 +54,7 @@ export default function MeetingDelegateModal({
               <img
                 src={
                   member.attachmentNo
-                    ? `http://localhost:8080/api/attachment/${member.attachmentNo}`
+                    ? `/attachment/${member.attachmentNo}`
                     : "/images/default-profile.png"
                 }
                 alt="profile"

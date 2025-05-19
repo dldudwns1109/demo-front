@@ -58,7 +58,7 @@ function App() {
         ] = `Bearer ${refreshToken}`;
 
         const res = await axios.post(
-          "http://localhost:8080/api/member/refresh"
+          "/member/refresh"
         );
 
         setUserNo(res.data.memberNo);

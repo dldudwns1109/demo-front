@@ -11,9 +11,9 @@ import { ImSpoonKnife } from "react-icons/im";
 export default function changeIcon(crewCategory) {
   switch (crewCategory) {
     case "스포츠":
-      return <IoPeople size={18} color="#6C757D" />;
-    case "사교":
       return <MdOutlineSportsBaseball size={18} color="#6C757D" />;
+      case "사교":
+      return <IoPeople size={18} color="#6C757D" />;
     case "독서":
       return <FaBookOpen size={18} color="#6C757D" />;
     case "여행":

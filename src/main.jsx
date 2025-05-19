@@ -1,12 +1,14 @@
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { RecoilRoot } from "recoil";
-import axios from "axios";
 import App from "./App.jsx";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootswatch/dist/cosmo/bootstrap.min.css";
 import "./index.css";
+
+import axios from "axios";
+axios.defaults.baseURL = import.meta.env.VITE_AJAX_BASE_URL;
 
 // 요청 헤더에 현재 페이지의 주소를 담아서 전송
 axios.interceptors.request.use((config) => {

@@ -30,7 +30,7 @@ export default function MypageEditPassword() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/member/checkPassword",
+        "/member/checkPassword",
         {
           memberNo: userNo,
           memberPw: originPw,
@@ -69,7 +69,7 @@ export default function MypageEditPassword() {
 
     try {
       const res = await axios.patch(
-        "http://localhost:8080/api/member/changePw",
+        "/member/changePw",
         {
           memberNo: userNo,
           memberPw: newPw,

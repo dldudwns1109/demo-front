@@ -108,7 +108,7 @@ export default function Signup() {
       }
 
       try {
-        await axios.post("http://localhost:8080/api/member/signup", formData, {
+        await axios.post("/member/signup", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -358,7 +358,7 @@ export default function Signup() {
                   }
 
                   const res = await axios.get(
-                    `http://localhost:8080/api/member/checkDuplicatedId/${member.memberId}`
+                    `/member/checkDuplicatedId/${member.memberId}`
                   );
                   if (res.data) {
                     setBlurMessage({
@@ -438,7 +438,7 @@ export default function Signup() {
                   }
 
                   const res = await axios.get(
-                    `http://localhost:8080/api/member/checkDuplicatedNickname/${member.memberNickname}`
+                    `/member/checkDuplicatedNickname/${member.memberNickname}`
                   );
                   if (res.data) {
                     setBlurMessage({
@@ -608,7 +608,7 @@ export default function Signup() {
                   }
 
                   const res = await axios.get(
-                    `http://localhost:8080/api/member/checkDuplicatedEmail/${member.memberEmail}`
+                    `/member/checkDuplicatedEmail/${member.memberEmail}`
                   );
                   if (res.data) {
                     setBlurMessage({

@@ -77,11 +77,10 @@
 }
 
 .member-input {
-  width: 360px;
+  width: 100%;
+  box-sizing: border-box; /* padding/border까지 100% 안에 포함 */
   height: 36px;
-  padding: 12px;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding: 8px 12px;      /* 위아래 8px, 좌우 12px */
   font-size: 14px;
   border: none;
   border-radius: 8px;
@@ -90,9 +89,9 @@
 
 .blue-btn {
   width: 100%;
-  padding: 12px;
-  padding-top: 7px;
-  padding-bottom: 7px;
+  box-sizing: border-box; /* padding/border까지 100% 안에 포함 */
+  height: 36px;
+  padding: 8px 12px; 
   background-color: #007bff;
   color: #ffffff;
   font-size: 16px;
@@ -103,9 +102,9 @@
 
 .red-btn {
   width: 100%;
-  padding: 12px;
-  padding-top: 7px;
-  padding-bottom: 7px;
+  box-sizing: border-box; /* padding/border까지 100% 안에 포함 */
+  height: 36px;
+  padding: 8px 12px; 
   background-color: #dc3545;
   color: #ffffff;
   font-size: 16px;
@@ -115,16 +114,18 @@
 }
 
 .light-gray-btn {
+  display: block;       /* 이 한 줄 추가 */
   width: 100%;
-  padding: 12px;
-  padding-top: 7px;
-  padding-bottom: 7px;
+  box-sizing: border-box;
+  height: 36px;
+  padding: 8px 12px;
   background-color: #f1f3f5;
   color: #6c757d;
   font-size: 16px;
   font-weight: bold;
   border: none;
   border-radius: 8px;
+  text-align: center;   /* 가운데 정렬 */
 }
 
 .mbti-badge.active {

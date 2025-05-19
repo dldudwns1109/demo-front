@@ -63,28 +63,28 @@ export default function CrewCreate() {
 
   useEffect(() => {
     const fullLocation = `${location.city} ${location.area}`;
-    setCrew((prev) => ({ 
-      ...prev, 
-      crewLocation: fullLocation 
+    setCrew((prev) => ({
+      ...prev,
+      crewLocation: fullLocation,
     }));
 
     if (!location.area.trim()) {
-      setErrorMessage((prev) => ({ 
-        ...prev, 
-        crewLocation: "지역을 선택해주세요." 
+      setErrorMessage((prev) => ({
+        ...prev,
+        crewLocation: "지역을 선택해주세요.",
       }));
-      setIsValid((prev) => ({ 
-        ...prev, 
-        crewLocation: false 
-      })); 
+      setIsValid((prev) => ({
+        ...prev,
+        crewLocation: false,
+      }));
     } else {
-      setErrorMessage((prev) => ({ 
-        ...prev, 
-        crewLocation: "" 
+      setErrorMessage((prev) => ({
+        ...prev,
+        crewLocation: "",
       }));
-      setIsValid((prev) => ({ 
-        ...prev, 
-        crewLocation: true 
+      setIsValid((prev) => ({
+        ...prev,
+        crewLocation: true,
       }));
     }
   }, [location]);
@@ -101,13 +101,13 @@ export default function CrewCreate() {
     const label = FIELD_LABELS[field] || field;
 
     if (!value.trim()) {
-      setErrorMessage((prev) => ({ 
-        ...prev, 
-        [field]: `${label}을(를) 입력해주세요.` 
+      setErrorMessage((prev) => ({
+        ...prev,
+        [field]: `${label}을(를) 입력해주세요.`,
       }));
-      setIsValid((prev) => ({ 
-        ...prev, 
-        [field]: false 
+      setIsValid((prev) => ({
+        ...prev,
+        [field]: false,
       }));
       return;
     }
@@ -119,9 +119,9 @@ export default function CrewCreate() {
           ...prev,
           crewName: "4~20자만 입력해주세요.",
         }));
-        setIsValid((prev) => ({ 
-          ...prev, 
-          crewName: false 
+        setIsValid((prev) => ({
+          ...prev,
+          crewName: false,
         }));
         return;
       }
@@ -133,52 +133,52 @@ export default function CrewCreate() {
           ...prev,
           crewIntro: "소개는 최소 10자 이상 입력해주세요.",
         }));
-        setIsValid((prev) => ({ 
-          ...prev, 
-          crewIntro: false 
+        setIsValid((prev) => ({
+          ...prev,
+          crewIntro: false,
         }));
         return;
       }
     }
 
-    setErrorMessage((prev) => ({ 
-      ...prev, 
-      [field]: "" 
+    setErrorMessage((prev) => ({
+      ...prev,
+      [field]: "",
     }));
-    setIsValid((prev) => ({ 
-      ...prev, 
-      [field]: true 
+    setIsValid((prev) => ({
+      ...prev,
+      [field]: true,
     }));
   }, []);
 
   const changeCrew = useCallback((e) => {
     const { name, value } = e.target;
-    setCrew((prev) => ({ 
-      ...prev, 
-      [name]: value 
+    setCrew((prev) => ({
+      ...prev,
+      [name]: value,
     }));
   }, []);
 
   const changeCrewCategory = useCallback((like) => {
-    setCrew((prev) => ({ 
-      ...prev, 
-      crewCategory: like 
+    setCrew((prev) => ({
+      ...prev,
+      crewCategory: like,
     }));
-    setErrorMessage((prev) => ({ 
-      ...prev, 
-      crewCategory: "" 
+    setErrorMessage((prev) => ({
+      ...prev,
+      crewCategory: "",
     }));
-    setIsValid((prev) => ({ 
-      ...prev, 
-      crewCategory: true 
+    setIsValid((prev) => ({
+      ...prev,
+      crewCategory: true,
     }));
   }, []);
 
   const changeCrewLimit = useCallback((e) => {
     const value = parseInt(e.target.value);
-    setCrew((prev) => ({ 
-      ...prev, 
-      crewLimit: value 
+    setCrew((prev) => ({
+      ...prev,
+      crewLimit: value,
     }));
   }, []);
 
@@ -210,13 +210,17 @@ export default function CrewCreate() {
     formData.append("attach", attach);
 
     try {
-      const res = await axios.post("http://localhost:8080/api/pay/ready", formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          "Refresh-Token": localStorage.getItem("refreshToken"),
-          "Frontend-URL": "http://localhost:5173",
-        },
-      });
+      const res = await axios.post(
+        "http://localhost:8080/api/pay/ready",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Refresh-Token": localStorage.getItem("refreshToken"),
+            "Frontend-URL": "http://localhost:5173",
+          },
+        }
+      );
 
       const redirectUrl = res.data?.next_redirect_pc_url;
       if (redirectUrl) window.location.href = redirectUrl;
@@ -227,40 +231,55 @@ export default function CrewCreate() {
     }
   }, [crew, totalPrice, attach]);
 
+  // 공통 래퍼 스타일
+  const boxStyle = {
+    width: "100%",
+    maxWidth: "380px",
+    padding: "0 16px",
+    margin: "0 auto 24px",
+  };
+
   //view
   return (
     <>
       <Header input={false} />
       <div
         className="d-flex flex-column align-items-center"
-        style={{ paddingTop: "70px", paddingBottom: "80px" }}
+        style={{ paddingTop: 70, paddingBottom: 80 }}
       >
-        <div style={{ marginBottom: "48px", marginTop: "80px" }}>
-          <span
-            style={{ fontSize: "24px", fontWeight: "bold", color: "#111111" }}
-          >
-            모임 개설
-          </span>
-        </div>
-        <div>
-          <img
-            src={previewUrl || "/images/default-profile.svg"}
-            onClick={openFileSelector}
-            className="memberProfile"
-            style={{ cursor: "pointer" }}
-          />
-        </div>
-        <input
-          type="file"
-          className="form-control"
-          name="crewImg"
-          accept=".png, .jpg"
-          onChange={handleFileChange}
-          ref={fileInputRef}
-          style={{ display: "none" }}
+        <h2
+          style={{
+            margin: "60px 0 24px",
+            fontSize: "24px",
+            fontWeight: "bold",
+            color: "#111",
+          }}
+        >
+          모임 개설
+        </h2>
+
+        <img
+          src={previewUrl || "/images/default-profile.svg"}
+          onClick={openFileSelector}
+          style={{
+            cursor: "pointer",
+            width: 200,
+            height: 200,
+            borderRadius: "50%",
+            display: "block",
+            margin: "0 auto 24px",
+          }}
         />
 
-        <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept=".png, .jpg"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+
+        <div style={boxStyle}>
           <label className="label-text">모임명</label>
           <input
             className="member-input"
@@ -269,22 +288,24 @@ export default function CrewCreate() {
             value={crew.crewName}
             onChange={changeCrew}
             onBlur={() => handleBlur("crewName", crew.crewName)}
-        />
-        <small className="text-danger">{errorMessage.crewName}</small>
-      </div>
-        <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
+          />
+          <small className="text-danger">{errorMessage.crewName}</small>
+        </div>
+
+        <div style={boxStyle}>
           <label className="label-text">모임 소개</label>
           <textarea
-            style={{ width: "360px", height: "155px", margin: "0 auto" }}
+            style={{ width: "100%", height: 155 }}
             placeholder="모임을 소개하는 글을 작성해주세요!"
             name="crewIntro"
             value={crew.crewIntro}
             onChange={changeCrew}
             onBlur={() => handleBlur("crewIntro", crew.crewIntro)}
-        />
-        <small className="text-danger">{errorMessage.crewIntro}</small>
-      </div>
-        <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
+          />
+          <small className="text-danger">{errorMessage.crewIntro}</small>
+        </div>
+
+        <div style={boxStyle}>
           <label className="label-text">활동 지역</label>
           <div>
             <button
@@ -363,7 +384,9 @@ export default function CrewCreate() {
             <small className="text-danger">{errorMessage.crewLocation}</small>
           </div>
         </div>
-        <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
+
+        {/* 관심사, 인원 수 필드도 같은 boxStyle 사용 */}
+        <div style={boxStyle}>
           <label className="label-text">관심사</label>
           <div
             style={{
@@ -376,11 +399,11 @@ export default function CrewCreate() {
             {categoryList.map((like) => (
               <button
                 key={like}
+                type="button"
                 className={`mbti-badge ${
                   crew.crewCategory === like ? "active" : ""
                 }`}
                 onClick={() => changeCrewCategory(like)}
-                type="button"
               >
                 {like}
               </button>
@@ -388,7 +411,8 @@ export default function CrewCreate() {
           </div>
           <small className="text-danger">{errorMessage.crewCategory}</small>
         </div>
-        <div style={{ width: "360px", margin: "0 auto", marginBottom: "48px" }}>
+
+        <div style={boxStyle}>
           <label className="label-text">인원 수</label>
           <p
             style={{ fontSize: "14px", color: "#6C757D", marginBottom: "8px" }}
@@ -408,24 +432,22 @@ export default function CrewCreate() {
             ))}
           </select>
           <p>
-            최종 금액
-            <span
-              className="ms-1"
-              style={{ color: "#dc3545", fontWeight: "bold" }}
-            >
+            최종 금액{" "}
+            <span style={{ color: "#dc3545", fontWeight: "bold" }}>
               [{totalPrice.toLocaleString()}]
             </span>
             원
           </p>
         </div>
-        <div style={{ width: "360px", margin: "0 auto" }}>
-        <button
-          className={isTotalValid ? "blue-btn" : "light-gray-btn"}
-          disabled={!isTotalValid}
-          onClick={createCrew}
-        >
-          모임개설하기
-        </button>
+
+        <div style={boxStyle}>
+          <button
+            className={isTotalValid ? "blue-btn" : "light-gray-btn"}
+            disabled={!isTotalValid}
+            onClick={createCrew}
+          >
+            모임개설하기
+          </button>
         </div>
       </div>
     </>

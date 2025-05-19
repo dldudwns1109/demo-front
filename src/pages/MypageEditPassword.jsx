@@ -7,6 +7,7 @@ import Header from "../components/Header";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Unauthorized from "../components/Unauthorized";
+import "../css/Mypage.css";
 
 export default function MypageEditPassword() {
   const navigate = useNavigate();
@@ -107,6 +108,14 @@ export default function MypageEditPassword() {
     );
   }
 
+  // 공통 래퍼 스타일
+  const boxStyle = {
+    width: "100%",
+    maxWidth: "380px",
+    padding: "0 16px",
+    margin: "0 auto 24px",
+  };
+
   return (
     <>
       {/* 헤더 */}
@@ -120,89 +129,61 @@ export default function MypageEditPassword() {
       />
       <div
         className="d-flex flex-column align-items-center"
-        style={{
-          paddingTop: "70px",
-          paddingLeft: "8.33%",
-          paddingRight: "8.33%",
-          paddingBottom: "80px",
-        }}
+        style={{ paddingTop: 70, paddingBottom: 80 }}
       >
-        <div
-          className="d-flex flex-column align-items-center"
+        <h2
           style={{
-            paddingLeft: "8.33%",
-            paddingRight: "8.33%",
-            paddingBottom: "80px",
+            margin: "60px 0 24px",
+            fontSize: "24px",
+            fontWeight: "bold",
+            color: "#111",
           }}
         >
-          <div
-            className="d-flex flex-column"
-            style={{ width: "360px", marginTop: "80px" }}
-          >
-            <span
-              className="fs-4 fw-bold text-center"
-              style={{ color: "#111111" }}
-            >
-              비밀번호 변경
-            </span>
-          </div>
+          비밀번호 변경
+        </h2>
 
-          <div
-            className="d-flex justify-content-center"
-            style={{ marginTop: "48px" }}
-          >
-            <div
-              style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}
-            >
-              <label className="label-text">비밀번호 입력</label>
-              <input
-                type="password"
-                className="member-input"
-                value={originPw}
-                onChange={(e) => setOriginPw(e.target.value)}
-                disabled={isVerified}
-              />
-            </div>
-          </div>
-          <div>
-            {!isVerified && (
-              <div
+        <div style={boxStyle}>
+          <label className="label-text">비밀번호 입력</label>
+          <input
+            type="password"
+            className="member-input"
+            value={originPw}
+            onChange={(e) => setOriginPw(e.target.value)}
+            disabled={isVerified}
+          />
+        </div>
+
+        <div>
+          {!isVerified && (
+            <div style={boxStyle}>
+              <button
+                type="button"
+                className="light-gray-btn"
                 style={{
-                  width: "360px",
-                  margin: "0 auto",
-                  marginBottom: "16px",
+                  backgroundColor: "#6C757D",
+                  color: "#ffffff",
                 }}
+                onClick={handleVerifyPassword}
               >
-                <button
-                  className="light-gray-btn w-100"
-                  style={{
-                    backgroundColor: "#6C757D",
-                    color: "#ffffff",
-                  }}
-                  onClick={handleVerifyPassword}
-                >
-                  현재 비밀번호 확인
-                </button>
-              </div>
-            )}
-          </div>
-          <div
-            style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}
-          >
-            <label className="label-text">새 비밀번호</label>
-            <input
-              type="password"
-              className="member-input"
-              value={newPw}
-              onChange={(e) => setNewPw(e.target.value)}
-            />
-          </div>
+                현재 비밀번호 확인
+              </button>
+            </div>
+          )}
+        </div>
+        <div style={boxStyle}>
+          <label className="label-text">새 비밀번호</label>
+          <input
+            type="password"
+            className="member-input"
+            value={newPw}
+            onChange={(e) => setNewPw(e.target.value)}
+          />
+        </div>
 
-          <div style={{ width: "360px", margin: "0 auto" }}>
-            <button className="blue-btn" onClick={changePassword}>
-              비밀번호 변경
-            </button>
-          </div>
+        <div style={boxStyle}>
+          <button className="blue-btn" onClick={changePassword}>
+            비밀번호 변경
+          </button>
         </div>
       </div>
     </>

@@ -31,9 +31,7 @@ export default function CrewBoardEdit() {
    */
   const checkMemberStatus = async () => {
     try {
-      const res = await axios.get(
-        `/crewmember/${crewNo}/member`
-      );
+      const res = await axios.get(`/crewmember/${crewNo}/member`);
       setIsMember(res.data);
     } catch (err) {
       console.error("모임원 여부 확인 실패:", err);
@@ -103,9 +101,7 @@ export default function CrewBoardEdit() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get(
-          `/member/mypage/${userNo}`
-        );
+        const res = await axios.get(`/member/mypage/${userNo}`);
         setProfile(res.data);
       } catch (err) {
         console.error("프로필 불러오기 실패:", err);
@@ -118,11 +114,11 @@ export default function CrewBoardEdit() {
   }, [userNo]);
 
   useEffect(() => {
-  if (!userNo) {
-    window.confirm("권한이 없습니다.");
-    navigate("/");
-  }
-}, [userNo]);
+    if (!userNo) {
+      window.confirm("권한이 없습니다.");
+      navigate("/");
+    }
+  }, [userNo]);
 
   /**
    * 7. 게시글 수정
@@ -153,24 +149,30 @@ export default function CrewBoardEdit() {
   };
 
   return (
-    <>
-      <Header
-        loginState={`${login ? "loggined" : "login"}`}
-        // location={location}
-        // setLocation={setLocation}
-        input={false}
-      />
-      <div className="container py-4">
+    <div className="vh-100">
+      <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
+      <div
+        style={{
+          paddingTop: "70px",
+          paddingLeft: "8.33%",
+          paddingRight: "8.33%",
+        }}
+      >
         {/* 목록으로 버튼 */}
         <div className="mb-5">
-          <Link to="/crew/board" className="btn btn-outline-secondary btn-sm">
+          <Link
+            to="/crew/board"
+            className="btn btn-outline-secondary btn-sm mt-4"
+          >
             목록으로
           </Link>
         </div>
         {profile && (
           <div className="d-flex align-items-center mb-4">
             <img
-              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${userNo}`}
+              src={`${
+                import.meta.env.VITE_AJAX_BASE_URL
+              }/member/image/${userNo}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{ width: "3rem", height: "3rem", objectFit: "cover" }}
@@ -184,26 +186,6 @@ export default function CrewBoardEdit() {
             </div>
           </div>
         )}
-
-        {/* 카테고리 선택
-        <div className="d-flex flex-wrap gap-2 mb-4">
-          {crewCategories.map((cat) => (
-            <button
-              key={cat}
-              className="btn btn-sm rounded-pill"
-              style={{
-                backgroundColor:
-                  board.boardCategory === cat ? "#F9B4ED" : "#ffffff",
-                color: board.boardCategory === cat ? "#ffffff" : "#F9B4ED",
-                border:
-                  board.boardCategory === cat ? "none" : "1px solid #F9B4ED",
-              }}
-              onClick={() => setBoard({ ...board, boardCategory: cat })}
-            >
-              {cat}
-            </button>
-          ))}
-        </div> */}
         {/* --- 카테고리 선택 --- */}
         <div className="d-flex flex-wrap gap-2 mb-4">
           {crewCategories.map((cat) => (
@@ -271,6 +253,6 @@ export default function CrewBoardEdit() {
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -10,20 +10,13 @@ import Header from "../components/Header";
 import CrewTopNav from "../components/CrewTopNav";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import {
-  FaHeart,
-  FaShareAlt,
-  FaExclamationTriangle,
-  FaMapMarkerAlt,
-  FaUsers,
-  FaCalendarAlt,
-  FaUserAlt,
-} from "react-icons/fa";
+import { FaHeart, FaMapMarkerAlt, FaUsers } from "react-icons/fa";
 import "../css/CrewDetail.css";
 import MeetingCard from "../components/MeetingCard";
 import { windowWidthState } from "../utils/storage";
 import ProfilePopover from "../components/ProfilePopover";
 import changeIcon from "../utils/changeIcon";
+import { IoHeartOutline, IoHeartSharp } from "react-icons/io5";
 
 export default function CrewDetail() {
   const navigate = useNavigate();
@@ -40,7 +33,6 @@ export default function CrewDetail() {
   // const [isCrewMember, setIsCrewMember] = useState(false);
   const [isLeader, setIsLeader] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const setShowReportInput = useState(false)[1];
   const [showJoinSheet, setShowJoinSheet] = useState(false);
   const joinSheetRef = useRef(null);
   const reportSheetRef = useRef(null);
@@ -66,7 +58,6 @@ export default function CrewDetail() {
   // 보여줄 개수 계산
   const [meetingvisibleCount, setMeetingVisibleCount] = useState(columnCount);
 
-  const [selectedMember, setSelectedMember] = useState(null);
   const [isManaging, setIsManaging] = useState(false);
 
   // windowWidth나 visibleRows가 변경되면 visibleCount 재계산
@@ -94,10 +85,9 @@ export default function CrewDetail() {
     if (!login || !userNo) return;
 
     try {
-      const res = await axios.get(
-        `/crew/findLikeGroup/${userNo}`,
-        { headers: getAuthHeaders() }
-      );
+      const res = await axios.get(`/crew/findLikeGroup/${userNo}`, {
+        headers: getAuthHeaders(),
+      });
 
       // 찜한 모임 중 현재 모임이 있는지 확인
       const likedGroups = res.data;
@@ -144,9 +134,7 @@ export default function CrewDetail() {
   //모임 멤버 목록 불러오기
   const fetchMembers = async () => {
     try {
-      const response = await axios.get(
-        `/crewmember/${crewNo}/members`
-      );
+      const response = await axios.get(`/crewmember/${crewNo}/members`);
 
       const fetchedMembers = Array.isArray(response.data) ? response.data : [];
 
@@ -173,10 +161,9 @@ export default function CrewDetail() {
     const fetchMemberStatus = async () => {
       try {
         const headers = getAuthHeaders();
-        const leaderRes = await axios.get(
-          `/crewmember/${crewNo}/leader`,
-          { headers }
-        );
+        const leaderRes = await axios.get(`/crewmember/${crewNo}/leader`, {
+          headers,
+        });
         setIsLeader(leaderRes.data);
       } catch (err) {
         console.error("Error checking leader status:", err.message);
@@ -261,9 +248,7 @@ export default function CrewDetail() {
   useEffect(() => {
     const fetchCrewData = async () => {
       try {
-        const response = await axios.get(
-          `/crew/${crewNo}`
-        );
+        const response = await axios.get(`/crew/${crewNo}`);
         setCrewData(response.data);
       } catch (err) {
         console.error("Error fetching crew data:", err.message);
@@ -272,9 +257,7 @@ export default function CrewDetail() {
 
     const fetchMeetingCount = async () => {
       try {
-        const response = await axios.get(
-          `/meeting/list/${crewNo}`
-        );
+        const response = await axios.get(`/meeting/list/${crewNo}`);
         setMeetingList(response.data);
         setMeetingCount(response.data.length); // ✅ 여기서 count 설정
       } catch (err) {
@@ -296,19 +279,16 @@ export default function CrewDetail() {
         const headers = getAuthHeaders();
 
         // 모임장 여부 확인
-        const leaderRes = await axios.get(
-          `/crewmember/${crewNo}/leader`,
-          { headers }
-        );
+        const leaderRes = await axios.get(`/crewmember/${crewNo}/leader`, {
+          headers,
+        });
         setIsLeader(leaderRes.data);
 
         // 모임원 여부 확인
-        const memberRes = await axios.get(
-          `/crewmember/${crewNo}/member`,
-          { headers }
-        );
+        const memberRes = await axios.get(`/crewmember/${crewNo}/member`, {
+          headers,
+        });
         setIsMember(memberRes.data);
-
       } catch (err) {
         console.error("Error fetching member status:", err.message);
       }
@@ -335,10 +315,9 @@ export default function CrewDetail() {
 
     try {
       const headers = getAuthHeaders();
-      const response = await axios.delete(
-        `/crewmember/${crewNo}/leave`,
-        { headers }
-      );
+      const response = await axios.delete(`/crewmember/${crewNo}/leave`, {
+        headers,
+      });
 
       if (response.data) {
         window.confirm(
@@ -361,12 +340,9 @@ export default function CrewDetail() {
     if (!confirmKick) return;
 
     try {
-      const res = await axios.delete(
-        `/crewmember/${crewNo}/kick/${memberNo}`,
-        {
-          headers: getAuthHeaders(),
-        }
-      );
+      const res = await axios.delete(`/crewmember/${crewNo}/kick/${memberNo}`, {
+        headers: getAuthHeaders(),
+      });
 
       if (res.status === 200) {
         alert("회원이 강퇴되었습니다.");
@@ -422,9 +398,7 @@ export default function CrewDetail() {
   useEffect(() => {
     const fetchUserNickname = async () => {
       try {
-        const response = await axios.get(
-          `/member/${userNo}/nickname`
-        );
+        const response = await axios.get(`/member/${userNo}/nickname`);
         setUserNickname(response.data);
       } catch (err) {
         console.error("닉네임 불러오기 실패:", err.message);
@@ -465,17 +439,8 @@ export default function CrewDetail() {
   return (
     <div className="vh-100">
       <div style={{ position: "relative", zIndex: 1100 }}>
-        <Header
-          loginState={login ? "loggined" : "login"}
-          category={category}
-          setCategory={setCategory}
-          location={location}
-          setLocation={setLocation}
-        />
+        <Header input={false} loginState={login ? "loggined" : "login"} />
       </div>
-      {/* <div className="container" style={{ paddingTop: "70px" }}>
-        <CrewTopNav />
-      </div> */}
       <div
         style={{
           position: "fixed",
@@ -488,9 +453,9 @@ export default function CrewDetail() {
         <CrewTopNav />
       </div>
 
-      <div style={{ paddingTop: "160px" }}>
-        <div className="container">
-          <div className="crew-detail-container">
+      <div style={{ paddingTop: "160px", paddingBottom: "80px" }}>
+        <div style={{ paddingLeft: "8.33%", paddingRight: "8.33%" }}>
+          <div className="crew-detail-container p-4">
             <div
               className="crew-image-section"
               style={{
@@ -499,7 +464,9 @@ export default function CrewDetail() {
               }}
             >
               <img
-                src={`${import.meta.env.VITE_AJAX_BASE_URL}/crew/image/${crewNo}`}
+                src={`${
+                  import.meta.env.VITE_AJAX_BASE_URL
+                }/crew/image/${crewNo}`}
                 alt="Crew"
                 className="crew-image"
               />
@@ -576,15 +543,21 @@ export default function CrewDetail() {
                 )}
 
                 <button
-                  className={`action-btn heart-btn ${isLiked ? "liked" : ""}`}
+                  className="d-flex justify-content-center align-items-center border-0 p-2 bg-white"
                   style={{
-                    padding: "0.2rem 0.4rem",
-                    cursor: "pointer",
-                    transition: "background-color 0.3s, color 0.3s",
+                    right: "8px",
+                    bottom: "8px",
+                    borderRadius: "999px",
+                    width: "36px",
+                    height: "36px",
                   }}
                   onClick={handleHeartClick}
                 >
-                  <FaHeart />
+                  {isLiked ? (
+                    <IoHeartSharp size={20} color="#DC3545" />
+                  ) : (
+                    <IoHeartOutline size={20} />
+                  )}
                 </button>
               </div>
             </div>
@@ -801,7 +774,9 @@ export default function CrewDetail() {
                             }}
                           >
                             <img
-                              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${member.memberNo}`}
+                              src={`${
+                                import.meta.env.VITE_AJAX_BASE_URL
+                              }/member/image/${member.memberNo}`}
                               alt="프로필"
                               style={{
                                 width: "40px",
@@ -901,7 +876,9 @@ export default function CrewDetail() {
                     >
                       {/* 이미지 */}
                       <img
-                        src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${member.memberNo}`}
+                        src={`${
+                          import.meta.env.VITE_AJAX_BASE_URL
+                        }/member/image/${member.memberNo}`}
                         alt="프로필"
                         style={{
                           width: "50px",

@@ -34,9 +34,7 @@ export default function Chat() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await axios.get(
-        `/chat/messages/${currRoom}`
-      );
+      const res = await axios.get(`/chat/messages/${currRoom}`);
       setMessages(res.data);
     };
     if (currRoom) fetchData();
@@ -226,6 +224,7 @@ export default function Chat() {
           >
             {windowWidth > 1024 ? (
               <div
+                className="overflow-auto"
                 style={{
                   padding: "32px",
                   backgroundColor: "#FAFAFA",
@@ -247,7 +246,9 @@ export default function Chat() {
                       <img
                         className="shadow-sm"
                         style={{ borderRadius: "999px", objectFit: "cover" }}
-                        src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${room.accountNo}`}
+                        src={`${
+                          import.meta.env.VITE_AJAX_BASE_URL
+                        }/member/image/${room.accountNo}`}
                         width={64}
                         height={64}
                       />
@@ -313,7 +314,9 @@ export default function Chat() {
                     <img
                       className="shadow-sm"
                       style={{ borderRadius: "999px", objectFit: "cover" }}
-                      src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${room.accountNo}`}
+                      src={`${
+                        import.meta.env.VITE_AJAX_BASE_URL
+                      }/member/image/${room.accountNo}`}
                       width={48}
                       height={48}
                     />
@@ -335,7 +338,7 @@ export default function Chat() {
                 className={`d-flex flex-column gap-2 overflow-auto ${
                   windowWidth > 1024 ? "p-4" : "my-4"
                 }`}
-                style={{ height: windowWidth > 1024 ? "76vh" : "60vh" }}
+                style={{ height: windowWidth > 1024 ? "80vh" : "63vh" }}
               >
                 {messages.map((message, idx) => (
                   <div key={idx} className="d-flex flex-column gap-3">
@@ -404,7 +407,9 @@ export default function Chat() {
                                   marginBottom:
                                     windowWidth > 1024 ? "0px" : "12px",
                                 }}
-                                src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${message.accountNo}`}
+                                src={`${
+                                  import.meta.env.VITE_AJAX_BASE_URL
+                                }/member/image/${message.accountNo}`}
                                 width={windowWidth > 1024 ? 64 : 48}
                                 height={windowWidth > 1024 ? 64 : 48}
                               />
@@ -443,9 +448,6 @@ export default function Chat() {
                               </div>
                             </div>
                           </div>
-                          {/* {message.chatRead !== 0 && (
-                          <span>{message.chatRead}</span>
-                        )} */}
                           {isLastMessage(message, idx) && (
                             <span
                               style={{ fontSize: "14px", color: "#333333" }}

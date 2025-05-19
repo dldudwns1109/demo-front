@@ -8,6 +8,7 @@ import { windowWidthState } from "../utils/storage";
 import { FaCog } from "react-icons/fa";
 
 import "../css/Mypage.css";
+import changeIcon from "../utils/changeIcon";
 
 export default function ProfileCard({ member }) {
   const windowWidth = useRecoilValue(windowWidthState);
@@ -48,13 +49,15 @@ export default function ProfileCard({ member }) {
                 height: "200px",
                 objectFit: "cover",
               }}
-              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${member.memberNo}`}
+              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${
+                member.memberNo
+              }`}
             />
 
             <div className="d-flex flex-column justify-content-between">
               <div>
                 <div
-                  className="d-flex align-items-center mb-3"
+                  className="d-flex align-items-center mb-2"
                   style={{ gap: "12px" }}
                 >
                   <span
@@ -127,14 +130,18 @@ export default function ProfileCard({ member }) {
               <div
                 className={`d-flex flex-wrap ${windowWidth < 768 && "mt-4"}`}
                 style={{
-                  gap: "12px",
+                  gap: "8px",
                   width: windowWidth > 768 ? "360px" : "180px",
                 }}
               >
                 {member.memberLike.map((like, idx) => (
-                  <span key={idx} className="mbti-badge">
+                  <div
+                    key={idx}
+                    className="mbti-badge d-flex align-items-center gap-2"
+                  >
+                    {changeIcon(like)}
                     {like}
-                  </span>
+                  </div>
                 ))}
               </div>
             </div>
@@ -181,9 +188,7 @@ export default function ProfileCard({ member }) {
                           "Authorization"
                         ] = `Bearer ${accessToken}`;
 
-                        await axios.post(
-                          "/member/signout"
-                        );
+                        await axios.post("/member/signout");
                       } catch (e) {
                       } finally {
                         localStorage.removeItem("accessToken");

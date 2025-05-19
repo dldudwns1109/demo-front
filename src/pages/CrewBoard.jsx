@@ -1,14 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
-import { useRecoilValue, useRecoilState } from "recoil";
-import { replyCountState } from "../store/replyCountState";
-import {
-  loginState,
-  locationState,
-  userNoState,
-  categoryState,
-} from "../utils/storage";
+import { useRecoilValue } from "recoil";
+import { loginState, userNoState } from "../utils/storage";
 import Header from "../components/Header";
 import CrewTopNav from "../components/CrewTopNav";
 import { FaRegCommentDots } from "react-icons/fa";
@@ -22,23 +16,13 @@ export default function CrewBoard() {
   const [visibleCount, setVisibleCount] = useState(4);
   const [isMember, setIsMember] = useState(false);
 
-  const replyCounts = useRecoilValue(replyCountState);
-
   // 로그인 및 위치 상태
   const login = useRecoilValue(loginState);
-  const [location, setLocation] = useRecoilState(locationState);
-  const [category, setCategory] = useRecoilState(categoryState);
   const userNo = useRecoilValue(userNoState);
 
   const [showPopoverId, setShowPopoverId] = useState(null);
   const popoverRef = useRef();
 
-  const [memberData, setMemberData] = useState({});
-
-  // const getAuthHeaders = () => {
-  //   const token = localStorage.getItem("refreshToken");
-  //   return token ? { Authorization: `Bearer ${token.trim()}` } : {};
-  // };
   const getAuthHeaders = () => {
     const token = localStorage.getItem("refreshToken");
     return { Authorization: `Bearer ${token.trim()}` };
@@ -51,10 +35,9 @@ export default function CrewBoard() {
 
       try {
         const headers = getAuthHeaders();
-        const res = await axios.get(
-          `/crewmember/${crewNo}/member`,
-          { headers }
-        );
+        const res = await axios.get(`/crewmember/${crewNo}/member`, {
+          headers,
+        });
         setIsMember(res.data);
       } catch (err) {
         console.error("모임원 여부 확인 실패:", err.message);
@@ -77,17 +60,13 @@ export default function CrewBoard() {
     fetchCrewName();
   }, [crewNo]);
 
-  
   useEffect(() => {
     const fetchBoardList = async () => {
       try {
-        const res = await axios.get(
-          `/board/crew/${crewNo}`,
-          {
-            params:
-              selectedCategory !== "전체" ? { category: selectedCategory } : {},
-          }
-        );
+        const res = await axios.get(`/board/crew/${crewNo}`, {
+          params:
+            selectedCategory !== "전체" ? { category: selectedCategory } : {},
+        });
 
         const updatedBoardList = await Promise.all(
           res.data.map(async (board) => {
@@ -142,15 +121,8 @@ export default function CrewBoard() {
     <div className="vh-100">
       {/* 헤더 */}
       <div style={{ position: "relative", zIndex: 1100 }}>
-
-      <Header
-        loginState={`${login ? "loggined" : "login"}`}
-        category={category}
-        setCategory={setCategory}
-        location={location}
-        setLocation={setLocation}
-        />
-        </div>
+        <Header input={false} loginState={`${login ? "loggined" : "login"}`} />
+      </div>
 
       <div
         style={{
@@ -164,7 +136,14 @@ export default function CrewBoard() {
         <CrewTopNav />
       </div>
 
-      <div style={{ paddingTop: "160px" }}>
+      <div
+        className="h-100"
+        style={{
+          paddingTop: "160px",
+          paddingLeft: "8.33%",
+          paddingRight: "8.33%",
+        }}
+      >
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div className="d-flex flex-wrap gap-2">
             {categories.map((cat) => (
@@ -235,7 +214,9 @@ export default function CrewBoard() {
                   <div className="d-flex align-items-center mb-3">
                     {/* 프로필 이미지 클릭 시 팝오버 */}
                     <img
-                      src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${board.boardWriter}`}
+                      src={`${
+                        import.meta.env.VITE_AJAX_BASE_URL
+                      }/member/image/${board.boardWriter}`}
                       alt="프로필"
                       className="rounded-circle me-3"
                       style={{
@@ -324,7 +305,9 @@ export default function CrewBoard() {
                 >
                   <div className="d-flex align-items-center mb-3">
                     <img
-                      src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${userNo}`}
+                      src={`${
+                        import.meta.env.VITE_AJAX_BASE_URL
+                      }/member/image/${userNo}`}
                       alt="프로필"
                       className="rounded-circle me-3"
                       style={{

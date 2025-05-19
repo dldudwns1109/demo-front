@@ -41,16 +41,21 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    setIsAroundMore(6);
+    setIsLikedMore(6);
+  }, [userNo]);
+
+  useEffect(() => {
     if (keyword !== "") navigate(`/crew/list?keyword=${keyword}`);
   }, [keyword]);
 
   useEffect(() => {
     setIsAroundMore(aroundGroupData.length > aroundRenderItem);
-  }, [location, aroundRenderItem, aroundGroupData]);
+  }, [userNo, location, aroundRenderItem, aroundGroupData]);
 
   useEffect(() => {
     setIsLikedMore(likedGroupData.length > likedRenderItem);
-  }, [location, likedRenderItem, likedGroupData]);
+  }, [userNo, location, likedRenderItem, likedGroupData]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,19 +67,31 @@ export default function Home() {
       setAroundGroupData([...res.data]);
     };
     fetchData();
-  }, [userNo, category, location]);
+  }, [login, userNo, category, location]);
 
   useEffect(() => {
     if (userNo) {
       const fetchData = async () => {
-        const res = await axios.get(
-          `/crew/findLikedGroup/${userNo}`
-        );
+        const res = await axios.get(`/crew/findLikedGroup/${userNo}`);
         setLikedGroupData([...res.data]);
       };
       fetchData();
     }
   }, [userNo]);
+
+  const handleLikeToggle = (crewNo, newIsLiked) => {
+    setAroundGroupData((prev) =>
+      prev.map((group) =>
+        group.crewNo === crewNo ? { ...group, crewIsLiked: newIsLiked } : group
+      )
+    );
+
+    setLikedGroupData((prev) =>
+      prev.map((group) =>
+        group.crewNo === crewNo ? { ...group, crewIsLiked: newIsLiked } : group
+      )
+    );
+  };
 
   return (
     <>
@@ -122,7 +139,12 @@ export default function Home() {
             aroundGroupData.map((group, idx) => {
               return (
                 idx < aroundRenderItem && (
-                  <GroupItem key={idx} data={group} userNo={userNo} />
+                  <GroupItem
+                    key={idx}
+                    data={group}
+                    userNo={userNo}
+                    onLikeToggle={handleLikeToggle}
+                  />
                 )
               );
             })
@@ -180,7 +202,11 @@ export default function Home() {
                 likedGroupData.map((group, idx) => {
                   return (
                     idx < likedRenderItem && (
-                      <GroupItem key={idx} data={group} />
+                      <GroupItem
+                        key={idx}
+                        data={group}
+                        onLikeToggle={handleLikeToggle}
+                      />
                     )
                   );
                 })

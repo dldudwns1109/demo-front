@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import Header from "../components/Header";
-import { useRecoilState } from "recoil";
-import { locationState } from "../utils/storage";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { locationState, loginState } from "../utils/storage";
 import locationData from "../json/location.json";
 import categoryData from "../json/category.json";
 import { RiArrowDropDownLine } from "react-icons/ri";
+import changeIcon from "../utils/changeIcon";
+import Unauthorized from "../components/Unauthorized";
 
 const locationList = locationData;
 const categoryList = categoryData.slice(1);
@@ -17,6 +19,7 @@ const FIELD_LABELS = {
 };
 
 export default function CrewCreate() {
+  const login = useRecoilValue(loginState);
   const [location, setLocation] = useRecoilState(locationState);
   const [city, setCity] = useState("서울특별시");
   const [isOpenLocationRef, setIsOpenLocationRef] = useState(false);
@@ -210,17 +213,13 @@ export default function CrewCreate() {
     formData.append("attach", attach);
 
     try {
-      const res = await axios.post(
-        "/pay/ready",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            "Refresh-Token": localStorage.getItem("refreshToken"),
-            "Frontend-URL": "http://localhost:5173",
-          },
-        }
-      );
+      const res = await axios.post("/pay/ready", formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          "Refresh-Token": localStorage.getItem("refreshToken"),
+          "Frontend-URL": "http://localhost:5173",
+        },
+      });
 
       const redirectUrl = res.data?.next_redirect_pc_url;
       if (redirectUrl) window.location.href = redirectUrl;
@@ -242,213 +241,232 @@ export default function CrewCreate() {
   //view
   return (
     <>
-      <Header input={false} />
+      <Header input={false} loginState={login ? "loggined" : "login"} />
       <div
         className="d-flex flex-column align-items-center"
         style={{ paddingTop: 70, paddingBottom: 80 }}
       >
-        <h2
-          style={{
-            margin: "60px 0 24px",
-            fontSize: "24px",
-            fontWeight: "bold",
-            color: "#111",
-          }}
-        >
-          모임 개설
-        </h2>
-
-        <img
-          src={previewUrl || "${import.meta.env.VITE_AJAX_BASE_URL}/images/default-profile.svg"}
-          onClick={openFileSelector}
-          style={{
-            cursor: "pointer",
-            width: 200,
-            height: 200,
-            borderRadius: "50%",
-            display: "block",
-            margin: "0 auto 24px",
-          }}
-        />
-
-        <input
-          type="file"
-          ref={fileInputRef}
-          accept=".png, .jpg"
-          style={{ display: "none" }}
-          onChange={handleFileChange}
-        />
-
-        <div style={boxStyle}>
-          <label className="label-text">모임명</label>
-          <input
-            className="member-input"
-            placeholder="모임 이름을 작성해주세요!"
-            name="crewName"
-            value={crew.crewName}
-            onChange={changeCrew}
-            onBlur={() => handleBlur("crewName", crew.crewName)}
-          />
-          <small className="text-danger">{errorMessage.crewName}</small>
-        </div>
-
-        <div style={boxStyle}>
-          <label className="label-text">모임 소개</label>
-          <textarea
-            style={{ width: "100%", height: 155 }}
-            placeholder="모임을 소개하는 글을 작성해주세요!"
-            name="crewIntro"
-            value={crew.crewIntro}
-            onChange={changeCrew}
-            onBlur={() => handleBlur("crewIntro", crew.crewIntro)}
-          />
-          <small className="text-danger">{errorMessage.crewIntro}</small>
-        </div>
-
-        <div style={boxStyle}>
-          <label className="label-text">활동 지역</label>
-          <div>
-            <button
-              className="w-100 bg-white border border-1 ps-3 py-2 d-flex justify-content-between align-items-center"
+        {login ? (
+          <>
+            <h2
               style={{
-                borderRadius: "8px",
-                color: "#111111",
-                borderColor: "#EBEBEB",
+                margin: "60px 0 24px",
+                fontSize: "24px",
+                fontWeight: "bold",
+                color: "#111",
               }}
-              onClick={() => setIsOpenLocationRef(true)}
             >
-              <div className="d-flex align-items-center gap-2">
-                {location.area}
+              모임 개설
+            </h2>
+
+            <img
+              src={previewUrl || "images/default-profile.svg"}
+              onClick={openFileSelector}
+              style={{
+                cursor: "pointer",
+                width: 200,
+                height: 200,
+                borderRadius: "50%",
+                display: "block",
+                margin: "0 auto 24px",
+              }}
+            />
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".png, .jpg"
+              style={{ display: "none" }}
+              onChange={handleFileChange}
+            />
+
+            <div style={boxStyle}>
+              <label className="label-text">모임명</label>
+              <input
+                className="member-input"
+                style={{ outline: 0 }}
+                placeholder="모임 이름을 작성해주세요!"
+                name="crewName"
+                value={crew.crewName}
+                onChange={changeCrew}
+                onBlur={() => handleBlur("crewName", crew.crewName)}
+              />
+              <small className="text-danger">{errorMessage.crewName}</small>
+            </div>
+
+            <div style={boxStyle}>
+              <label className="label-text">모임 소개</label>
+              <textarea
+                style={{ width: "100%", height: 155, outline: 0 }}
+                placeholder="모임을 소개하는 글을 작성해주세요!"
+                name="crewIntro"
+                value={crew.crewIntro}
+                onChange={changeCrew}
+                onBlur={() => handleBlur("crewIntro", crew.crewIntro)}
+              />
+              <small className="text-danger">{errorMessage.crewIntro}</small>
+            </div>
+
+            <div style={boxStyle}>
+              <label className="label-text">활동 지역</label>
+              <div>
+                <button
+                  className="w-100 bg-white border border-1 ps-3 py-2 d-flex justify-content-between align-items-center"
+                  style={{
+                    borderRadius: "8px",
+                    color: "#111111",
+                    borderColor: "#EBEBEB",
+                  }}
+                  onClick={() => setIsOpenLocationRef(true)}
+                >
+                  <div className="d-flex align-items-center gap-2">
+                    {location.area}
+                  </div>
+                  <RiArrowDropDownLine size={22} />
+                </button>
+                {isOpenLocationRef && (
+                  <div
+                    ref={locationRef}
+                    className="d-flex flex-column bg-white p-4 position-absolute shadow-lg"
+                    style={{ borderRadius: "8px" }}
+                  >
+                    <span className="mb-4">지역</span>
+                    <div className="d-flex">
+                      <div
+                        className="d-flex flex-column overflow-auto"
+                        style={{ height: "300px" }}
+                      >
+                        {locationList.map((v, i) => (
+                          <button
+                            key={i}
+                            className={`text-start border-0 ${
+                              city === v.city
+                                ? "bg-primary text-white"
+                                : "bg-white"
+                            } ps-2 pe-4 py-2`}
+                            style={{
+                              fontSize: "14px",
+                              borderRadius: "8px",
+                            }}
+                            onClick={() => setCity(v.city)}
+                          >
+                            {v.city}
+                          </button>
+                        ))}
+                      </div>
+                      <div
+                        className="d-flex flex-column overflow-auto"
+                        style={{ width: "160px", height: "300px" }}
+                      >
+                        {areaList.map((v, i) => (
+                          <button
+                            key={i}
+                            className={`text-start border-0 ${
+                              location.area === v
+                                ? "bg-primary text-white"
+                                : "bg-white"
+                            } ps-2 pe-4 py-2`}
+                            style={{
+                              fontSize: "14px",
+                              borderRadius: "8px",
+                            }}
+                            onClick={() => {
+                              setLocation({
+                                city,
+                                area: v,
+                              });
+                              setIsOpenLocationRef(false);
+                            }}
+                          >
+                            {v}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <small className="text-danger">
+                  {errorMessage.crewLocation}
+                </small>
               </div>
-              <RiArrowDropDownLine size={22} />
-            </button>
-            {isOpenLocationRef && (
+            </div>
+
+            {/* 관심사, 인원 수 필드도 같은 boxStyle 사용 */}
+            <div style={boxStyle}>
+              <label className="label-text">관심사</label>
               <div
-                ref={locationRef}
-                className="d-flex flex-column bg-white p-4 position-absolute shadow-lg"
-                style={{ borderRadius: "8px" }}
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "8px",
+                  marginBottom: "24px",
+                }}
               >
-                <span className="mb-4">지역</span>
-                <div className="d-flex">
-                  <div
-                    className="d-flex flex-column overflow-auto"
-                    style={{ height: "300px" }}
+                {categoryList.map((like) => (
+                  <button
+                    key={like}
+                    type="button"
+                    className={`d-flex justify-content-center gap-2 mbti-badge ${
+                      crew.crewCategory === like ? "active" : ""
+                    }`}
+                    onClick={() => changeCrewCategory(like)}
                   >
-                    {locationList.map((v, i) => (
-                      <button
-                        key={i}
-                        className={`text-start border-0 ${
-                          city === v.city ? "bg-primary text-white" : "bg-white"
-                        } ps-2 pe-4 py-2`}
-                        style={{
-                          fontSize: "14px",
-                          borderRadius: "8px",
-                        }}
-                        onClick={() => setCity(v.city)}
-                      >
-                        {v.city}
-                      </button>
-                    ))}
-                  </div>
-                  <div
-                    className="d-flex flex-column overflow-auto"
-                    style={{ width: "160px", height: "300px" }}
-                  >
-                    {areaList.map((v, i) => (
-                      <button
-                        key={i}
-                        className={`text-start border-0 ${
-                          location.area === v
-                            ? "bg-primary text-white"
-                            : "bg-white"
-                        } ps-2 pe-4 py-2`}
-                        style={{
-                          fontSize: "14px",
-                          borderRadius: "8px",
-                        }}
-                        onClick={() => {
-                          setLocation({
-                            city,
-                            area: v,
-                          });
-                          setIsOpenLocationRef(false);
-                        }}
-                      >
-                        {v}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                    {changeIcon(
+                      like,
+                      crew.crewCategory === like ? "#FFFFFF" : "#666666"
+                    )}
+                    {like}
+                  </button>
+                ))}
               </div>
-            )}
-            <small className="text-danger">{errorMessage.crewLocation}</small>
-          </div>
-        </div>
+              <small className="text-danger">{errorMessage.crewCategory}</small>
+            </div>
 
-        {/* 관심사, 인원 수 필드도 같은 boxStyle 사용 */}
-        <div style={boxStyle}>
-          <label className="label-text">관심사</label>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "8px",
-              marginBottom: "24px",
-            }}
-          >
-            {categoryList.map((like) => (
-              <button
-                key={like}
-                type="button"
-                className={`mbti-badge ${
-                  crew.crewCategory === like ? "active" : ""
-                }`}
-                onClick={() => changeCrewCategory(like)}
+            <div style={boxStyle}>
+              <label className="label-text">인원 수</label>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "#6C757D",
+                  marginBottom: "8px",
+                }}
               >
-                {like}
+                * 인원 수에 따라 결제 금액이 상이할 수 있습니다
+              </p>
+              <select
+                className="form-control"
+                name="crewLimit"
+                value={crew.crewLimit}
+                onChange={changeCrewLimit}
+              >
+                {crewLimitList.map((count) => (
+                  <option key={count} value={count}>
+                    {count}명
+                  </option>
+                ))}
+              </select>
+              <p>
+                최종 금액{" "}
+                <span style={{ color: "#dc3545", fontWeight: "bold" }}>
+                  [{totalPrice.toLocaleString()}]
+                </span>
+                원
+              </p>
+            </div>
+
+            <div style={boxStyle}>
+              <button
+                className="btn w-100 btn-primary"
+                disabled={!isTotalValid}
+                onClick={createCrew}
+              >
+                모임개설하기
               </button>
-            ))}
-          </div>
-          <small className="text-danger">{errorMessage.crewCategory}</small>
-        </div>
-
-        <div style={boxStyle}>
-          <label className="label-text">인원 수</label>
-          <p
-            style={{ fontSize: "14px", color: "#6C757D", marginBottom: "8px" }}
-          >
-            * 인원 수에 따라 결제 금액이 상이할 수 있습니다
-          </p>
-          <select
-            className="form-control"
-            name="crewLimit"
-            value={crew.crewLimit}
-            onChange={changeCrewLimit}
-          >
-            {crewLimitList.map((count) => (
-              <option key={count} value={count}>
-                {count}명
-              </option>
-            ))}
-          </select>
-          <p>
-            최종 금액{" "}
-            <span style={{ color: "#dc3545", fontWeight: "bold" }}>
-              [{totalPrice.toLocaleString()}]
-            </span>
-            원
-          </p>
-        </div>
-
-        <div style={boxStyle}>
-          <button
-            className={isTotalValid ? "blue-btn" : "light-gray-btn"}
-            disabled={!isTotalValid}
-            onClick={createCrew}
-          >
-            모임개설하기
-          </button>
-        </div>
+            </div>
+          </>
+        ) : (
+          <Unauthorized />
+        )}
       </div>
     </>
   );

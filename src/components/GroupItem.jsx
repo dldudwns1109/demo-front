@@ -4,13 +4,13 @@ import { useRecoilValue } from "recoil";
 import axios from "axios";
 
 import { IoLocationSharp } from "react-icons/io5";
-import { IoPeople } from "react-icons/io5";
 import { IoHeartSharp } from "react-icons/io5";
 import { IoHeartOutline } from "react-icons/io5";
 import { userNoState } from "../utils/storage";
 import changeIcon from "../utils/changeIcon";
+import { FaUsers } from "react-icons/fa";
 
-export default function GroupItem({ data }) {
+export default function GroupItem({ data, onLikeToggle }) {
   const userNo = useRecoilValue(userNoState);
   const [toggle, setToggle] = useState(data.crewIsLiked);
 
@@ -63,7 +63,10 @@ export default function GroupItem({ data }) {
                 crewNo: data.crewNo,
               });
             }
+            const newIsLiked = !toggle;
             setToggle((toggle) => !toggle);
+
+            onLikeToggle?.(data.crewNo, newIsLiked);
           }}
         >
           {toggle ? (
@@ -94,7 +97,7 @@ export default function GroupItem({ data }) {
         {icon}
         <span>{data.crewCategory}</span> ·
         <IoLocationSharp size={18} color="#6C757D" />
-        <span>{data.crewLocation}</span> ·{" "}
+        <span>{data.crewLocation}</span> · <FaUsers size={18} color="#6C757D" />
         <span>회원 {data.crewMemberCnt}명</span>
       </div>
     </div>

@@ -29,13 +29,10 @@ export default function MypageEditPassword() {
     }
 
     try {
-      const res = await axios.post(
-        "/member/checkPassword",
-        {
-          memberNo: userNo,
-          memberPw: originPw,
-        }
-      );
+      const res = await axios.post("/member/checkPassword", {
+        memberNo: userNo,
+        memberPw: originPw,
+      });
 
       if (res.data === true) {
         toast.success("비밀번호가 확인되었습니다!");
@@ -68,13 +65,10 @@ export default function MypageEditPassword() {
     }
 
     try {
-      const res = await axios.patch(
-        "/member/changePw",
-        {
-          memberNo: userNo,
-          memberPw: newPw,
-        }
-      );
+      const res = await axios.patch("/member/changePw", {
+        memberNo: userNo,
+        memberPw: newPw,
+      });
 
       if (res.data === true) {
         const confirmed = window.confirm(
@@ -119,7 +113,7 @@ export default function MypageEditPassword() {
   return (
     <>
       {/* 헤더 */}
-      <Header input={false} />
+      <Header input={false} loginState={login ? "loggined" : "login"} />
       <ToastContainer
         position="bottom-right"
         autoClose={2000}
@@ -147,18 +141,19 @@ export default function MypageEditPassword() {
           <input
             type="password"
             className="member-input"
+            style={{ outline: 0 }}
             value={originPw}
             onChange={(e) => setOriginPw(e.target.value)}
             disabled={isVerified}
           />
         </div>
 
-        <div>
+        <div className="w-100">
           {!isVerified && (
-            <div style={boxStyle}>
+            <div className="w-100" style={boxStyle}>
               <button
                 type="button"
-                className="light-gray-btn"
+                className="btn w-100"
                 style={{
                   backgroundColor: "#6C757D",
                   color: "#ffffff",
@@ -175,13 +170,14 @@ export default function MypageEditPassword() {
           <input
             type="password"
             className="member-input"
+            style={{ outline: 0 }}
             value={newPw}
             onChange={(e) => setNewPw(e.target.value)}
           />
         </div>
 
         <div style={boxStyle}>
-          <button className="blue-btn" onClick={changePassword}>
+          <button className="btn btn-primary w-100" onClick={changePassword}>
             비밀번호 변경
           </button>
         </div>

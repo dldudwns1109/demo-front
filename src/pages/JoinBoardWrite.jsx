@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import Header from "../components/Header";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { userNoState, loginState, locationState } from "../utils/storage";
+import { useRecoilValue } from "recoil";
+import { userNoState, loginState } from "../utils/storage";
 
 export default function JoinBoardWrite() {
-  const [location, setLocation] = useRecoilState(locationState);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [boardTitle, setBoardTitle] = useState("");
   const [boardContent, setBoardContent] = useState("");
@@ -33,9 +32,7 @@ export default function JoinBoardWrite() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get(
-          `/member/mypage/${userNo}`
-        );
+        const res = await axios.get(`/member/mypage/${userNo}`);
         setProfile(res.data);
       } catch (err) {
         console.error(err);
@@ -53,7 +50,6 @@ export default function JoinBoardWrite() {
 
     fetchProfile();
   }, [navigate]);
-
 
   const handleSubmit = async () => {
     if (!selectedCategory || !boardTitle.trim() || !boardContent.trim()) {
@@ -76,11 +72,14 @@ export default function JoinBoardWrite() {
   };
 
   return (
-    <>
+    <div className="vh-100">
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
       <div
-        className="container"
-        style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
+        style={{
+          paddingTop: "70px",
+          paddingLeft: "8.33%",
+          paddingRight: "8.33%",
+        }}
       >
         <div className="mb-5">
           <Link
@@ -96,7 +95,9 @@ export default function JoinBoardWrite() {
         {profile && (
           <div className="d-flex align-items-center mb-4">
             <img
-              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${userNo}`}
+              src={`${
+                import.meta.env.VITE_AJAX_BASE_URL
+              }/member/image/${userNo}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{
@@ -105,13 +106,6 @@ export default function JoinBoardWrite() {
                 objectFit: "cover",
               }}
             />
-            {/* <div>
-              <strong>{profile.boardWriterNickname}</strong>
-              <div className="text-muted" style={{ fontSize: "0.85rem" }}>
-                {profile.boardWriterGender === "M" ? "남성" : "여성"} ·{" "}
-                {profile.boardWriterBirth} · {profile.boardWriterMbti}
-              </div>
-            </div> */}
             <div>
               <strong>{profile.memberNickname}</strong>{" "}
               <div className="text-muted" style={{ fontSize: "0.85rem" }}>
@@ -128,14 +122,13 @@ export default function JoinBoardWrite() {
             <button
               key={cat}
               type="button"
-              className={`btn btn-sm rounded-pill px-3 ${
-                selectedCategory === cat ? "text-white" : "text-pink-400"
-              }`}
+              className="btn btn-sm rounded-pill"
               style={{
                 backgroundColor:
                   selectedCategory === cat ? "#000000" : "#f1f3f5",
                 color: selectedCategory === cat ? "#ffffff" : "#000000",
                 border: "none",
+                padding: "0.5rem 1rem",
                 fontSize: "0.95rem",
               }}
               onClick={() => setSelectedCategory(cat)}
@@ -185,6 +178,6 @@ export default function JoinBoardWrite() {
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }

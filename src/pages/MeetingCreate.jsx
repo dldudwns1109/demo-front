@@ -56,14 +56,11 @@ export default function MeetingCreate() {
     if (!login || !crewNo) return;
 
     try {
-      const res = await axios.get(
-        `/crewmember/${crewNo}/member`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
+      const res = await axios.get(`/crewmember/${crewNo}/member`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       if (!res.data) {
         alert("정모를 생성하려면 해당 모임의 회원이어야 합니다.");
         navigate(`/crew/${crewNo}/detail`);
@@ -168,17 +165,13 @@ export default function MeetingCreate() {
     formData.append("attach", attach);
 
     try {
-      const response = await axios.post(
-        "/meeting/",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            "Refresh-Token": localStorage.getItem("refreshToken"),
-            "Frontend-URL": "http://localhost:5173",
-          },
-        }
-      );
+      const response = await axios.post("/meeting/", formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          "Refresh-Token": localStorage.getItem("refreshToken"),
+          "Frontend-URL": "http://localhost:5173",
+        },
+      });
 
       navigate(`/crew/${crewNo}/detail`);
     } catch (err) {
@@ -196,12 +189,11 @@ export default function MeetingCreate() {
       </div>
     );
   }
-  
+
   // 공통 래퍼 스타일
   const boxStyle = {
     width: "100%",
-    maxWidth: "380px",
-    padding: "0 16px",
+    maxWidth: "300px",
     margin: "0 auto 24px",
   };
 
@@ -254,6 +246,7 @@ export default function MeetingCreate() {
           <label className="label-text">정모명</label>
           <input
             className="member-input"
+            style={{ outline: "none" }}
             placeholder="정모 이름을 작성해주세요!"
             name="meetingName"
             value={meeting.meetingName}
@@ -287,7 +280,7 @@ export default function MeetingCreate() {
             {meeting.meetingLocation || "정모 위치를 검색해주세요!"}
           </div>
           <button
-            className="light-gray-btn mt-2"
+            className="btn w-100 mt-2"
             style={{ backgroundColor: "#6C757D", color: "#ffffff" }}
             onClick={() => setIsPostcodeOpen(true)}
           >
@@ -307,6 +300,7 @@ export default function MeetingCreate() {
             type="text"
             inputMode="numeric"
             className="member-input"
+            style={{ outline: "none" }}
             placeholder="정모 비용을 작성해주세요!"
             name="meetingPrice"
             value={meeting.meetingPrice}
@@ -330,7 +324,7 @@ export default function MeetingCreate() {
         </div>
         <div style={boxStyle}>
           <button
-            className={isTotalValid ? "blue-btn" : "light-gray-btn"}
+            className="btn btn-primary w-100"
             onClick={meetingAdd}
             disabled={!isTotalValid}
           >

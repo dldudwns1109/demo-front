@@ -32,9 +32,7 @@ export default function JoinBoardDetail() {
   useEffect(() => {
     const fetchBoard = async () => {
       try {
-        const res = await axios.get(
-          `/board/${boardNo}`
-        );
+        const res = await axios.get(`/board/${boardNo}`);
         setBoard(res.data);
       } catch (err) {
         console.error("게시글 불러오기 에러:", err);
@@ -43,9 +41,7 @@ export default function JoinBoardDetail() {
 
     const fetchReplies = async () => {
       try {
-        const res = await axios.get(
-          `/reply/${boardNo}`
-        );
+        const res = await axios.get(`/reply/${boardNo}`);
         console.log("댓글 데이터:", res.data);
         setReplies(res.data);
       } catch (err) {
@@ -57,23 +53,6 @@ export default function JoinBoardDetail() {
     fetchReplies();
   }, [boardNo]);
 
-  // useEffect(() => {
-  //   const handleClickOutside = (e) => {
-  //     if (
-  //       boardPopoverRef.current &&
-  //       !boardPopoverRef.current.contains(e.target)
-  //     ) {
-  //       setShowBoardWriterPopover(false);
-  //     }
-  //     if (
-  //       !replyPopoverRefs.current.some((ref) => ref && ref.contains(e.target))
-  //     ) {
-  //       setReplyPopoverIndex(null);
-  //     }
-  //   };
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => document.removeEventListener("mousedown", handleClickOutside);
-  // }, []);
   useEffect(() => {
     const handleClickOutside = (e) => {
       // 게시글 드롭다운 외부 클릭 시 닫힘
@@ -104,8 +83,6 @@ export default function JoinBoardDetail() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [boardDropdownOpen, dropdownOpen]);
 
-
-
   const handleReplySubmit = async () => {
     if (!login) {
       alert("로그인이 필요합니다.");
@@ -121,10 +98,7 @@ export default function JoinBoardDetail() {
         replyContent: newReply.trim(),
       };
 
-      const res = await axios.post(
-        "/reply",
-        replyData
-      );
+      const res = await axios.post("/reply", replyData);
       setReplies([res.data, ...replies]);
 
       setReplyCounts((prev) => ({
@@ -136,7 +110,6 @@ export default function JoinBoardDetail() {
       console.error("댓글 작성 에러:", err);
     }
   };
-
 
   const handleDeleteReply = async (replyNo, idx) => {
     // 댓글 작성자 확인
@@ -194,14 +167,6 @@ export default function JoinBoardDetail() {
     setBoardDropdownOpen(!boardDropdownOpen);
   };
 
-  // const handleEditReply = (idx) => {
-  //   const updatedReplies = [...replies];
-  //   updatedReplies[idx].isEditing = true;
-  //   updatedReplies[idx].backupContent = updatedReplies[idx].replyContent;
-  //   setReplies(updatedReplies);
-  //   setDropdownOpen(null);
-  // };
-
   const handleEditReply = (idx) => {
     const replyWriter = replies[idx].replyWriter;
 
@@ -228,17 +193,6 @@ export default function JoinBoardDetail() {
     setDropdownOpen(null);
   };
 
-  // const handleUpdateReply = (idx, newContent) => {
-  //   const updatedReplies = [...replies];
-  //   updatedReplies[idx].content = newContent;
-  //   updatedReplies[idx].isEditing = false;
-  //   updatedReplies[idx].writeTime = new Date();
-  //   setReplies(
-  //     updatedReplies.sort(
-  //       (a, b) => new Date(b.writeTime) - new Date(a.writeTime)
-  //     )
-  //   );
-  // };
   const handleUpdateReply = async (replyNo, idx, newContent) => {
     if (!newContent.trim()) return;
 
@@ -252,10 +206,9 @@ export default function JoinBoardDetail() {
     }
 
     try {
-      const response = await axios.put(
-        `/reply/${replyNo}`,
-        { replyContent: newContent }
-      );
+      const response = await axios.put(`/reply/${replyNo}`, {
+        replyContent: newContent,
+      });
 
       if (response.data) {
         const updatedReplies = replies.map((reply) =>
@@ -279,18 +232,6 @@ export default function JoinBoardDetail() {
       console.error("댓글 수정 에러:", err);
     }
   };
-
-  // const handleDeleteReply = (idx) => {
-  //   if (window.confirm("이 댓글을 삭제하시겠습니까?")) {
-  //     const updatedReplies = replies.filter((_, i) => i !== idx);
-  //     setReplies(updatedReplies);
-  //     setDropdownOpen(null);
-  //     setReplyCounts((prev) => ({
-  //       ...prev,
-  //       [boardNo]: (prev[boardNo] ?? board?.boardReply ?? 1) - 1,
-  //     }));
-  //   }
-  // };
 
   const handleBoardEdit = () => {
     if (board.boardWriter !== userNo) {
@@ -331,25 +272,16 @@ export default function JoinBoardDetail() {
   if (!board) return <div>로딩 중...</div>;
 
   return (
-    <>
-      <Header
-        loginState={`${login ? "loggined" : "login"}`}
-        // location={location}
-        // setLocation={setLocation}
-        input={false}
-      />
+    <div className="vh-100">
+      <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
       <div
-        className="container"
-        style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
+        style={{
+          paddingTop: "70px",
+          paddingLeft: "8.33%",
+          paddingRight: "8.33%",
+        }}
       >
         <div className="mb-5">
-          {/* <Link
-            to="/join/board"
-            className="btn btn-outline-secondary btn-sm"
-            style={{ marginTop: "3rem" }}
-          >
-            목록으로
-          </Link> */}
           <button
             className="btn btn-outline-secondary btn-sm mt-4"
             onClick={handleBoardReturn}
@@ -362,7 +294,9 @@ export default function JoinBoardDetail() {
         <div className="d-flex justify-content-between align-items-start mb-4 position-relative">
           <div className="d-flex align-items-center">
             <img
-              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${board.boardWriter}`}
+              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${
+                board.boardWriter
+              }`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{
@@ -556,7 +490,6 @@ export default function JoinBoardDetail() {
                       <li>
                         <button
                           className="dropdown-item"
-                          // onClick={() => handleDeleteReply(reply.replyNo)}
                           onClick={() => handleDeleteReply(reply.replyNo, idx)}
                         >
                           삭제
@@ -579,18 +512,18 @@ export default function JoinBoardDetail() {
         </div>
 
         {/* 댓글 작성 폼 */}
-        <div className="position-relative border rounded p-2">
+        <div className="d-flex align-items-center position-relative border rounded p-2">
           <input
             type="text"
-            className="form-control border-0 pe-5"
+            className="border-0"
             placeholder="댓글을 입력하세요"
             value={newReply}
             onChange={(e) => setNewReply(e.target.value)}
             onKeyDown={handleKeyPress}
-            style={{ flex: 1, boxShadow: "none" }}
+            style={{ flex: 1, boxShadow: "none", outline: "none" }}
           />
           <button
-            className="btn position-absolute"
+            className="btn position-absolute px-0 pt-0 pb-1"
             style={{
               top: "50%",
               right: "1rem",
@@ -599,10 +532,10 @@ export default function JoinBoardDetail() {
             }}
             onClick={handleReplySubmit}
           >
-            <FaPaperPlane size="1.2rem" />
+            <FaPaperPlane size={18} />
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }

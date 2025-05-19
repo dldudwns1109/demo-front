@@ -11,6 +11,7 @@ import categoryData from "../json/category.json";
 import mbtiData from "../json/mbti.json";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import Unauthorized from "../components/Unauthorized";
+import changeIcon from "../utils/changeIcon";
 
 const locationOptions = locationData;
 const schoolOptions = schoolData;
@@ -127,7 +128,9 @@ export default function MypageEdit() {
       const [city, area] = data.memberLocation.split(" ");
       setCity(city);
       setLocation({ city, area });
-      setPreviewImg(`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${data.memberNo}`);
+      setPreviewImg(
+        `${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${data.memberNo}`
+      );
 
       setMember({
         memberId: data.memberId,
@@ -181,16 +184,12 @@ export default function MypageEdit() {
     if (attach) formData.append("attach", attach);
 
     try {
-      await axios.patch(
-        `/member/${userNo}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      await axios.patch(`/member/${userNo}`, formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
       alert("개인정보가 수정되었습니다!");
       navigate("/mypage");
       window.location.reload();
@@ -221,7 +220,7 @@ export default function MypageEdit() {
   return (
     <>
       {/* 헤더 */}
-      <Header input={false} />
+      <Header input={false} loginState={login ? "loggined" : "login"} />
       {/* 수정 페이지 */}
       <div
         className="d-flex flex-column align-items-center"
@@ -274,6 +273,7 @@ export default function MypageEdit() {
           <label className="label-text">닉네임</label>
           <input
             className="member-input"
+            style={{ outline: 0 }}
             name="memberNickname"
             value={member.memberNickname}
             onChange={changeMember}
@@ -330,7 +330,7 @@ export default function MypageEdit() {
         <div style={boxStyle}>
           <label className="label-text">비밀번호</label>
           <button
-            className="light-gray-btn"
+            className="btn w-100"
             style={{ backgroundColor: "#6C757D", color: "#ffffff" }}
             onClick={() => navigate("/mypage/edit/password")}
           >
@@ -342,6 +342,7 @@ export default function MypageEdit() {
           <input
             type="text"
             className="member-input"
+            style={{ outline: 0 }}
             name="memberEmail"
             value={member.memberEmail}
             onChange={changeMember}
@@ -531,7 +532,7 @@ export default function MypageEdit() {
             {categoryOptions.map((v, i) => (
               <button
                 key={i}
-                className="btn"
+                className="btn d-flex align-items-center gap-2"
                 style={{
                   borderColor: "#F9B4ED",
                   color: `${member.memberLike.has(v) ? "#FFFFFF" : "#333333"}`,
@@ -551,6 +552,10 @@ export default function MypageEdit() {
                   });
                 }}
               >
+                {changeIcon(
+                  v,
+                  member.memberLike.has(v) ? "#FFFFFF" : "#666666"
+                )}
                 {v}
               </button>
             ))}
@@ -592,7 +597,7 @@ export default function MypageEdit() {
         </div>
         <div style={boxStyle}>
           <button
-            className="blue-btn"
+            className="btn btn-primary w-100"
             style={{ marginTop: "48px" }}
             onClick={(e) => clickEdit(e)}
             disabled={!isTotalValid}

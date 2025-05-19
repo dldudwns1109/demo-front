@@ -83,9 +83,7 @@ export default function MeetingEdit() {
 
   const loadMeetingData = useCallback(async () => {
     try {
-      const res = await axios.get(
-        `/meeting/${meetingNo}`
-      );
+      const res = await axios.get(`/meeting/${meetingNo}`);
       const data = res.data;
 
       setMeeting({
@@ -95,7 +93,9 @@ export default function MeetingEdit() {
         meetingPrice: data.meetingPrice.toLocaleString(), // 또는 숫자 그대로 유지
         meetingLimit: data.meetingLimit,
       });
-      setPreviewUrl(`${import.meta.env.VITE_AJAX_BASE_URL}/meeting/image/${meetingNo}`);
+      setPreviewUrl(
+        `${import.meta.env.VITE_AJAX_BASE_URL}/meeting/image/${meetingNo}`
+      );
 
       // ✅ 모임장 여부 판단
       setIsLeader(data.meetingOwnerNo === userNo);
@@ -140,16 +140,12 @@ export default function MeetingEdit() {
     if (attach) formData.append("attach", attach);
 
     try {
-      await axios.put(
-        `/meeting/${meetingNo}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      await axios.put(`/meeting/${meetingNo}`, formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
       alert("정모가 수정되었습니다!");
       navigate(`/meeting/detail/${meetingNo}`);
     } catch (err) {
@@ -222,6 +218,7 @@ export default function MeetingEdit() {
           <label className="label-text">정모명</label>
           <input
             className="member-input"
+            style={{ outline: "none" }}
             name="meetingName"
             value={meeting.meetingName}
             onChange={changeMeeting}
@@ -253,7 +250,7 @@ export default function MeetingEdit() {
             {meeting.meetingLocation || "정모 위치를 검색해주세요!"}
           </div>
           <button
-            className="light-gray-btn mt-2"
+            className="btn w-100 mt-2"
             style={{ backgroundColor: "#6C757D", color: "#ffffff" }}
             onClick={() => setIsPostcodeOpen(true)}
           >
@@ -272,6 +269,7 @@ export default function MeetingEdit() {
             type="text"
             inputMode="numeric"
             className="member-input"
+            style={{ outline: "none" }}
             name="meetingPrice"
             value={meeting.meetingPrice}
             onChange={changeMeeting}
@@ -294,7 +292,7 @@ export default function MeetingEdit() {
         </div>
         <div style={boxStyle}>
           <button
-            className={isTotalValid ? "blue-btn" : "light-gray-btn"}
+            className="btn btn-primary w-100"
             onClick={meetingEdit}
             disabled={!isTotalValid}
           >

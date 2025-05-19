@@ -35,9 +35,7 @@ export default function JoinBoardEdit() {
   useEffect(() => {
     const fetchBoard = async () => {
       try {
-        const res = await axios.get(
-          `/board/${boardNo}`
-        );
+        const res = await axios.get(`/board/${boardNo}`);
         setBoard({
           boardTitle: res.data.boardTitle,
           boardContent: res.data.boardContent,
@@ -60,7 +58,6 @@ export default function JoinBoardEdit() {
     fetchBoard();
   }, [boardNo, navigate, userNo]);
 
-
   // 프로필 불러오기
   useEffect(() => {
     const fetchProfile = async () => {
@@ -70,9 +67,7 @@ export default function JoinBoardEdit() {
       }
 
       try {
-        const res = await axios.get(
-          `/member/mypage/${userNo}`
-        );
+        const res = await axios.get(`/member/mypage/${userNo}`);
         setProfile(res.data);
       } catch (err) {
         console.error("프로필 불러오기 실패:", err);
@@ -107,16 +102,21 @@ export default function JoinBoardEdit() {
 
   return (
     <>
-      <Header
-        loginState={`${login ? "loggined" : "login"}`}
-        // location={location}
-        // setLocation={setLocation}
-        input={false}
-      />
-      <div className="container py-4">
+      <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
+      <div
+        style={{
+          paddingTop: "70px",
+          paddingLeft: "8.33%",
+          paddingRight: "8.33%",
+        }}
+      >
         {/* 목록으로 버튼 */}
         <div className="mb-5">
-          <Link to="/join/board" className="btn btn-outline-secondary btn-sm">
+          <Link
+            to="/join/board"
+            className="btn btn-outline-secondary btn-sm"
+            style={{ marginTop: "3rem" }}
+          >
             목록으로
           </Link>
         </div>
@@ -125,7 +125,9 @@ export default function JoinBoardEdit() {
         {profile && (
           <div className="d-flex align-items-center mb-4">
             <img
-              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${userNo}`}
+              src={`${
+                import.meta.env.VITE_AJAX_BASE_URL
+              }/member/image/${userNo}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{ width: "3rem", height: "3rem", objectFit: "cover" }}

@@ -14,8 +14,8 @@ export const categoryState = atom({
 export const locationState = atom({
   key: "locationState",
   default: {
-    city: "서울특별시",
-    area: "강남구",
+    city: localStorage.getItem("city") ?? "서울특별시",
+    area: localStorage.getItem("area") ?? "강남구",
   },
 });
 

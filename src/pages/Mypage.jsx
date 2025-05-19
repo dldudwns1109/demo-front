@@ -29,43 +29,32 @@ export default function Mypage() {
 
   const loadMember = useCallback(async () => {
     if (!userNo) return;
-    const res = await axios.get(
-      `/member/mypage/${userNo}`
-    );
+    const res = await axios.get(`/member/mypage/${userNo}`);
     setMember(res.data);
   }, [userNo]);
 
   const loadCreateList = useCallback(async () => {
     if (!userNo) return;
-    const res = await axios.get(
-      `/crew/findCreatedGroup/${userNo}`
-    );
+    const res = await axios.get(`/crew/findCreatedGroup/${userNo}`);
     const list = Array.isArray(res.data) ? res.data : [];
     setCreateList(list);
   }, [userNo]);
 
   const loadJoinList = useCallback(async () => {
     if (!userNo) return;
-    const res = await axios.get(
-      `/crew/findJoinedGroup/${userNo}`
-    );
+    const res = await axios.get(`/crew/findJoinedGroup/${userNo}`);
     const list = Array.isArray(res.data) ? res.data : [];
     setJoinList(list);
   }, [userNo]);
 
   const loadLikeGroupList = useCallback(async () => {
-    const res = await axios.get(
-      `/crew/findLikeGroup/${userNo}`
-    );
+    const res = await axios.get(`/crew/findLikeGroup/${userNo}`);
     const list = Array.isArray(res.data) ? res.data : [];
     setLikeList(list);
   }, [userNo]);
 
   const loadMeetingList = useCallback(async () => {
-    const res = await axios.get(
-      `/meeting/crew/${userNo}`
-    );
-    console.log(res.data);
+    const res = await axios.get(`/meeting/crew/${userNo}`);
     const list = Array.isArray(res.data) ? res.data : [];
     setMeetingList(list);
   }, [userNo]);
@@ -95,7 +84,7 @@ export default function Mypage() {
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
 
       {login ? (
-        <div style={{ paddingTop: "70px"}}>
+        <div style={{ paddingTop: "70px" }}>
           <div style={{ marginTop: "48px" }}>
             <ProfileCard member={member} />
           </div>

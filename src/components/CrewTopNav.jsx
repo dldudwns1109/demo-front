@@ -21,7 +21,7 @@ export default function CrewTopNav() {
         zIndex: "1000",
       }}
     >
-      <div className="d-flex justify-content-between border-bottom mb-4">
+      <div className="d-flex justify-content-between border-bottom">
         {tabs.map((tab) => {
           const fullPath = `/crew/${crewNo}/${tab.path}`;
           const isActive = location.pathname.includes(fullPath);
@@ -36,13 +36,15 @@ export default function CrewTopNav() {
                 color: isActive ? "#000" : "#888",
                 fontWeight: isActive ? "bold" : "normal",
                 padding: "1rem 0",
+                borderBottom: isActive && "2px solid black",
+                borderRadius: 0,
               }}
             >
               {tab.name}
-              {isActive && (
+              {/* {isActive && (
                 <div
                   style={{
-                    height: "3px",
+                    height: "2px",
                     backgroundColor: "#000",
                     position: "absolute",
                     bottom: 0,
@@ -50,7 +52,7 @@ export default function CrewTopNav() {
                     right: 0,
                   }}
                 ></div>
-              )}
+              )} */}
             </button>
           );
         })}

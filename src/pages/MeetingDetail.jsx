@@ -198,8 +198,8 @@ export default function MeetingDetail() {
   });
 
   return (
-    <>
-      <Header loginState="loggedIn" input={false} />
+    <div className="vh-100">
+      <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
       <ToastContainer
         position="bottom-right"
         autoClose={2000}
@@ -217,18 +217,14 @@ export default function MeetingDetail() {
           onDelegate={async () => {
             if (!selectedMember) return;
             try {
-              await axios.put(
-                `/meeting/${meetingNo}/owner`,
-                null,
-                {
-                  params: { newOwnerNo: selectedMember.memberNo },
-                  headers: {
-                    Authorization: `Bearer ${localStorage.getItem(
-                      "accessToken"
-                    )}`,
-                  },
-                }
-              );
+              await axios.put(`/meeting/${meetingNo}/owner`, null, {
+                params: { newOwnerNo: selectedMember.memberNo },
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem(
+                    "accessToken"
+                  )}`,
+                },
+              });
               toast.success("모임장 위임이 완료되었습니다.");
               setIsDelegating(false);
               setSelectedMember(null);
@@ -242,10 +238,18 @@ export default function MeetingDetail() {
         />
       )}
 
-      <div>
+      <div
+        style={{
+          paddingLeft: "8.33%",
+          paddingRight: "8.33%",
+          paddingBottom: "80px",
+        }}
+      >
         {meeting.attachmentNo && (
           <img
-            src={`${import.meta.env.VITE_AJAX_BASE_URL}/meeting/image/${meetingNo}`}
+            src={`${
+              import.meta.env.VITE_AJAX_BASE_URL
+            }/meeting/image/${meetingNo}`}
             alt="정모 이미지"
             style={{
               width: "100%",
@@ -256,7 +260,7 @@ export default function MeetingDetail() {
             }}
           />
         )}
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+        <div>
           {/* 상단 타이틀 & 버튼 */}
           <div
             style={{
@@ -281,7 +285,7 @@ export default function MeetingDetail() {
                   border: "none",
                   borderRadius: "8px",
                   cursor: "pointer",
-                  fontWeight: "bold"
+                  fontWeight: "bold",
                 }}
                 onClick={() => {
                   if (!crewNo) return navigate(-1);
@@ -300,7 +304,7 @@ export default function MeetingDetail() {
                       border: "none",
                       borderRadius: "8px",
                       cursor: "pointer",
-                      fontWeight: "bold"
+                      fontWeight: "bold",
                     }}
                     onClick={() => navigate(`/meeting/edit/${meetingNo}`)}
                   >
@@ -314,7 +318,7 @@ export default function MeetingDetail() {
                       border: "none",
                       borderRadius: "8px",
                       cursor: "pointer",
-                      fontWeight: "bold"
+                      fontWeight: "bold",
                     }}
                     onClick={meetingDelete}
                   >
@@ -359,7 +363,7 @@ export default function MeetingDetail() {
                 </span>
               </div>
             </div>
-            <p style={{ margin: 0, fontSize: "14px", color: "#333" }}>
+            <p style={{ margin: 0, fontSize: "16px", color: "#333" }}>
               {dateStr}
             </p>
           </div>
@@ -398,7 +402,7 @@ export default function MeetingDetail() {
                 </span>
               </div>
             </div>
-            <p style={{ margin: 0, fontSize: "14px", color: "#333" }}>
+            <p style={{ margin: 0, fontSize: "16px", color: "#333" }}>
               {timeStr}
             </p>
           </div>
@@ -437,7 +441,7 @@ export default function MeetingDetail() {
                 </span>
               </div>
             </div>
-            <p style={{ margin: 0, fontSize: "14px", color: "#333" }}>
+            <p style={{ margin: 0, fontSize: "16px", color: "#333" }}>
               {meeting.meetingLocation}
             </p>
           </div>
@@ -476,7 +480,7 @@ export default function MeetingDetail() {
                 </span>
               </div>
             </div>
-            <p style={{ margin: 0, fontSize: "14px", color: "#333" }}>
+            <p style={{ margin: 0, fontSize: "16px", color: "#333" }}>
               {Number(meeting.meetingPrice).toLocaleString()}원
             </p>
           </div>
@@ -631,6 +635,6 @@ export default function MeetingDetail() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

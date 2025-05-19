@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import Header from "../components/Header";
-import { useRecoilValue, useRecoilState } from "recoil";
+import { useRecoilValue } from "recoil";
 import { replyCountState } from "../store/replyCountState";
-import { loginState, locationState, userNoState } from "../utils/storage";
+import { loginState, userNoState, windowWidthState } from "../utils/storage";
 import { FaRegCommentDots } from "react-icons/fa";
 import ProfilePopover from "../components/ProfilePopover";
+import changeIcon from "../utils/changeIcon";
 
 export default function JoinBoard() {
   const categories = [
@@ -26,23 +27,18 @@ export default function JoinBoard() {
   const [visibleCount, setVisibleCount] = useState(4);
   const [showPopoverId, setShowPopoverId] = useState(null);
 
-  const navigate = useNavigate();
-  const { crewNo } = useParams();
+  const windowWidth = useRecoilValue(windowWidthState);
   const replyCounts = useRecoilValue(replyCountState);
   const login = useRecoilValue(loginState);
   const userNo = useRecoilValue(userNoState);
-  const [location, setLocation] = useRecoilState(locationState);
 
   useEffect(() => {
     const fetchBoardList = async () => {
       try {
-        const res = await axios.get(
-          `/board/joinboard`,
-          {
-            params:
-              selectedCategory !== "전체" ? { category: selectedCategory } : {},
-          }
-        );
+        const res = await axios.get(`/board/joinboard`, {
+          params:
+            selectedCategory !== "전체" ? { category: selectedCategory } : {},
+        });
         setBoardList(res.data);
       } catch (err) {
         console.error("게시글 불러오기 에러:", err);
@@ -59,19 +55,30 @@ export default function JoinBoard() {
     <>
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
       <div
-        className="container"
-        style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
+        className="vh-100"
+        style={{
+          paddingTop: "70px",
+          paddingBottom: "2rem",
+          paddingLeft: "8.33%",
+          paddingRight: "8.33%",
+        }}
       >
         <div className="mb-5">
           <h2
             className="fw-bold"
-            style={{ fontSize: "2rem", marginTop: "3rem" }}
+            style={{ fontSize: "2rem", marginTop: "80px" }}
           >
             모임 가입 게시판
           </h2>
         </div>
 
-        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div
+          className={`d-flex ${
+            windowWidth > 768
+              ? "justify-content-between"
+              : "flex-column align-items-end"
+          } mb-4 flex-wrap ${windowWidth > 768 ? "gap-2" : "gap-5"}`}
+        >
           <div className="d-flex flex-wrap gap-2">
             {categories.map((cat) => (
               <button
@@ -127,7 +134,9 @@ export default function JoinBoard() {
                   <div className="card-body" style={{ padding: "1.5rem" }}>
                     <div className="d-flex align-items-center mb-3">
                       <img
-                        src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${board.boardWriter}`}
+                        src={`${
+                          import.meta.env.VITE_AJAX_BASE_URL
+                        }/member/image/${board.boardWriter}`}
                         alt="프로필"
                         className="rounded-circle me-3"
                         style={{
@@ -159,16 +168,21 @@ export default function JoinBoard() {
                       </div>
                     </div>
                     <div
-                      className="mb-2"
+                      className="d-inline-flex bg-light align-items-center gap-2 mb-3"
                       style={{
-                        color: "#DABFFF",
-                        fontWeight: "bold",
-                        fontSize: "0.9rem",
+                        border: "1px solid #F9B4ED",
+                        borderRadius: "8px",
+                        paddingLeft: "12px",
+                        paddingRight: "12px",
+                        paddingTop: "7px",
+                        paddingBottom: "7px",
+                        color: "#333333",
                       }}
                     >
+                      {changeIcon(board.boardCategory)}
                       {board.boardCategory}
                     </div>
-                    <h5 className="fw-bold mb-2" style={{ fontSize: "1.2rem" }}>
+                    <h5 className="fw-bold mb-3" style={{ fontSize: "1.2rem" }}>
                       {board.boardTitle}
                     </h5>
                     <p
@@ -179,7 +193,10 @@ export default function JoinBoard() {
                         ? board.boardContent.slice(0, 20) + "..."
                         : board.boardContent}
                     </p>
-                    <small className="text-muted d-flex align-items-center gap-1">
+                    <div
+                      className="d-flex align-items-center gap-3"
+                      style={{ color: "#666666" }}
+                    >
                       {board.boardWriteTime
                         ? new Date(board.boardWriteTime).toLocaleString(
                             "ko-KR",
@@ -191,10 +208,14 @@ export default function JoinBoard() {
                               minute: "2-digit",
                             }
                           )
-                        : "시간 정보 없음"}
-                      / <FaRegCommentDots style={{ marginBottom: "2px" }} />{" "}
-                      댓글 {replyCounts[board.boardNo] ?? board.boardReply}
-                    </small>
+                        : "시간 정보 없음"}{" "}
+                      <div className="d-flex align-items-center gap-1">
+                        <FaRegCommentDots />{" "}
+                        <span>
+                          댓글 {replyCounts[board.boardNo] ?? board.boardReply}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </Link>

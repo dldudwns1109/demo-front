@@ -8,27 +8,27 @@ import { BiSolidParty } from "react-icons/bi";
 import { BsGraphUpArrow } from "react-icons/bs";
 import { ImSpoonKnife } from "react-icons/im";
 
-export default function changeIcon(crewCategory) {
+export default function changeIcon(crewCategory, color = "#6C757D") {
   switch (crewCategory) {
     case "스포츠":
-      return <MdOutlineSportsBaseball size={18} color="#6C757D" />;
-      case "사교":
-      return <IoPeople size={18} color="#6C757D" />;
+      return <MdOutlineSportsBaseball size={18} color={color} />;
+    case "사교":
+      return <IoPeople size={18} color={color} />;
     case "독서":
-      return <FaBookOpen size={18} color="#6C757D" />;
+      return <FaBookOpen size={18} color={color} />;
     case "여행":
-      return <BiTrip size={18} color="#6C757D" />;
+      return <BiTrip size={18} color={color} />;
     case "음악":
-      return <IoIosMusicalNotes size={18} color="#6C757D" />;
+      return <IoIosMusicalNotes size={18} color={color} />;
     case "게임":
-      return <FaGamepad size={18} color="#6C757D" />;
+      return <FaGamepad size={18} color={color} />;
     case "공연":
-      return <BiSolidParty size={18} color="#6C757D" />;
+      return <BiSolidParty size={18} color={color} />;
     case "자기계발":
-      return <BsGraphUpArrow size={18} color="#6C757D" />;
+      return <BsGraphUpArrow size={18} color={color} />;
     case "요리":
-      return <ImSpoonKnife size={18} color="#6C757D" />;
+      return <ImSpoonKnife size={18} color={color} />;
     default:
-      return <IoPeople size={18} color="#6C757D" />;
+      return <IoPeople size={18} color={color} />;
   }
 }

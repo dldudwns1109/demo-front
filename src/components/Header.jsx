@@ -326,6 +326,7 @@ export default function Header({
                       borderRadius: "8px",
                       right: "0px",
                       width: "140px",
+                      zIndex: "999",
                     }}
                   >
                     <button
@@ -372,9 +373,7 @@ export default function Header({
                             "Authorization"
                           ] = `Bearer ${accessToken}`;
 
-                          await axios.post(
-                            "/member/signout"
-                          );
+                          await axios.post("/member/signout");
                         } catch (e) {
                         } finally {
                           localStorage.removeItem("accessToken");

@@ -29,7 +29,6 @@ export default function CrewBoardDetail() {
   const boardDropdownRef = useRef(null);
 
   const login = useRecoilValue(loginState);
-  const [location, setLocation] = useRecoilState(locationState);
   const userNo = useRecoilValue(userNoState);
 
   const getAuthHeaders = () => {
@@ -42,10 +41,9 @@ export default function CrewBoardDetail() {
     const checkMemberStatus = async () => {
       try {
         const headers = getAuthHeaders();
-        const res = await axios.get(
-          `/crewmember/${crewNo}/member`,
-          { headers }
-        );
+        const res = await axios.get(`/crewmember/${crewNo}/member`, {
+          headers,
+        });
 
         setIsMember(res.data);
       } catch (err) {
@@ -69,9 +67,7 @@ export default function CrewBoardDetail() {
       if (!userNo || !crewNo) return;
 
       try {
-        const res = await axios.get(
-          `/board/leader/${userNo}/${crewNo}`
-        );
+        const res = await axios.get(`/board/leader/${userNo}/${crewNo}`);
         setIsLeader(res.data);
       } catch (err) {
         console.error("리더 여부 확인 실패:", err);
@@ -82,13 +78,10 @@ export default function CrewBoardDetail() {
     checkLeaderStatus();
   }, [userNo, crewNo]);
 
-  
   useEffect(() => {
     const fetchBoardData = async () => {
       try {
-        const res = await axios.get(
-          `/board/${boardNo}`
-        );
+        const res = await axios.get(`/board/${boardNo}`);
         if (res.data) {
           setBoard({
             ...res.data,
@@ -106,60 +99,6 @@ export default function CrewBoardDetail() {
 
     fetchBoardData();
   }, [boardNo]);
-
-  // useEffect(() => {
-  //   const handleClickOutside = (e) => {
-  //     if (
-  //       boardPopoverRef.current &&
-  //       !boardPopoverRef.current.contains(e.target)
-  //     ) {
-  //       setShowBoardWriterPopover(false);
-  //     }
-  //     if (
-  //       !replyPopoverRefs.current.some((ref) => ref && ref.contains(e.target))
-  //     ) {
-  //       setReplyPopoverIndex(null);
-  //     }
-  //   };
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => document.removeEventListener("mousedown", handleClickOutside);
-  // }, []);
-  // useEffect(() => {
-  //   const handleClickOutside = (e) => {
-  //     // 게시글 작성자 팝오버 외부 클릭 시 닫힘
-  //     if (
-  //       boardPopoverRef.current &&
-  //       !boardPopoverRef.current.contains(e.target)
-  //     ) {
-  //       setShowBoardWriterPopover(false);
-  //     }
-
-  //     // 게시글 드롭다운 외부 클릭 시 닫힘
-  //     if (
-  //       boardDropdownOpen &&
-  //       boardDropdownRef.current &&
-  //       !boardDropdownRef.current.contains(e.target)
-  //     ) {
-  //       setBoardDropdownOpen(false);
-  //     }
-
-  //     // 댓글 드롭다운 외부 클릭 시 닫힘
-  //     let isReplyDropdownClicked = false;
-  //     replyPopoverRefs.current.forEach((ref) => {
-  //       if (ref && ref.contains(e.target)) {
-  //         isReplyDropdownClicked = true;
-  //       }
-  //     });
-
-  //     if (!isReplyDropdownClicked) {
-  //       setDropdownOpen(null);
-  //       setReplyPopoverIndex(null);
-  //     }
-  //   };
-
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => document.removeEventListener("mousedown", handleClickOutside);
-  // }, [boardDropdownOpen, dropdownOpen]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -190,9 +129,7 @@ export default function CrewBoardDetail() {
   useEffect(() => {
     const fetchReplies = async () => {
       try {
-        const res = await axios.get(
-          `/reply/${boardNo}`
-        );
+        const res = await axios.get(`/reply/${boardNo}`);
         setReplies(res.data);
       } catch (err) {
         console.error("댓글 목록 불러오기 에러:", err.message);
@@ -213,10 +150,7 @@ export default function CrewBoardDetail() {
         crewNo: parseInt(crewNo),
       };
 
-      const res = await axios.post(
-        `/reply`,
-        replyData
-      );
+      const res = await axios.post(`/reply`, replyData);
       setReplies([res.data, ...replies]);
 
       setReplyCounts((prev) => ({
@@ -229,21 +163,6 @@ export default function CrewBoardDetail() {
     }
   };
 
-  // const handleEditReply = (idx) => {
-  //   const replyWriter = replies[idx].replyWriter;
-
-  //   if (replyWriter !== userNo) {
-  //     window.confirm("수정 권한이 없습니다.");
-  //     setDropdownOpen(null);
-  //     return;
-  //   }
-
-  //   const updatedReplies = [...replies];
-  //   updatedReplies[idx].isEditing = true;
-  //   updatedReplies[idx].previousContent = updatedReplies[idx].replyContent;
-  //   setReplies(updatedReplies);
-  //   setDropdownOpen(null);
-  // };
   const handleEditReply = (idx) => {
     const replyWriter = replies[idx].replyWriter;
 
@@ -271,10 +190,9 @@ export default function CrewBoardDetail() {
     if (!newContent.trim()) return;
 
     try {
-      const response = await axios.put(
-        `/reply/${replyNo}`,
-        { replyContent: newContent }
-      );
+      const response = await axios.put(`/reply/${replyNo}`, {
+        replyContent: newContent,
+      });
 
       if (response.data) {
         const updatedReplies = replies.map((reply) =>
@@ -299,14 +217,6 @@ export default function CrewBoardDetail() {
     }
   };
 
-  // const handleCancelEdit = (idx) => {
-  //   const updatedReplies = [...replies];
-  //   updatedReplies[idx].isEditing = false;
-  //   updatedReplies[idx].replyContent = updatedReplies[idx].backupContent; // 백업된 내용으로 복구
-  //   delete updatedReplies[idx].backupContent; // 백업 제거
-  //   setReplies(updatedReplies);
-  //   setDropdownOpen(null);
-  // };
   const handleCancelEdit = (idx) => {
     const updatedReplies = [...replies];
 
@@ -337,7 +247,6 @@ export default function CrewBoardDetail() {
     }
   };
 
-
   const handleDeleteReply = async (replyNo, idx) => {
     const replyWriter = replies[idx].replyWriter;
 
@@ -362,9 +271,7 @@ export default function CrewBoardDetail() {
       setReplies(updatedReplies);
 
       // 서버로부터 최신 댓글 수를 받아와서 업데이트
-      const res = await axios.get(
-        `/reply/count/${boardNo}`
-      );
+      const res = await axios.get(`/reply/count/${boardNo}`);
       const updatedCount = res.data;
 
       setReplyCounts((prev) => ({
@@ -423,21 +330,31 @@ export default function CrewBoardDetail() {
   }
 
   return (
-    <>
-      <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
+    <div className="vh-100">
+      <div style={{ position: "relative", zIndex: 1100 }}>
+        <Header input={false} loginState={`${login ? "loggined" : "login"}`} />
+      </div>
       <div
-        className="container"
-        style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
+        style={{
+          position: "fixed",
+          top: "70px",
+          width: "100%",
+          zIndex: 100,
+          backgroundColor: "#fff",
+        }}
       >
         <CrewTopNav />
+      </div>
 
+      <div
+        className="h-100"
+        style={{
+          paddingTop: "70px",
+          paddingLeft: "8.33%",
+          paddingRight: "8.33%",
+        }}
+      >
         <div className="mb-4">
-          {/* <Link
-            to={`/crew/${crewNo}/board`}
-            className="btn btn-outline-secondary btn-sm mt-4"
-          >
-            목록으로
-          </Link> */}
           <button
             className="btn btn-outline-secondary btn-sm mt-4"
             onClick={handleBoardReturn}
@@ -449,7 +366,9 @@ export default function CrewBoardDetail() {
         <div className="d-flex justify-content-between align-items-start mb-4 position-relative">
           <div className="d-flex align-items-center">
             <img
-              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${board.boardWriter}`}
+              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${
+                board.boardWriter
+              }`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{
@@ -460,29 +379,6 @@ export default function CrewBoardDetail() {
               }}
               onClick={() => setShowBoardWriterPopover(!showBoardWriterPopover)}
             />
-            {/* <div>
-              <div className="d-flex align-items-center">
-                <strong className="me-2">{board.boardWriterNickname}</strong>
-                <small className="text-muted">
-                  {new Date(board.boardWriteTime).toLocaleString("ko-KR", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </small>
-              </div>
-              <div className="text-muted" style={{ fontSize: "0.85rem" }}>
-                {board.boardCategory} · {new Date(board.boardWriteTime).toLocaleString("ko-KR", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-              </div>
-            </div> */}
             <div>
               <strong>{board.boardWriterNickname}</strong>
 
@@ -491,7 +387,7 @@ export default function CrewBoardDetail() {
                   fontSize: "0.85rem",
                   fontWeight: "bold",
                   color: board.isLeader === "Y" ? "#F9B4ED" : "#888",
-                  marginLeft: "0.5rem", // 간격 조정
+                  marginLeft: "0.5rem",
                 }}
               >
                 {board.isLeader === "Y" ? "회장" : "회원"}
@@ -609,13 +505,11 @@ export default function CrewBoardDetail() {
               maxWidth: "50ch",
             }}
           >
-            {board.boardContent
-              .split(/(?<=[.!?])\s+/) // 문장 단위로 분리 (마침표, 느낌표, 물음표 이후)
-              .map((sentence, index) => (
-                <p key={index} style={{ marginBottom: "0.5rem" }}>
-                  {sentence.trim()}
-                </p>
-              ))}
+            {board.boardContent.split("\n").map((sentence, index) => (
+              <p key={index} style={{ marginBottom: "0.5rem" }}>
+                {sentence.trim()}
+              </p>
+            ))}
           </div>
         </div>
 
@@ -754,7 +648,6 @@ export default function CrewBoardDetail() {
             placeholder="댓글을 입력하세요"
             value={newReply}
             onChange={(e) => setNewReply(e.target.value)}
-            // onKeyDown={handleKeyPress}
             onKeyDown={(e) => handleKeyPress(e)}
             style={{ flex: 1, boxShadow: "none" }}
           />
@@ -772,6 +665,6 @@ export default function CrewBoardDetail() {
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }

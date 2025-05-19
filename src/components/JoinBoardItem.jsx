@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import changeIcon from "../utils/changeIcon";
 
 export default function JoinBoardItem({ data }) {
   const navigate = useNavigate();
@@ -17,7 +18,9 @@ export default function JoinBoardItem({ data }) {
       </span>
       <div className="d-flex gap-3 mb-3" style={{ marginTop: "12px" }}>
         <img
-          src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${data.boardWriter}`}
+          src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${
+            data.boardWriter
+          }`}
           width={80}
           height={80}
           style={{ borderRadius: "999px" }}
@@ -38,7 +41,7 @@ export default function JoinBoardItem({ data }) {
       </div>
       <div className="mb-4">
         <div
-          className="d-inline-flex bg-light"
+          className="d-inline-flex bg-light align-items-center gap-2"
           style={{
             border: "1px solid #F9B4ED",
             borderRadius: "8px",
@@ -49,6 +52,7 @@ export default function JoinBoardItem({ data }) {
             color: "#333333",
           }}
         >
+          {changeIcon(data.boardCategory)}
           {data.boardCategory}
         </div>
       </div>

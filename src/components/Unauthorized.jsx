@@ -6,7 +6,7 @@ export default function Unauthorized() {
     >
       <img
         style={{ marginTop: "80px" }}
-        src="${import.meta.env.VITE_AJAX_BASE_URL}/images/no-authorized.svg"
+        src="/images/no-authorized.svg"
         width={240}
       />
       <span className="fs-6" style={{ color: "#333333" }}>

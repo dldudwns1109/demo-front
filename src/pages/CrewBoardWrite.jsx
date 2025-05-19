@@ -38,11 +38,10 @@ export default function CrewBoardWrite() {
 
       try {
         const headers = getAuthHeaders();
-        const res = await axios.get(
-          `/crewmember/${crewNo}/member`,
-          { headers }
-        );
-        
+        const res = await axios.get(`/crewmember/${crewNo}/member`, {
+          headers,
+        });
+
         if (!res.data) throw new Error("권한이 없습니다.");
 
         setIsMember(true);
@@ -60,9 +59,7 @@ export default function CrewBoardWrite() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get(
-          `/member/mypage/${userNo}`
-        );
+        const res = await axios.get(`/member/mypage/${userNo}`);
         setProfile(res.data);
       } catch (err) {
         console.error(err);
@@ -106,17 +103,19 @@ export default function CrewBoardWrite() {
   };
 
   return (
-    <>
+    <div className="h-100">
       <Header input={false} loginState={`${login ? "loggined" : "login"}`} />
       <div
-        className="container"
-        style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
+        style={{
+          paddingTop: "70px",
+          paddingLeft: "8.33%",
+          paddingRight: "8.33%",
+        }}
       >
         <div className="mb-5">
           <Link
             to={`/crew/${crewNo}/board`}
-            className="btn btn-outline-secondary btn-sm"
-            style={{ marginTop: "3rem" }}
+            className="btn btn-outline-secondary btn-sm mt-4"
           >
             목록으로
           </Link>
@@ -125,7 +124,9 @@ export default function CrewBoardWrite() {
         {profile && (
           <div className="d-flex align-items-center mb-4">
             <img
-              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${userNo}`}
+              src={`${
+                import.meta.env.VITE_AJAX_BASE_URL
+              }/member/image/${userNo}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{
@@ -206,6 +207,6 @@ export default function CrewBoardWrite() {
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }

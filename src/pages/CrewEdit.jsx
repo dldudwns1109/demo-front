@@ -277,8 +277,14 @@ export default function CrewEdit() {
     <>
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
       <div
-        className="d-flex flex-column align-items-center"
-        style={{ paddingTop: "70px", paddingBottom: "80px" }}
+        className="container d-flex flex-column align-items-center"
+        style={{
+          paddingTop: "70px",
+          paddingBottom: "80px",
+          maxWidth: "100%",
+          overflowX: window.innerWidth <= 380 ? "auto" : "unset",
+          boxSizing: "border-box",
+        }}
       >
         <div style={{ marginBottom: "48px", marginTop: "80px" }}>
           <span
@@ -322,7 +328,7 @@ export default function CrewEdit() {
             value={crew.crewName}
             onChange={handleInputChange}
             style={{
-              borderColor: crewNameError ? "#dc3545" : "#ced4da", 
+              borderColor: crewNameError ? "#dc3545" : "#ced4da",
             }}
           />
           {crewNameError && (

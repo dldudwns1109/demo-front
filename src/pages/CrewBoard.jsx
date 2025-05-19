@@ -181,7 +181,7 @@ export default function CrewBoard() {
   };
 
   return (
-    <>
+    <div className="vh-100">
       {/* 헤더 */}
       <Header
         loginState={`${login ? "loggined" : "login"}`}
@@ -192,11 +192,18 @@ export default function CrewBoard() {
       />
 
       <div
-        className="container"
-        style={{ paddingTop: "5rem", paddingBottom: "2rem" }}
+        style={{
+          position: "fixed",
+          top: "70px",
+          width: "100%",
+          zIndex: 1000,
+          backgroundColor: "#fff",
+        }}
       >
         <CrewTopNav />
+      </div>
 
+      <div style={{ paddingTop: "160px" }}>
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div className="d-flex flex-wrap gap-2">
             {categories.map((cat) => (
@@ -407,6 +414,6 @@ export default function CrewBoard() {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }

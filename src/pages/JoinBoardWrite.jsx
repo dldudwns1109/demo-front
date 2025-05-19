@@ -155,8 +155,9 @@ export default function JoinBoardWrite() {
               }`}
               style={{
                 backgroundColor:
-                  selectedCategory === cat ? "#F9B4ED" : "#ffffff",
-                border: selectedCategory === cat ? "none" : "1px solid #F9B4ED",
+                  selectedCategory === cat ? "#000000" : "#f1f3f5",
+                color: selectedCategory === cat ? "#ffffff" : "#000000",
+                border: "none",
                 fontSize: "0.95rem",
               }}
               onClick={() => setSelectedCategory(cat)}

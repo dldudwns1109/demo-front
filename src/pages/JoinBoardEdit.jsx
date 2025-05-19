@@ -171,10 +171,9 @@ export default function JoinBoardEdit() {
               className="btn btn-sm rounded-pill"
               style={{
                 backgroundColor:
-                  board.boardCategory === cat ? "#F9B4ED" : "#ffffff",
-                color: board.boardCategory === cat ? "#ffffff" : "#F9B4ED",
-                border:
-                  board.boardCategory === cat ? "none" : "1px solid #F9B4ED",
+                  board.boardCategory === cat ? "#000000" : "#f1f3f5",
+                color: board.boardCategory === cat ? "#ffffff" : "#000000",
+                border: "none",
                 padding: "0.5rem 1.2rem",
                 fontSize: "0.95rem",
               }}
@@ -217,7 +216,7 @@ export default function JoinBoardEdit() {
         </div>
 
         {/* 수정 버튼 */}
-        <div
+        {/* <div
           className="text-center d-flex justify-content-center"
           style={{ gap: "2rem" }}
         >
@@ -235,6 +234,22 @@ export default function JoinBoardEdit() {
           <button
             className="btn btn-secondary px-5 py-2"
             style={{ fontSize: "1rem" }}
+            onClick={() => navigate(`/join/board/detail/${boardNo}`)}
+          >
+            뒤로가기
+          </button>
+        </div> */}
+        <div className="d-flex justify-content-center gap-3">
+          <button
+            className="btn btn-primary px-4"
+            onClick={handleEdit}
+            disabled={board.boardWriter !== userNo}
+          >
+            수정하기
+          </button>
+
+          <button
+            className="btn btn-secondary px-4"
             onClick={() => navigate(`/join/board/detail/${boardNo}`)}
           >
             뒤로가기

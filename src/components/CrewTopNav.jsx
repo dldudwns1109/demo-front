@@ -13,39 +13,48 @@ export default function CrewTopNav() {
   const { crewNo } = useParams();
 
   return (
-    <div className="d-flex justify-content-between border-bottom mb-4">
-      {tabs.map((tab) => {
-        const fullPath = `/crew/${crewNo}/${tab.path}`;
-        const isActive = location.pathname.includes(fullPath);
-        return (
-          <button
-            key={tab.name}
-            onClick={() => navigate(fullPath)}
-            className="btn btn-link position-relative text-center"
-            style={{
-              flex: 1,
-              textDecoration: "none",
-              color: isActive ? "#000" : "#888",
-              fontWeight: isActive ? "bold" : "normal",
-              padding: "1rem 0",
-            }}
-          >
-            {tab.name}
-            {isActive && (
-              <div
-                style={{
-                  height: "3px",
-                  backgroundColor: "#000",
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                }}
-              ></div>
-            )}
-          </button>
-        );
-      })}
+    <div
+      style={{
+        position: "sticky",
+        top: "0",
+        backgroundColor: "#fff",
+        zIndex: "1000",
+      }}
+    >
+      <div className="d-flex justify-content-between border-bottom mb-4">
+        {tabs.map((tab) => {
+          const fullPath = `/crew/${crewNo}/${tab.path}`;
+          const isActive = location.pathname.includes(fullPath);
+          return (
+            <button
+              key={tab.name}
+              onClick={() => navigate(fullPath)}
+              className="btn btn-link position-relative text-center"
+              style={{
+                flex: 1,
+                textDecoration: "none",
+                color: isActive ? "#000" : "#888",
+                fontWeight: isActive ? "bold" : "normal",
+                padding: "1rem 0",
+              }}
+            >
+              {tab.name}
+              {isActive && (
+                <div
+                  style={{
+                    height: "3px",
+                    backgroundColor: "#000",
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                  }}
+                ></div>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

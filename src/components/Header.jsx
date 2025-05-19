@@ -406,7 +406,7 @@ export default function Header({
           <input
             ref={searchRef}
             type="text"
-            className={`d-flex ps-0 pe-2 border-0`}
+            className={`d-flex ps-0 pe-2 border-0 w-100`}
             placeholder="찾을 모임을 검색해보세요!"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}

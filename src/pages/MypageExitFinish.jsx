@@ -2,9 +2,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import Header from "../components/Header";
 import Unauthorized from "../components/Unauthorized";
-import { loginState } from "../utils/storage";
+import { loginState, windowWidthState } from "../utils/storage";
 
 export default function MypageExitFinish() {
+  const windowWidth = useRecoilValue(windowWidthState);
   const login = useRecoilValue(loginState);
   const location = useLocation();
   const { isFinish } = location?.state || {};
@@ -18,7 +19,10 @@ export default function MypageExitFinish() {
         <div className="d-flex justify-content-center">
           <div
             className="d-flex flex-column align-items-center"
-            style={{ paddingTop: "70px", width: "360px" }}
+            style={{
+              paddingTop: "70px",
+              width: windowWidth > 768 ? "360px" : "300px",
+            }}
           >
             <span
               className="fs-4 fw-bold"

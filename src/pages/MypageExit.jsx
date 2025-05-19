@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import axios from "axios";
-import { loginState, userNoState } from "../utils/storage";
+import { loginState, userNoState, windowWidthState } from "../utils/storage";
 import Header from "../components/Header";
 import Unauthorized from "../components/Unauthorized";
 
 export default function MypageExit() {
+  const windowWidth = useRecoilValue(windowWidthState);
   const userNo = useRecoilValue(userNoState);
   const login = useRecoilValue(loginState);
   const [checkAgree, setCheckAgree] = useState(false);
@@ -44,7 +45,10 @@ export default function MypageExit() {
         <div className="d-flex justify-content-center h-100">
           <div
             className="d-flex flex-column align-items-center"
-            style={{ paddingTop: "70px", width: "360px" }}
+            style={{
+              paddingTop: "70px",
+              width: windowWidth > 768 ? "360px" : "300px",
+            }}
           >
             <span
               className="text-danger fw-bold"
@@ -98,7 +102,10 @@ export default function MypageExit() {
 
             <div
               className="d-flex align-items-center"
-              style={{ width: "360px", marginBottom: "24px" }}
+              style={{
+                width: windowWidth > 768 ? "360px" : "300px",
+                marginBottom: "24px",
+              }}
             >
               <input
                 type="checkbox"
@@ -127,7 +134,10 @@ export default function MypageExit() {
                 type="password"
                 placeholder="사용중이신 비밀번호를 입력해주세요."
                 className="member-input"
-                style={{ outline: "none" }}
+                style={{
+                  outline: "none",
+                  width: windowWidth > 768 ? "360px" : "300px",
+                }}
                 value={password}
                 onChange={(e) => setPassowrd(e.target.value)}
                 onBlur={async () =>

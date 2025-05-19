@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
-import { loginState, userNoState } from "../utils/storage";
+import { loginState, userNoState, windowWidthState } from "../utils/storage";
 import { useRecoilValue } from "recoil";
 import { useNavigate, useParams } from "react-router-dom";
 import Unauthorized from "../components/Unauthorized";
 import axios from "axios";
 
 export default function CrewDelete() {
+  const windowWidth = useRecoilValue(windowWidthState);
   const userNo = useRecoilValue(userNoState);
   const { crewNo } = useParams();
   const login = useRecoilValue(loginState);
@@ -65,10 +66,14 @@ export default function CrewDelete() {
         <Header input={false} loginState={`${login ? "loggined" : "login"}`} />
         {login ? (
           isLeader ? (
-            <div className="d-flex justify-content-center h-100">
+            <div className="d-flex justify-content-center">
               <div
                 className="d-flex flex-column align-items-center"
-                style={{ paddingTop: "70px", width: "360px" }}
+                style={{
+                  paddingTop: "70px",
+                  paddingBottom: windowWidth > 768 ? "0px" : "80px",
+                  width: windowWidth > 768 ? "360px" : "300px",
+                }}
               >
                 <span
                   className="text-danger fw-bold"
@@ -153,7 +158,10 @@ export default function CrewDelete() {
 
                 <div
                   className="d-flex align-items-center"
-                  style={{ width: "360px", marginBottom: "24px" }}
+                  style={{
+                    width: windowWidth > 768 ? "360px" : "300px",
+                    marginBottom: "24px",
+                  }}
                 >
                   <input
                     type="checkbox"

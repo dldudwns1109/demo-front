@@ -8,12 +8,15 @@ import { IoPeople } from "react-icons/io5";
 import { IoHeartSharp } from "react-icons/io5";
 import { IoHeartOutline } from "react-icons/io5";
 import { userNoState } from "../utils/storage";
+import changeIcon from "../utils/changeIcon";
 
 export default function GroupItem({ data }) {
   const userNo = useRecoilValue(userNoState);
   const [toggle, setToggle] = useState(data.crewIsLiked);
 
   const navigate = useNavigate();
+
+  const icon = changeIcon(data.crewCategory);
 
   useEffect(() => {
     setToggle(data.crewIsLiked);
@@ -88,7 +91,7 @@ export default function GroupItem({ data }) {
         className="d-flex flex-wrap align-items-center gap-1"
         style={{ color: "#666666" }}
       >
-        <IoPeople size={18} color="#6C757D" />
+        {icon}
         <span>{data.crewCategory}</span> ·
         <IoLocationSharp size={18} color="#6C757D" />
         <span>{data.crewLocation}</span> ·{" "}

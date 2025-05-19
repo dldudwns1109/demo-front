@@ -325,7 +325,7 @@ export default function CrewChat() {
                                 marginBottom:
                                   windowWidth > 1024 ? "0px" : "12px",
                               }}
-                              src={`/member/image/${message.accountNo}`}
+                              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${message.accountNo}`}
                               width={windowWidth > 1024 ? 64 : 48}
                               height={windowWidth > 1024 ? 64 : 48}
                             />

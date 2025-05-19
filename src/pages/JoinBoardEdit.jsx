@@ -125,7 +125,7 @@ export default function JoinBoardEdit() {
         {profile && (
           <div className="d-flex align-items-center mb-4">
             <img
-              src={`/member/image/${userNo}`}
+              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${userNo}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{ width: "3rem", height: "3rem", objectFit: "cover" }}

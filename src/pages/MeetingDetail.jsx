@@ -245,7 +245,7 @@ export default function MeetingDetail() {
       <div>
         {meeting.attachmentNo && (
           <img
-            src={`/meeting/image/${meetingNo}`}
+            src={`${import.meta.env.VITE_AJAX_BASE_URL}/meeting/image/${meetingNo}`}
             alt="정모 이미지"
             style={{
               width: "100%",

@@ -103,11 +103,11 @@ export default function CrewEdit() {
         crewCategory: crewData.crewCategory,
         crewLocation: crewData.crewLocation,
         crewIntro: crewData.crewIntro,
-        crewImage: `/crew/image/${crewNo}`,
+        crewImage: `${import.meta.env.VITE_AJAX_BASE_URL}/crew/image/${crewNo}`,
       });
 
       setLocation({ city, area });
-      setImagePreview(`/crew/image/${crewNo}`);
+      setImagePreview(`${import.meta.env.VITE_AJAX_BASE_URL}/crew/image/${crewNo}`);
     } catch (err) {
       console.error("Error fetching crew data:", err.message);
       alert("모임 정보를 불러오는데 실패했습니다.");

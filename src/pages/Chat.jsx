@@ -247,7 +247,7 @@ export default function Chat() {
                       <img
                         className="shadow-sm"
                         style={{ borderRadius: "999px", objectFit: "cover" }}
-                        src={`/member/image/${room.accountNo}`}
+                        src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${room.accountNo}`}
                         width={64}
                         height={64}
                       />
@@ -313,7 +313,7 @@ export default function Chat() {
                     <img
                       className="shadow-sm"
                       style={{ borderRadius: "999px", objectFit: "cover" }}
-                      src={`/member/image/${room.accountNo}`}
+                      src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${room.accountNo}`}
                       width={48}
                       height={48}
                     />
@@ -404,7 +404,7 @@ export default function Chat() {
                                   marginBottom:
                                     windowWidth > 1024 ? "0px" : "12px",
                                 }}
-                                src={`/member/image/${message.accountNo}`}
+                                src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${message.accountNo}`}
                                 width={windowWidth > 1024 ? 64 : 48}
                                 height={windowWidth > 1024 ? 64 : 48}
                               />
@@ -513,7 +513,7 @@ export default function Chat() {
             style={{ paddingTop: "70px" }}
           >
             <img
-              src="/images/no-authorized.svg"
+              src="${import.meta.env.VITE_AJAX_BASE_URL}/images/no-authorized.svg"
               style={{ marginTop: "80px" }}
             />
             <span className="fs-6 fw-bold" style={{ color: "#333333" }}>

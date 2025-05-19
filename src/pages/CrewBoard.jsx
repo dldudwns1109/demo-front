@@ -235,7 +235,7 @@ export default function CrewBoard() {
                   <div className="d-flex align-items-center mb-3">
                     {/* 프로필 이미지 클릭 시 팝오버 */}
                     <img
-                      src={`/member/image/${board.boardWriter}`}
+                      src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${board.boardWriter}`}
                       alt="프로필"
                       className="rounded-circle me-3"
                       style={{
@@ -324,7 +324,7 @@ export default function CrewBoard() {
                 >
                   <div className="d-flex align-items-center mb-3">
                     <img
-                      src={`/member/image/${userNo}`}
+                      src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${userNo}`}
                       alt="프로필"
                       className="rounded-circle me-3"
                       style={{
@@ -348,7 +348,7 @@ export default function CrewBoard() {
                   <div className="fw-bold">가입한 모임 예시</div>
                   <div className="d-flex align-items-center mt-2">
                     <img
-                      src="/images/sample-group.jpg"
+                      src="${import.meta.env.VITE_AJAX_BASE_URL}/images/sample-group.jpg"
                       className="me-2 rounded"
                       style={{ width: "2rem", height: "2rem" }}
                       alt="모임"

@@ -45,7 +45,7 @@ export default function CrewCreateFinish() {
           {crew ? (
             <>
               <img
-                src={`/crew/image/${crewNo}`}
+                src={`${import.meta.env.VITE_AJAX_BASE_URL}/crew/image/${crewNo}`}
                 className="shadow-sm"
                 style={{ marginTop: "48px", borderRadius: "999px" }}
                 width={200}

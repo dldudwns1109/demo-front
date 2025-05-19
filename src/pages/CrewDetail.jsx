@@ -40,8 +40,6 @@ export default function CrewDetail() {
   // const [isCrewMember, setIsCrewMember] = useState(false);
   const [isLeader, setIsLeader] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  // const [crewImage, setCrewImage] = useState("/images/dummy-crew.jpg");
-  // const [showJoinInput, setShowJoinInput] = useState(false);
   const setShowReportInput = useState(false)[1];
   const [showJoinSheet, setShowJoinSheet] = useState(false);
   const joinSheetRef = useRef(null);
@@ -501,7 +499,7 @@ export default function CrewDetail() {
               }}
             >
               <img
-                src={`/crew/image/${crewNo}`}
+                src={`${import.meta.env.VITE_AJAX_BASE_URL}/crew/image/${crewNo}`}
                 alt="Crew"
                 className="crew-image"
               />
@@ -803,7 +801,7 @@ export default function CrewDetail() {
                             }}
                           >
                             <img
-                              src={`/member/image/${member.memberNo}`}
+                              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${member.memberNo}`}
                               alt="프로필"
                               style={{
                                 width: "40px",
@@ -903,7 +901,7 @@ export default function CrewDetail() {
                     >
                       {/* 이미지 */}
                       <img
-                        src={`/member/image/${member.memberNo}`}
+                        src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${member.memberNo}`}
                         alt="프로필"
                         style={{
                           width: "50px",

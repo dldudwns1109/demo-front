@@ -127,7 +127,7 @@ export default function MypageEdit() {
       const [city, area] = data.memberLocation.split(" ");
       setCity(city);
       setLocation({ city, area });
-      setPreviewImg(`/member/image/${data.memberNo}`);
+      setPreviewImg(`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${data.memberNo}`);
 
       setMember({
         memberId: data.memberId,

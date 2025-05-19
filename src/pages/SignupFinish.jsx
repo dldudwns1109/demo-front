@@ -53,7 +53,7 @@ export default function SignupFinish() {
               src={
                 memberNo === null
                   ? "images/default-profile.svg"
-                  : `/member/image/${memberNo}`
+                  : `${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${memberNo}`
               }
               className="shadow-sm"
               style={{ marginTop: "48px", borderRadius: "999px" }}

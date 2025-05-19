@@ -127,7 +127,7 @@ export default function JoinBoard() {
                   <div className="card-body" style={{ padding: "1.5rem" }}>
                     <div className="d-flex align-items-center mb-3">
                       <img
-                        src={`/member/image/${board.boardWriter}`}
+                        src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${board.boardWriter}`}
                         alt="프로필"
                         className="rounded-circle me-3"
                         style={{

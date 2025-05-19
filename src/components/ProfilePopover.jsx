@@ -115,7 +115,7 @@ export default function ProfilePopover({ memberNo, onClose }) {
       >
         {/* 프로필 이미지 */}
         <img
-          src={`/member/image/${memberNo}`}
+          src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${memberNo}`}
           alt="프로필"
           className="rounded-circle"
           style={{ width: "3.5rem", height: "3.5rem", objectFit: "cover" }}
@@ -225,7 +225,7 @@ export default function ProfilePopover({ memberNo, onClose }) {
               }}
             >
               <img
-                src={`/crew/image/${crew.crewNo}`}
+                src={`${import.meta.env.VITE_AJAX_BASE_URL}/crew/image/${crew.crewNo}`}
                 className="rounded-circle me-2"
                 style={{ width: "3rem", height: "3rem", objectFit: "cover" }}
               />

@@ -449,7 +449,7 @@ export default function CrewBoardDetail() {
         <div className="d-flex justify-content-between align-items-start mb-4 position-relative">
           <div className="d-flex align-items-center">
             <img
-              src={`/member/image/${board.boardWriter}`}
+              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${board.boardWriter}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{
@@ -583,7 +583,7 @@ export default function CrewBoardDetail() {
               <div className="fw-bold">가입한 모임 예시</div>
               <div className="d-flex align-items-center mt-2">
                 <img
-                  src="/images/sample-group.jpg"
+                  src="${import.meta.env.VITE_AJAX_BASE_URL}/images/sample-group.jpg"
                   className="me-2 rounded"
                   style={{ width: "2rem", height: "2rem" }}
                   alt="모임"

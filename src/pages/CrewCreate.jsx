@@ -259,7 +259,7 @@ export default function CrewCreate() {
         </h2>
 
         <img
-          src={previewUrl || "/images/default-profile.svg"}
+          src={previewUrl || "${import.meta.env.VITE_AJAX_BASE_URL}/images/default-profile.svg"}
           onClick={openFileSelector}
           style={{
             cursor: "pointer",

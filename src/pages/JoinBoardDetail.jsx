@@ -104,26 +104,7 @@ export default function JoinBoardDetail() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [boardDropdownOpen, dropdownOpen]);
 
-  // const handleReplySubmit = () => {
-  //   if (newReply.trim()) {
-  //     const reply = {
-  //       writer: "댓글작성자", // 더미
-  //       profileUrl: "/images/default-profile.png",
-  //       content: newReply,
-  //       writeTime: new Date(),
-  //       isEditing: false,
-  //       memberLocation: "서울",
-  //       memberSchool: "서울대학교",
-  //       memberMbti: "ENTP",
-  //     };
-  //     setReplies([reply, ...replies]);
-  //     setNewReply("");
-  //     setReplyCounts((prev) => ({
-  //       ...prev,
-  //       [boardNo]: (prev[boardNo] ?? board?.boardReply ?? 0) + 1,
-  //     }));
-  //   }
-  // };
+
 
   const handleReplySubmit = async () => {
     if (!login) {
@@ -381,7 +362,7 @@ export default function JoinBoardDetail() {
         <div className="d-flex justify-content-between align-items-start mb-4 position-relative">
           <div className="d-flex align-items-center">
             <img
-              src={`/member/image/${board.boardWriter}`}
+              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${board.boardWriter}`}
               alt="프로필"
               className="rounded-circle me-3"
               style={{

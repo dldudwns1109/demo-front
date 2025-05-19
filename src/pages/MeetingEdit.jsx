@@ -95,7 +95,7 @@ export default function MeetingEdit() {
         meetingPrice: data.meetingPrice.toLocaleString(), // 또는 숫자 그대로 유지
         meetingLimit: data.meetingLimit,
       });
-      setPreviewUrl(`/meeting/image/${meetingNo}`);
+      setPreviewUrl(`${import.meta.env.VITE_AJAX_BASE_URL}/meeting/image/${meetingNo}`);
 
       // ✅ 모임장 여부 판단
       setIsLeader(data.meetingOwnerNo === userNo);

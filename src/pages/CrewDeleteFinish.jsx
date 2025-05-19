@@ -52,7 +52,7 @@ export default function MypageExitFinish() {
               </span>
             </p>
             <div style={{ marginBottom: "48px" }}>
-              <img src="/images/exit-finish.svg" />
+              <img src="${import.meta.env.VITE_AJAX_BASE_URL}/images/exit-finish.svg" />
             </div>
             <button
               className="light-gray-btn w-100"

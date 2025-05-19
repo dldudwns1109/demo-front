@@ -48,7 +48,7 @@ export default function ProfileCard({ member }) {
                 height: "200px",
                 objectFit: "cover",
               }}
-              src={`/member/image/${member.memberNo}`}
+              src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${member.memberNo}`}
             />
 
             <div className="d-flex flex-column justify-content-between">

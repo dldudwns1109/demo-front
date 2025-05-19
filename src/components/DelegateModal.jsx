@@ -55,7 +55,7 @@ export default function MeetingDelegateModal({
                 src={
                   member.attachmentNo
                     ? `/attachment/${member.attachmentNo}`
-                    : "/images/default-profile.png"
+                    : "${import.meta.env.VITE_AJAX_BASE_URL}/images/default-profile.png"
                 }
                 alt="profile"
                 style={{

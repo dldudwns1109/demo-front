@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import axios from "axios";
 import Header from "../components/Header";
-import { loginState, userNoState } from "../utils/storage";
+import { userNoState } from "../utils/storage";
 import { toast, ToastContainer } from "react-toastify";
 import MeetingDelegateModal from "../components/DelegateModal";
 import {
@@ -16,30 +16,33 @@ import Unauthorized from "../components/Unauthorized";
 import ProfilePopover from "../components/ProfilePopover";
 
 export default function MeetingDetail() {
-  const location = useLocation();
+  // URL 파라미터로 crewNo, meetingNo 획득
+  const { crewNo, meetingNo } = useParams();
   const navigate = useNavigate();
-  const { meetingNo } = useParams();
-  const userNo = useRecoilValue(userNoState);
-  const login = useRecoilValue(loginState);
 
-  const [crewNo, setCrewNo] = useState(location.state?.crewNo);
+  // Recoil에서 userNo만 사용, 로그인은 로컬스토리지 토큰으로
+  const userNo = useRecoilValue(userNoState);
+  const login = Boolean(localStorage.getItem("accessToken"));
+
+  // 상태들
   const [meeting, setMeeting] = useState(null);
   const [memberList, setMemberList] = useState([]);
   const [isJoined, setIsJoined] = useState(false);
+  const [unauthorized, setUnauthorized] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const [isDelegating, setIsDelegating] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [showPopoverId, setShowPopoverId] = useState(null);
   const [isMeetingLeader, setIsMeetingLeader] = useState(false);
-  const [unauthorized, setUnauthorized] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
 
-  // 정원 체크
+  // 인원 초과 체크
   const isFull = useMemo(
     () => meeting && memberList.length >= meeting.meetingLimit,
     [meeting, memberList]
   );
 
-  // 1) 정모 상세 가져오기 & crewNo 세팅
+  // 1) 회의 상세 조회
   const fetchMeetingDetail = useCallback(() => {
     axios
       .get(`http://localhost:8080/api/meeting/${meetingNo}`, {
@@ -47,19 +50,18 @@ export default function MeetingDetail() {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       })
-      .then((res) => {
-        setMeeting(res.data);
-        setCrewNo(res.data.meetingCrewNo);
-      })
+      .then((res) => setMeeting(res.data))
       .catch((err) => {
         console.error("정모 정보 조회 실패", err);
         if (err.response?.status === 403) {
-          // 모임 회원이 아닐 때
-          if (window.confirm("모임 회원만 이용 가능합니다.")) {
-            crewNo ? navigate(`/crew/${crewNo}/detail`) : navigate(-1);
+          if (
+            window.confirm(
+              "모임 회원만 이용 가능합니다. 크루 상세로 이동할까요?"
+            )
+          ) {
+            return navigate(`/crew/${crewNo}/detail`);
           }
-          crewNo ? navigate(`/crew/${crewNo}/detail`) : navigate(-1);
-          return;
+          return navigate(-1);
         }
         if (err.response?.status === 404) {
           toast.error("삭제된 정모입니다.");
@@ -71,7 +73,7 @@ export default function MeetingDetail() {
         setErrorMessage("정모 정보를 불러오는 중 오류가 발생했습니다.");
         setUnauthorized(true);
       });
-  }, [meetingNo, navigate]);
+  }, [meetingNo, crewNo, navigate]);
 
   // 2) 참여자 목록 조회
   const fetchMeetingMemberList = useCallback(() => {
@@ -97,7 +99,7 @@ export default function MeetingDetail() {
       .catch((err) => console.error("참여 여부 확인 실패", err));
   }, [meetingNo]);
 
-  // 4) 참여 / 나가기 / 삭제
+  // 4) 참여, 탈퇴, 삭제
   const meetingJoin = useCallback(() => {
     axios
       .post(
@@ -140,8 +142,7 @@ export default function MeetingDetail() {
       })
       .then(() => {
         toast.success("정모가 삭제되었습니다.");
-        if (crewNo) navigate(`/crew/${crewNo}/detail`);
-        else navigate(-1);
+        navigate(crewNo ? `/crew/${crewNo}/detail` : -1);
       })
       .catch((err) => {
         console.error("정모 삭제 실패", err);
@@ -149,7 +150,7 @@ export default function MeetingDetail() {
       });
   }, [meetingNo, crewNo, navigate]);
 
-  // 초기 로드
+  // 초기 데이터 로드
   useEffect(() => {
     if (!login) return;
     fetchMeetingDetail();
@@ -157,7 +158,7 @@ export default function MeetingDetail() {
     checkMeetingJoin();
   }, [login, fetchMeetingDetail, fetchMeetingMemberList, checkMeetingJoin]);
 
-  // 로그인 필수: useEffect로 옮기기
+  // 로그인 강제 리다이렉트
   useEffect(() => {
     if (!login) {
       if (
@@ -172,31 +173,16 @@ export default function MeetingDetail() {
     }
   }, [login, crewNo, navigate]);
 
-  // render 단계에선 로그인 여부만 검사
-  if (!login) {
-    return null;
-  }
-
-  // 권한 또는 기타 에러
+  // 렌더링 분기
+  if (!login) return null;
   if (unauthorized) {
     return (
       <div className="vh-100">
-        <Header input={false} loginState={login ? "loggined" : "login"} />
+        <Header input={false} loginState="login" />
         <Unauthorized message={errorMessage} />
       </div>
     );
   }
-
-  // 올바르지 않은 접근: 유효한 crewNo가 없을 때
-  if (!crewNo) {
-    return (
-      <div className="vh-100">
-        <Header input={false} loginState={login ? "loggined" : "login"} />
-        <Unauthorized message="잘못된 접근입니다." />
-      </div>
-    );
-  }
-
   if (!meeting) return null;
 
   // 날짜/시간 포맷팅
@@ -213,7 +199,7 @@ export default function MeetingDetail() {
 
   return (
     <>
-      <Header loginState={login ? "loggedIn" : "login"} input={false} />
+      <Header loginState="loggedIn" input={false} />
       <ToastContainer
         position="bottom-right"
         autoClose={2000}
@@ -227,10 +213,7 @@ export default function MeetingDetail() {
           userNo={userNo}
           selectedMember={selectedMember}
           setSelectedMember={setSelectedMember}
-          onClose={() => {
-            setIsDelegating(false);
-            setSelectedMember(null);
-          }}
+          onClose={() => setIsDelegating(false)}
           onDelegate={async () => {
             if (!selectedMember) return;
             try {
@@ -249,8 +232,8 @@ export default function MeetingDetail() {
               toast.success("모임장 위임이 완료되었습니다.");
               setIsDelegating(false);
               setSelectedMember(null);
-              await fetchMeetingMemberList();
-              await fetchMeetingDetail();
+              fetchMeetingMemberList();
+              fetchMeetingDetail();
             } catch (err) {
               console.error("모임장 위임 실패", err);
               toast.error("모임장 위임 중 오류 발생");
@@ -267,22 +250,23 @@ export default function MeetingDetail() {
             style={{
               width: "100%",
               height: "auto",
-              maxHeight: "600px",
+              maxHeight: 400,
               objectFit: "cover",
-              marginBottom: "64px",
+              marginBottom: 24,
             }}
           />
         )}
-        <div
-          style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px" }}
-        >
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
           {/* 상단 타이틀 & 버튼 */}
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
+              marginTop: "24px",
               marginBottom: "24px",
+              flexWrap: "wrap", // ① 줄바꿈 허용
+              minWidth: 0, // flex item이 너무 작아지는 걸 방지
             }}
           >
             <h1 style={{ fontSize: "32px", fontWeight: "bold", color: "#333" }}>
@@ -297,6 +281,7 @@ export default function MeetingDetail() {
                   border: "none",
                   borderRadius: "8px",
                   cursor: "pointer",
+                  fontWeight: "bold"
                 }}
                 onClick={() => {
                   if (!crewNo) return navigate(-1);
@@ -315,6 +300,7 @@ export default function MeetingDetail() {
                       border: "none",
                       borderRadius: "8px",
                       cursor: "pointer",
+                      fontWeight: "bold"
                     }}
                     onClick={() => navigate(`/meeting/edit/${meetingNo}`)}
                   >
@@ -328,6 +314,7 @@ export default function MeetingDetail() {
                       border: "none",
                       borderRadius: "8px",
                       cursor: "pointer",
+                      fontWeight: "bold"
                     }}
                     onClick={meetingDelete}
                   >

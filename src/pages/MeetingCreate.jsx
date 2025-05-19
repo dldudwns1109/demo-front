@@ -197,29 +197,49 @@ export default function MeetingCreate() {
     );
   }
   
+  // 공통 래퍼 스타일
+  const boxStyle = {
+    width: "100%",
+    maxWidth: "380px",
+    padding: "0 16px",
+    margin: "0 auto 24px",
+  };
+
   return (
     <>
       {/* 헤더 */}
       <Header loginState={`${login ? "loggined" : "login"}`} input={false} />
       <div
         className="d-flex flex-column align-items-center"
-        style={{ paddingTop: "70px", paddingBottom: "80px" }}
+        style={{ paddingTop: 70, paddingBottom: 80 }}
       >
-        <div style={{ marginBottom: "48px", marginTop: "80px" }}>
-          <span
-            style={{ fontSize: "24px", fontWeight: "bold", color: "#111111" }}
-          >
-            정모 추가
-          </span>
-        </div>
+        <h2
+          style={{
+            margin: "60px 0 24px",
+            fontSize: "24px",
+            fontWeight: "bold",
+            color: "#111",
+          }}
+        >
+          정모 추가
+        </h2>
+
         <div>
           <img
             src={previewUrl || "/images/default-profile.svg"}
             onClick={ChangeImage}
             className="memberProfile"
-            style={{ cursor: "pointer" }}
+            style={{
+              cursor: "pointer",
+              width: 200,
+              height: 200,
+              borderRadius: "50%",
+              display: "block",
+              margin: "0 auto 24px",
+            }}
           />
         </div>
+
         <input
           type="file"
           className="form-control"
@@ -230,7 +250,7 @@ export default function MeetingCreate() {
           style={{ display: "none" }}
         />
 
-        <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
+        <div style={boxStyle}>
           <label className="label-text">정모명</label>
           <input
             className="member-input"
@@ -240,7 +260,7 @@ export default function MeetingCreate() {
             onChange={changeMeeting}
           />
         </div>
-        <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
+        <div style={boxStyle}>
           <label className="label-text">정모 날짜/시간</label>
           <input
             type="datetime-local"
@@ -257,7 +277,7 @@ export default function MeetingCreate() {
             </div>
           )}
         </div>
-        <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
+        <div style={boxStyle}>
           <label className="label-text">정모 위치</label>
           <div
             className="member-input"
@@ -281,7 +301,7 @@ export default function MeetingCreate() {
             />
           )}
         </div>
-        <div style={{ width: "360px", margin: "0 auto", marginBottom: "16px" }}>
+        <div style={boxStyle}>
           <label className="label-text">정모 비용</label>
           <input
             type="text"
@@ -293,7 +313,7 @@ export default function MeetingCreate() {
             onChange={changeMeeting}
           />
         </div>
-        <div style={{ width: "360px", margin: "0 auto", marginBottom: "48px" }}>
+        <div style={boxStyle}>
           <label className="label-text">인원 수</label>
           <select
             className="form-control"
@@ -308,7 +328,7 @@ export default function MeetingCreate() {
             ))}
           </select>
         </div>
-        <div style={{ width: "360px", margin: "0 auto" }}>
+        <div style={boxStyle}>
           <button
             className={isTotalValid ? "blue-btn" : "light-gray-btn"}
             onClick={meetingAdd}

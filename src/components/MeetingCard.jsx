@@ -28,7 +28,7 @@ export default function MeetingCard({ meeting, crewNo }) {
       }
       className="w-100"
       style={{
-        width: "100%", // ✅ 핵심 포인트
+        width: "100%",
         cursor: "pointer",
         display: "flex",
         flexDirection: "column",
@@ -65,7 +65,7 @@ export default function MeetingCard({ meeting, crewNo }) {
           fontSize: "14px",
           color: "#666666",
           display: "flex",
-          gap: "8px",
+          gap: "4px",
           alignItems: "center",
           flexWrap: "wrap",
         }}

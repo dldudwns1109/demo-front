@@ -75,7 +75,7 @@ export default function GroupMeetingCard({ meeting, crewNo }) {
           fontSize: "14px",
           color: "#666666",
           display: "flex",
-          gap: "8px",
+          gap: "4px",
           alignItems: "center",
           flexWrap: "wrap",
         }}

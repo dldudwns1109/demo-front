@@ -112,7 +112,7 @@ export default function Mypage() {
             <button
               className={`group-tab-button ${
                 activeTab === "create" ? " active" : ""
-              }`}
+              } ${windowWidth < 768 && "fs-6"}`}
               style={{ width: "25%" }}
               onClick={() => handleTabClick("create")}
             >
@@ -121,7 +121,7 @@ export default function Mypage() {
             <button
               className={`group-tab-button${
                 activeTab === "join" ? " active" : ""
-              }`}
+              } ${windowWidth < 768 && "fs-6"}`}
               style={{ width: "25%" }}
               onClick={() => handleTabClick("join")}
             >
@@ -130,7 +130,7 @@ export default function Mypage() {
             <button
               className={`group-tab-button${
                 activeTab === "like" ? " active" : ""
-              }`}
+              } ${windowWidth < 768 && "fs-6"}`}
               style={{ width: "25%" }}
               onClick={() => handleTabClick("like")}
             >
@@ -139,7 +139,7 @@ export default function Mypage() {
             <button
               className={`group-tab-button${
                 activeTab === "meeting" ? " active" : ""
-              }`}
+              } ${windowWidth < 768 && "fs-6"}`}
               style={{ width: "25%" }}
               onClick={() => handleTabClick("meeting")}
             >

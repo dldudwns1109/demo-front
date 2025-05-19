@@ -93,22 +93,43 @@ export default function ProfileCard({ member }) {
                     <FaCog size={18} color="#6C757D" />
                   </button>
                 </div>
-                <div
-                  className="d-flex align-items-center gap-1 fs-6"
-                  style={{ color: "#666666" }}
-                >
-                  <div>{member.memberGender === "m" ? "남자" : "여자"}</div>
-                  <span>·</span>
-                  <div>{member.memberLocation}</div>
-                  <span>·</span>
-                  <div>{member.memberSchool}</div>
-                  <span>·</span>
-                  <div>{member.memberBirth}</div>
-                </div>
+                {windowWidth > 768 ? (
+                  <div
+                    className="d-flex align-items-center gap-1 fs-6"
+                    style={{ color: "#666666" }}
+                  >
+                    <div>{member.memberGender === "m" ? "남자" : "여자"}</div>
+                    <span>·</span>
+                    <div>{member.memberLocation}</div>
+                    <span>·</span>
+                    <div>{member.memberSchool}</div>
+                    <span>·</span>
+                    <div>{member.memberBirth}</div>
+                  </div>
+                ) : (
+                  <div
+                    className="d-flex flex-column justify-content-center gap-1 fs-6"
+                    style={{ color: "#666666" }}
+                  >
+                    <div className="d-flex">
+                      <div>{member.memberGender === "m" ? "남자" : "여자"}</div>
+                      <span>·</span>
+                      <div>{member.memberLocation}</div>
+                    </div>
+                    <div className="d-flex">
+                      <div>{member.memberSchool}</div>
+                      <span>·</span>
+                      <div>{member.memberBirth}</div>
+                    </div>
+                  </div>
+                )}
               </div>
               <div
                 className={`d-flex flex-wrap ${windowWidth < 768 && "mt-4"}`}
-                style={{ gap: "12px", width: "360px" }}
+                style={{
+                  gap: "12px",
+                  width: windowWidth > 768 ? "360px" : "180px",
+                }}
               >
                 {member.memberLike.map((like, idx) => (
                   <span key={idx} className="mbti-badge">

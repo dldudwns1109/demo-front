@@ -12,6 +12,7 @@ import {
 import Header from "../components/Header";
 import CrewTopNav from "../components/CrewTopNav";
 import { FaRegCommentDots } from "react-icons/fa";
+import ProfilePopover from "../components/ProfilePopover";
 
 export default function CrewBoard() {
   const { crewNo } = useParams();
@@ -51,10 +52,9 @@ export default function CrewBoard() {
 
       try {
         const headers = getAuthHeaders();
-        const res = await axios.get(
-          `/crewmember/${crewNo}/member`,
-          { headers }
-        );
+        const res = await axios.get(`/crewmember/${crewNo}/member`, {
+          headers,
+        });
         setIsMember(res.data);
       } catch (err) {
         console.error("모임원 여부 확인 실패:", err.message);
@@ -77,17 +77,13 @@ export default function CrewBoard() {
     fetchCrewName();
   }, [crewNo]);
 
-  
   useEffect(() => {
     const fetchBoardList = async () => {
       try {
-        const res = await axios.get(
-          `/board/crew/${crewNo}`,
-          {
-            params:
-              selectedCategory !== "전체" ? { category: selectedCategory } : {},
-          }
-        );
+        const res = await axios.get(`/board/crew/${crewNo}`, {
+          params:
+            selectedCategory !== "전체" ? { category: selectedCategory } : {},
+        });
 
         const updatedBoardList = await Promise.all(
           res.data.map(async (board) => {
@@ -142,15 +138,14 @@ export default function CrewBoard() {
     <div className="vh-100">
       {/* 헤더 */}
       <div style={{ position: "relative", zIndex: 1100 }}>
-
-      <Header
-        loginState={`${login ? "loggined" : "login"}`}
-        category={category}
-        setCategory={setCategory}
-        location={location}
-        setLocation={setLocation}
+        <Header
+          loginState={`${login ? "loggined" : "login"}`}
+          category={category}
+          setCategory={setCategory}
+          location={location}
+          setLocation={setLocation}
         />
-        </div>
+      </div>
 
       <div
         style={{
@@ -235,7 +230,9 @@ export default function CrewBoard() {
                   <div className="d-flex align-items-center mb-3">
                     {/* 프로필 이미지 클릭 시 팝오버 */}
                     <img
-                      src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${board.boardWriter}`}
+                      src={`${
+                        import.meta.env.VITE_AJAX_BASE_URL
+                      }/member/image/${board.boardWriter}`}
                       alt="프로필"
                       className="rounded-circle me-3"
                       style={{
@@ -310,54 +307,10 @@ export default function CrewBoard() {
               </div>
 
               {showPopoverId === board.boardNo && (
-                <div
-                  ref={popoverRef}
-                  className="shadow position-absolute bg-white rounded p-3"
-                  style={{
-                    top: "5rem",
-                    left: "1rem",
-                    zIndex: 10,
-                    width: "300px",
-                    fontSize: "0.9rem",
-                    border: "1px solid #ddd",
-                  }}
-                >
-                  <div className="d-flex align-items-center mb-3">
-                    <img
-                      src={`${import.meta.env.VITE_AJAX_BASE_URL}/member/image/${userNo}`}
-                      alt="프로필"
-                      className="rounded-circle me-3"
-                      style={{
-                        width: "3.5rem",
-                        height: "3.5rem",
-                        objectFit: "cover",
-                      }}
-                    />
-                    <div>
-                      <div className="fw-bold">{board.boardWriterNickname}</div>
-                      <div className="badge bg-info text-white me-1">
-                        {board.boardWriterMbti || "MBTI"}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-muted mb-2">
-                    {board.boardWriterLocation} · {board.boardWriterSchool} ·{" "}
-                    {board.boardWriterBirth}
-                  </div>
-                  <hr />
-                  <div className="fw-bold">가입한 모임 예시</div>
-                  <div className="d-flex align-items-center mt-2">
-                    <img
-                      src="${import.meta.env.VITE_AJAX_BASE_URL}/images/sample-group.jpg"
-                      className="me-2 rounded"
-                      style={{ width: "2rem", height: "2rem" }}
-                      alt="모임"
-                    />
-                    <div className="text-muted" style={{ fontSize: "0.8rem" }}>
-                      모임 이름
-                    </div>
-                  </div>
-                </div>
+                <ProfilePopover
+                  memberNo={board.boardWriter}
+                  onClose={() => setShowPopoverId(null)}
+                />
               )}
             </div>
           ))}

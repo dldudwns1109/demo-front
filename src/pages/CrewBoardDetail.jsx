@@ -438,7 +438,7 @@ export default function CrewBoardDetail() {
             )}
           </div>
 
-          {showBoardWriterPopover && (
+          {/* {showBoardWriterPopover && (
             <div
               ref={boardPopoverRef}
               className="shadow position-absolute bg-white rounded p-3"
@@ -489,7 +489,7 @@ export default function CrewBoardDetail() {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="mb-5">
@@ -617,7 +617,7 @@ export default function CrewBoardDetail() {
                     </ul>
                   )}
                 </div>
-                {replyPopoverIndex === idx && (
+                {/* {replyPopoverIndex === idx && (
                   <div
                     ref={(el) => (replyPopoverRefs.current[idx] = el)}
                     className="shadow position-absolute bg-white rounded p-3"
@@ -635,7 +635,7 @@ export default function CrewBoardDetail() {
                       {reply.memberMbti}
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
             ))
           )}

@@ -30,7 +30,7 @@ DE:MO(대학생 모임)는 대학생들이 관심사 기반으로 소모임을 �
 </div>
 
 ## ⚙ 기능
-### 메인 페이지
+### 메인페이지
 - 비회원일 시 주변 모임 검색 및 조회를 할 수 있습니다.
 - 회원일 시 주변 모임 검색 및 조회, 나의 관심사와 일치하는 모임을 조회할 수 있습니다.
 <table align="center">
@@ -43,6 +43,26 @@ DE:MO(대학생 모임)는 대학생들이 관심사 기반으로 소모임을 �
 <tr>
   <td>
    <img src="https://github.com/user-attachments/assets/61970c90-60d5-44b0-bfd5-f30f1c7558bf">
+  </td>
+</tr>
+</tbody>
+</table>
+
+### 마이페이지
+- 프로필 이미지, 닉네임, MBTI, 성별, 거주지, 학교, 생년월일, 관심사 등 회원정보를 조회할 수 있습니다.
+- 개인정보수정, 로그아웃, 회원탈퇴 등 계정에 대한 기능이 이용 가능합니다.
+- 모임 개설이 가능합니다.
+- 만든 모임, 가입한 모임, 찜한 모임, 정모 일정 등 모임과 정모에 대한 정보를 한 번에 볼 수 있습니다.
+<table align="center">
+<tbody>
+<tr>
+  <td align="center">
+    <strong>마이페이지</strong>
+  </td>
+</tr>
+<tr>
+  <td>
+   <img src="https://github.com/user-attachments/assets/d0b941eb-58b6-4d87-b7a0-cd74caa7e4de">
   </td>
 </tr>
 </tbody>
